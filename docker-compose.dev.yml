@@ -1,0 +1,45 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/triveni_mgmt_db
+      - SPRING_DATASOURCE_USERNAME=proha
+      - SPRING_DATASOURCE_PASSWORD=gosaikunda
+    volumes:
+      - ./src:/app/src
+      - ./.gradle:/root/.gradle
+    depends_on:
+       db:
+         condition: service_healthy
+    networks:
+      - store-network
+
+  db:
+    image: postgres:16
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=triveni_mgmt_db
+      - POSTGRES_USER=proha
+      - POSTGRES_PASSWORD=gosaikunda
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - store-network
+    healthcheck: 
+      test: ["CMD-SHELL", "pg_isready -U proha -d triveni_mgmt_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+
+networks:
+  store-network:
+    driver: bridge
