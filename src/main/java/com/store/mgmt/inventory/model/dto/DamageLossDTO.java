@@ -1,0 +1,23 @@
+package com.store.mgmt.inventory.model.dto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+
+@Data
+@Schema(name = "DamageLoss", description = "Data Transfer Object for a product category")
+public class DamageLossDTO {
+    @Schema(description = "Unique identifier for the damage or loss record", required = true)
+    private String id;
+
+    @Schema(description = "Unique identifier for the inventory item", required = true)
+    private String inventoryItemId;
+
+    @Schema(description = "Quantity of the item that is damaged or lost", required = true)
+    private Integer quantity;
+
+    @Schema(description = "Description of the damage or loss")
+    private String description;
+
+    @Schema(description = "Date when the damage or loss occurred", required = true)
+    private String date;
+}

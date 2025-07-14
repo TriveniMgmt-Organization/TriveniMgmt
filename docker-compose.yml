@@ -11,8 +11,16 @@ services:
       - SPRING_DATASOURCE_USERNAME=proha
       - SPRING_DATASOURCE_PASSWORD=gosaikunda
       - JAVA_OPTS=-Xms512m -Xmx1g
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION_MS=${JWT_EXPIRATION_MS:86400000}
+      - JWT_ISSUER=${JWT_ISSUER}
+      - SPRING_LIQUIBASE_ENABLED=true
+      - SPRING_LIQUIBASE_CHANGE_LOG=classpath:db/changelog/db.changelog-master.yaml
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:dev}
+      - FRONTEND_URL=${FRONTEND_URL}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - store-network
     healthcheck:
@@ -27,6 +35,8 @@ services:
       - POSTGRES_DB=triveni_mgmt_db
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
@@ -43,3 +53,5 @@ volumes:
 networks:
   store-network:
     driver: bridge
+
+version: '3.9'

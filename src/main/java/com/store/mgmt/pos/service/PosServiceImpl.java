@@ -1,6 +1,6 @@
 package com.store.mgmt.pos.service;
 
-import com.store.mgmt.pos.model.entity.Transaction;
+import com.store.mgmt.pos.model.entity.Sale;
 import com.store.mgmt.pos.model.dto.TransactionDTO;
 import com.store.mgmt.pos.repository.TransactionRepository;
 import com.store.mgmt.inventory.service.InventoryService;
@@ -38,16 +38,16 @@ public class PosServiceImpl implements PosService {
         inventoryService.updateStock(request.getProductId(), -request.getQuantity());
 
         // Save transaction
-        Transaction transaction = new Transaction();
-        transaction.setProductId(request.getProductId());
-        transaction.setQuantity(request.getQuantity());
-        transaction.setTotal(total);
-        transaction.setTax(tax);
-        transaction.setPaymentMethod(request.getPaymentMethod());
-        transaction.setTimestamp(LocalDateTime.now());
-        transaction.setUserId(request.getUserId());
+        Sale sale = new Sale();
+        sale.setProductId(request.getProductId());
+        sale.setQuantity(request.getQuantity());
+        sale.setTotal(total);
+        sale.setTax(tax);
+        sale.setPaymentMethod(request.getPaymentMethod());
+        sale.setTimestamp(LocalDateTime.now());
+        sale.setUserId(request.getUserId());
 
-        Transaction saved = transactionRepository.save(transaction);
+        Sale saved = transactionRepository.save(sale);
 
         // Convert to DTO
         TransactionDTO response = new TransactionDTO();
@@ -63,17 +63,17 @@ public class PosServiceImpl implements PosService {
     }
 
     public TransactionDTO getTransaction(UUID id) {
-        Transaction transaction = transactionRepository.findById(id)
+        Sale sale = transactionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Transaction not found"));
         TransactionDTO dto = new TransactionDTO();
-        dto.setId(transaction.getId());
-        dto.setProductId(transaction.getProductId());
-        dto.setQuantity(transaction.getQuantity());
-        dto.setTotal(transaction.getTotal());
-        dto.setTax(transaction.getTax());
-        dto.setPaymentMethod(transaction.getPaymentMethod());
-        dto.setTimestamp(transaction.getTimestamp());
-        dto.setUserId(transaction.getUserId());
+        dto.setId(sale.getId());
+        dto.setProductId(sale.getProductId());
+        dto.setQuantity(sale.getQuantity());
+        dto.setTotal(sale.getTotal());
+        dto.setTax(sale.getTax());
+        dto.setPaymentMethod(sale.getPaymentMethod());
+        dto.setTimestamp(sale.getTimestamp());
+        dto.setUserId(sale.getUserId());
         return dto;
     }
 
@@ -94,11 +94,11 @@ public class PosServiceImpl implements PosService {
 
     @Transactional
     public TransactionDTO updateTransaction(UUID id, TransactionDTO request) {
-        Transaction transaction = transactionRepository.findById(id)
+        Sale sale = transactionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Transaction not found"));
 
         // Revert previous inventory change
-        inventoryService.updateStock(transaction.getProductId(), transaction.getQuantity());
+        inventoryService.updateStock(sale.getProductId(), sale.getQuantity());
 
         // Update inventory with new quantity
         inventoryService.checkStock(request.getProductId(), request.getQuantity());
@@ -109,14 +109,14 @@ public class PosServiceImpl implements PosService {
         BigDecimal subtotal = price.multiply(BigDecimal.valueOf(request.getQuantity()));
         BigDecimal tax = subtotal.multiply(BigDecimal.valueOf(0.08));
 
-        transaction.setProductId(request.getProductId());
-        transaction.setQuantity(request.getQuantity());
-        transaction.setTotal(subtotal.add(tax));
-        transaction.setTax(tax);
-        transaction.setPaymentMethod(request.getPaymentMethod());
-        transaction.setUserId(request.getUserId());
+        sale.setProductId(request.getProductId());
+        sale.setQuantity(request.getQuantity());
+        sale.setTotal(subtotal.add(tax));
+        sale.setTax(tax);
+        sale.setPaymentMethod(request.getPaymentMethod());
+        sale.setUserId(request.getUserId());
 
-        Transaction updated = transactionRepository.save(transaction);
+        Sale updated = transactionRepository.save(sale);
 
         TransactionDTO response = new TransactionDTO();
         response.setId(updated.getId());
@@ -132,10 +132,10 @@ public class PosServiceImpl implements PosService {
 
     @Transactional
     public void deleteTransaction(UUID id) {
-        Transaction transaction = transactionRepository.findById(id)
+        Sale sale = transactionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Transaction not found"));
         // Revert inventory change
-        inventoryService.updateStock(transaction.getProductId(), transaction.getQuantity());
+        inventoryService.updateStock(sale.getProductId(), sale.getQuantity());
         transactionRepository.deleteById(id);
     }
 }

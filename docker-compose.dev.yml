@@ -10,6 +10,10 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/triveni_mgmt_db
       - SPRING_DATASOURCE_USERNAME=proha
       - SPRING_DATASOURCE_PASSWORD=gosaikunda
+      - JWT_SECRET
+      - JWT_EXPIRATION_MS
+      - JWT_ISSUER
+      - FRONTEND_URL=http://localhost:3000
     volumes:
       - ./src:/app/src
       - ./.gradle:/root/.gradle

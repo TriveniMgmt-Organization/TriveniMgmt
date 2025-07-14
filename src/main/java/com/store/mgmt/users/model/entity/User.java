@@ -1,5 +1,6 @@
 package com.store.mgmt.users.model.entity;
 
+import com.store.mgmt.common.model.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -9,11 +10,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "users")
 @Data
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-
+public class User extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String username;
 
@@ -22,6 +19,9 @@ public class User {
 
     @Column(nullable = false, unique = true)
     private String email;
+
+    @Column(name = "full_name", nullable = true)
+    private String fullName;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

@@ -8,6 +8,7 @@ import com.store.mgmt.users.model.entity.User;
 import com.store.mgmt.users.repository.UserRepository;
 import com.store.mgmt.users.repository.RoleRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,7 +45,8 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = new User();
-        user.setUsername(request.getUsername());
+        user.setFullName(request.getFullName());
+        user.setUsername(request.getEmail());
         user.setPasswordHash(passwordEncoder.encode(request.getUsername())); // Default password same as username
         user.setEmail(request.getEmail());
         user.setCreatedAt(LocalDateTime.now());
@@ -81,8 +83,11 @@ public class UserServiceImpl implements UserService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists");
         }
 
-        if (request.getUsername() != null) user.setUsername(request.getUsername());
-        if (request.getEmail() != null) user.setEmail(request.getEmail());
+        if (request.getFullName() != null) user.setFullName(request.getFullName());
+        if (request.getEmail() != null){
+            user.setEmail(request.getEmail());
+            user.setUsername(request.getEmail());
+        }
         if (request.isActive() != user.isActive()) user.setActive(request.isActive());
         user.setUpdatedAt(LocalDateTime.now());
 
@@ -95,9 +100,10 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(UUID id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        userRepository.delete(user);
+        user.setDeletedAt(LocalDateTime.now());
+        user.setDeletedBy(SecurityContextHolder.getContext().getAuthentication().getName());
+        userRepository.save(user);
     }
-
     @Override
     @Transactional
     public UserDTO assignRole(UUID userId, UUID roleId) {
@@ -125,6 +131,7 @@ public class UserServiceImpl implements UserService {
     private UserDTO toDTO(User user) {
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
+        dto.setFullName(user.getFullName());
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
         dto.setCreatedAt(user.getCreatedAt());

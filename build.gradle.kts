@@ -31,10 +31,20 @@ dependencies {
 	implementation("org.springframework.security:spring-security-crypto")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.springframework.boot:spring-boot-starter-web")
+	implementation("com.github.f4b6a3:uuid-creator:6.1.0")
   // implementation("org.flywaydb:flyway-core:11.10.2")
 //	implementation("org.liquibase:liquibase-core")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
+	// MapStruct Core Dependency
+	implementation("org.mapstruct:mapstruct:1.5.5.Final") // Use the latest stable version
+
+	// MapStruct Processor (for annotation processing)
+	annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final") // Must match core version
+
+	// If you are using Lombok, add lombok-mapstruct-binding
+	annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
 	compileOnly("org.projectlombok:lombok")
+
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	runtimeOnly("org.postgresql:postgresql")
 	annotationProcessor("org.projectlombok:lombok")
@@ -42,9 +52,9 @@ dependencies {
 	testImplementation("org.springframework.security:spring-security-test")
   testImplementation("com.h2database:h2")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-	implementation("io.jsonwebtoken:jjwt-api:0.12.6")
-	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
-	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")}
+	implementation("io.jsonwebtoken:jjwt-api:0.12.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.5")}
 
 tasks.withType<Test> {
 	useJUnitPlatform()
