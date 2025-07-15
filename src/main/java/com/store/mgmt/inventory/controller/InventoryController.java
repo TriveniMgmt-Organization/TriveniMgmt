@@ -24,11 +24,11 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 @RestController
 @RequestMapping("/api/v1/inventory") // Base path for all inventory related operations
-@Tag(name = "Inventory Management System", description = "Comprehensive API for managing product inventory, sales, purchases, and related master data.")
+@Tag(name = "Inventory", description = "Comprehensive API for managing product inventory, sales, purchases, and related master data.")
 public class InventoryController {
     private final InventoryService inventoryService;
 
-    public InventoryController(InventoryService inventoryService) {
+    public InventoryController(InventoryService inventoryService){
         this.inventoryService = inventoryService;
     }
 

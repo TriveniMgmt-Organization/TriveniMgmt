@@ -2,6 +2,7 @@ package com.store.mgmt.users.controller;
 
 import com.store.mgmt.users.model.dto.RoleDTO;
 import com.store.mgmt.users.service.RoleService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +12,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/roles")
+@Tag(name = "Role", description = "Operations related to roles")
 public class RoleController {
     private final RoleService roleService;
 

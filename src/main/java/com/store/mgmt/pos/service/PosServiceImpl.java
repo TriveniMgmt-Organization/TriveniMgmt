@@ -1,6 +1,5 @@
 package com.store.mgmt.pos.service;
 
-import com.store.mgmt.pos.model.entity.Sale;
 import com.store.mgmt.pos.model.dto.TransactionDTO;
 import com.store.mgmt.pos.repository.TransactionRepository;
 import com.store.mgmt.inventory.service.InventoryService;
