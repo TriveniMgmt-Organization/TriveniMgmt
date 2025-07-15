@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.UUID;
 
 public interface InventoryService {
-    List<ProductDTO> getAllProductCategories();
 
+    List<CategoryDTO> getAllProductCategories(boolean includeInactive);
     // --- Product Management ---
     ProductDTO createProduct(CreateProductDTO createDTO);
     List<ProductDTO> getAllProducts(boolean includeInactive); // Added param for filtering

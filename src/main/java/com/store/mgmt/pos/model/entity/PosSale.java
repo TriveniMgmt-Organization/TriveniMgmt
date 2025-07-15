@@ -5,16 +5,18 @@ import com.store.mgmt.customer.model.entity.Customer;
 import com.store.mgmt.users.model.entity.User;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 
 @Entity
-@Table(name = "sales")
+@Table(name = "pos_sales")
 @Data
-public class Sale extends BaseEntity {
+@EqualsAndHashCode(callSuper = true)
+public class PosSale extends BaseEntity {
 
     @Column(nullable = false)
     private BigDecimal tax;
@@ -38,7 +40,7 @@ public class Sale extends BaseEntity {
     private PaymentMethod paymentMethod;
 
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SaleItem> saleItems;
+    private List<PosSaleItem> saleItems;
 
     public enum PaymentMethod {
         CASH, CARD, UPI

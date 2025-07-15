@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.UUID;
 
 public interface PosService {
-    TransactionDTO createTransaction(TransactionDTO request);
-    TransactionDTO getTransaction(UUID id);
-    List<TransactionDTO> getAllTransactions();
-    TransactionDTO updateTransaction(UUID id, TransactionDTO request);
-    void deleteTransaction(UUID id);
+//    TransactionDTO createTransaction(TransactionDTO request);
+//    TransactionDTO getTransaction(UUID id);
+//    List<TransactionDTO> getAllTransactions();
+//    TransactionDTO updateTransaction(UUID id, TransactionDTO request);
+//    void deleteTransaction(UUID id);
 }

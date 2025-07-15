@@ -3,6 +3,7 @@ package com.store.mgmt.inventory.model.entity;
 import com.store.mgmt.common.model.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -15,13 +16,10 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "discounts")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class Discount extends BaseEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
     @Column(name = "name", unique = true, nullable = false, length = 255)
     private String name;
@@ -58,14 +56,6 @@ public class Discount extends BaseEntity {
 
     @Column(name = "minimum_item_quantity")
     private Integer minimumItemQuantity;
-
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 
     public enum DiscountType {
         PERCENTAGE,

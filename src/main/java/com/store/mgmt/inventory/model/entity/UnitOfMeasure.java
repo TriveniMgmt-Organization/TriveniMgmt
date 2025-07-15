@@ -3,6 +3,7 @@ package com.store.mgmt.inventory.model.entity;
 import com.store.mgmt.common.model.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -14,6 +15,7 @@ import java.util.Set; // For OneToMany relationship
 @Entity
 @Table(name = "units_of_measure")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class UnitOfMeasure extends BaseEntity {

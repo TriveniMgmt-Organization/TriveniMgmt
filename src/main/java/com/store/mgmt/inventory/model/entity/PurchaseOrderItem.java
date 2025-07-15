@@ -3,6 +3,7 @@ package com.store.mgmt.inventory.model.entity;
 import com.store.mgmt.common.model.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
         @UniqueConstraint(columnNames = {"purchase_order_id", "product_id"})
 })
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class PurchaseOrderItem extends BaseEntity {

@@ -3,6 +3,7 @@ package com.store.mgmt.inventory.model.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -14,6 +15,9 @@ public class CreatePurchaseOrderDTO {
     @Schema(description = "Location ID where the items will be delivered", required = true)
     private UUID locationId;
 
+    @Schema(description = "Location ID where the items will be delivered", required = true)
+    private UUID productId;
+
 @Schema(description = "Unique identifier of the user creating the purchase order", required = true)
     private UUID userId;
 
@@ -24,5 +28,5 @@ public class CreatePurchaseOrderDTO {
     private String status;
 
     @Schema(description = "List of items in the purchase order", required = true)
-    private PurchaseOrderItemDTO[] items;
+    private List<CreatePurchaseOrderDTO> items;
 }

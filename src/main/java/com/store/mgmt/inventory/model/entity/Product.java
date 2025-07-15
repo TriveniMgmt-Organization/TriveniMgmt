@@ -16,6 +16,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "products")
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class Product extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String sku; // Stock Keeping Unit - Unique identifier for the product (e.g., UPC/EAN) - UNIQUE
@@ -49,7 +50,7 @@ public class Product extends BaseEntity {
     private UUID unitOfMeasureId; // Foreign key to UnitOfMeasure entity, if applicable
 
     @ManyToOne(fetch = FetchType.LAZY) // Many products to one unit of measure
-    @JoinColumn(name = "unit_of_measure_id", nullable = false) // Foreign key column
+    @JoinColumn(name = "unit_of_measure_id", nullable = false, insertable = false, updatable = false) // Foreign key column
     private UnitOfMeasure unitOfMeasure;
 
     @Column(name = "max_stock_level")

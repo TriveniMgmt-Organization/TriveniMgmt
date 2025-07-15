@@ -2,6 +2,7 @@ package com.store.mgmt.inventory.model.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
@@ -16,6 +17,7 @@ import com.store.mgmt.common.model.BaseEntity;
         @UniqueConstraint(columnNames = {"product_id", "location_id", "batch_number", "expiration_date"})
 })
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class InventoryItem extends BaseEntity {

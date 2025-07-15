@@ -16,6 +16,7 @@ import java.util.Set;
 @Entity
 @Table(name = "purchase_orders")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class PurchaseOrder extends BaseEntity {

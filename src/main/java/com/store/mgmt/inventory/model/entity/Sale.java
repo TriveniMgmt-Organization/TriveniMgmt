@@ -15,6 +15,7 @@ import java.util.Set;
 @Entity
 @Table(name = "sales")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class Sale extends BaseEntity {

@@ -157,8 +157,23 @@ public class InventoryServiceImpl implements InventoryService {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
     }
-
+    private DamageLoss findDamageLossOrThrow(UUID damageLossId){
+        return damageLossRepository.findById(damageLossId)
+                .orElseThrow(() -> new ResourceNotFoundException("Damage/Loss record not found with ID: " + damageLossId));
+    }
     // --- Product Management ---
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CategoryDTO> getAllProductCategories(boolean includeInactive) {
+        log.debug("Fetching all product categories.");
+        List<Category> categories = categoryRepository.findAll();
+        if (!includeInactive) {
+            categories = categories.stream().filter(Category::isActive).collect(Collectors.toList());
+        }
+        return categoryMapper.toDtoList(categories);
+    }
 
     @Override
     @Transactional
@@ -347,6 +362,10 @@ public class InventoryServiceImpl implements InventoryService {
     public void processSale(CreateSaleDTO saleDTO) {
         log.info("Processing new sale for user ID: {}", saleDTO.getUserId());
 
+        if (saleDTO == null || saleDTO.getItems() == null || saleDTO.getItems().isEmpty()) {
+            throw new IllegalArgumentException("Sale DTO and its items must not be null or empty");
+        }
+
         User user = null;
         if (saleDTO.getUserId() != null) {
             user = findUserOrThrow(saleDTO.getUserId());
@@ -354,80 +373,82 @@ public class InventoryServiceImpl implements InventoryService {
 
         Sale newSale = saleMapper.toEntity(saleDTO);
         newSale.setSaleTimestamp(LocalDateTime.now());
-        newSale.setPaymentMethod(Sale.PaymentMethod.valueOf(saleDTO.getPaymentMethod().toUpperCase())); // Assuming enum string
+        newSale.setPaymentMethod(Sale.PaymentMethod.valueOf(String.valueOf(saleDTO.getPaymentMethod())));
         newSale.setUser(user);
-
-        BigDecimal totalAmount = BigDecimal.ZERO;
-        BigDecimal totalDiscountAmount = BigDecimal.ZERO;
 
         Set<SaleItem> saleItems = saleDTO.getItems().stream().map(itemDTO -> {
             Product product = findProductOrThrow(itemDTO.getProductId());
 
-            // --- Advanced Inventory Item Selection Logic ---
-            // For a production system, this would involve complex logic:
-            // 1. Prioritize items by expiration date (FEFO - First Expired, First Out)
-            // 2. Consider FIFO (First In, First Out) for non-expiring goods.
-            // 3. Consider location (e.g., POS implies current store location).
-            // 4. Handle partial fulfillments from multiple inventory items.
-            // A dedicated "InventoryAllocationService" or "StockService" might be extracted for this.
-
-            // Simplified logic: find items for the product that are IN_STOCK and have enough quantity
-            List<InventoryItem> availableInventoryItems = inventoryItemRepository.findByProductId(product.getId()).stream()
-                    .filter(item -> item.getStatus() == InventoryItem.InventoryStatus.IN_STOCK && item.getQuantity() > 0)
-                    // Sort by expiration date for FEFO, then by creation date for FIFO (if no exp date)
-                    .sorted((item1, item2) -> {
-                        if (item1.getExpirationDate() != null && item2.getExpirationDate() != null) {
-                            return item1.getExpirationDate().compareTo(item2.getExpirationDate());
-                        }
-                        if (item1.getExpirationDate() != null) return -1; // Expiring first
-                        if (item2.getExpirationDate() != null) return 1;
-                        return item1.getCreatedAt().compareTo(item2.getCreatedAt()); // FIFO by creation
-                    })
-                    .collect(Collectors.toList());
-
+            List<InventoryItem> availableInventoryItems = getAvailableInventoryItems(product.getId());
             int quantityToSell = itemDTO.getQuantity();
+
             if (getTotalStockQuantity(product.getId()) < quantityToSell) {
                 throw new InsufficientStockException("Insufficient total stock for product " + product.getName() + ". Requested: " + quantityToSell + ", Available: " + getTotalStockQuantity(product.getId()));
             }
 
-            // This loop attempts to decrement from multiple inventory items if one is not enough
-            int remainingToSell = quantityToSell;
-            for (InventoryItem inventoryItemToUpdate : availableInventoryItems) {
-                if (remainingToSell <= 0) break; // All quantity fulfilled
+            allocateStock(availableInventoryItems, quantityToSell, product.getName());
 
-                int quantityTaken = Math.min(remainingToSell, inventoryItemToUpdate.getQuantity());
-                if (quantityTaken > 0) {
-                    updateInventoryItemQuantity(inventoryItemToUpdate.getId(), -quantityTaken); // Decrement stock
-                    remainingToSell -= quantityTaken;
-                    log.debug("Decremented {} units from inventory item ID {} for product {}", quantityTaken, inventoryItemToUpdate.getId(), product.getName());
-                }
-            }
-
-            if (remainingToSell > 0) {
-                // This should ideally not happen if getTotalStockQuantity check passed, but good for robustness
-                throw new InsufficientStockException("Failed to fully allocate stock for product " + product.getName() + ". Remaining: " + remainingToSell);
-            }
-
-            SaleItem saleItem = saleItemMapper.toEntity(itemDTO);
-            saleItem.setSale(newSale); // Link to the new sale entity
-            saleItem.setProduct(product);
-            saleItem.setUnitPrice(itemDTO.getUnitPrice()); // Price at time of sale
-            saleItem.setDiscountAmount(itemDTO.getDiscountAmount());
-
-            totalAmount = totalAmount.add(saleItem.getUnitPrice().multiply(BigDecimal.valueOf(saleItem.getQuantity())));
-            totalDiscountAmount = totalDiscountAmount.add(saleItem.getDiscountAmount());
-            return saleItem;
+            return createSaleItem(itemDTO, newSale, product);
         }).collect(Collectors.toSet());
+
+        // Calculate totalAmount and totalDiscountAmount using reduce
+        BigDecimal totalAmount = saleItems.stream()
+                .map(saleItem -> saleItem.getUnitPrice().multiply(BigDecimal.valueOf(saleItem.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal totalDiscountAmount = saleItems.stream()
+                .map(SaleItem::getDiscountAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         newSale.setTotalAmount(totalAmount.subtract(totalDiscountAmount));
         newSale.setTotalDiscountAmount(totalDiscountAmount);
-        newSale.setSaleItems(saleItems); // Link items to sale
+        newSale.setSaleItems(saleItems);
 
         Sale savedSale = saleRepository.save(newSale);
-        saleItems.forEach(saleItem -> saleItem.setSale(savedSale)); // Ensure Sale reference is set for child entities
         saleItemRepository.saveAll(saleItems);
 
         log.info("Sale with ID {} processed successfully.", savedSale.getId());
+    }
+
+    private List<InventoryItem> getAvailableInventoryItems(UUID productId) {
+        return inventoryItemRepository.findByProductId(productId).stream()
+                .filter(item -> item.getStatus() == InventoryItem.InventoryStatus.IN_STOCK && item.getQuantity() > 0)
+                .sorted((item1, item2) -> {
+                    if (item1.getExpirationDate() != null && item2.getExpirationDate() != null) {
+                        return item1.getExpirationDate().compareTo(item2.getExpirationDate());
+                    }
+                    if (item1.getExpirationDate() != null) return -1;
+                    if (item2.getExpirationDate() != null) return 1;
+                    return item1.getCreatedAt().compareTo(item2.getCreatedAt());
+                })
+                .collect(Collectors.toList());
+    }
+
+    private void allocateStock(List<InventoryItem> availableInventoryItems, int quantityToSell, String productName) {
+        int remainingToSell = quantityToSell;
+        for (InventoryItem inventoryItemToUpdate : availableInventoryItems) {
+            if (remainingToSell <= 0) break;
+
+            int quantityTaken = Math.min(remainingToSell, inventoryItemToUpdate.getQuantity());
+            if (quantityTaken > 0) {
+                updateInventoryItemQuantity(inventoryItemToUpdate.getId(), -quantityTaken);
+                remainingToSell -= quantityTaken;
+                log.debug("Decremented {} units from inventory item ID {} for product {}", quantityTaken, inventoryItemToUpdate.getId(), productName);
+            }
+        }
+
+        if (remainingToSell > 0) {
+            throw new InsufficientStockException("Failed to fully allocate stock for product " + productName + ". Remaining: " + remainingToSell);
+        }
+    }
+
+    private SaleItem createSaleItem(CreateSaleItemDTO itemDTO, Sale newSale, Product product) {
+        SaleItem saleItem = saleItemMapper.toEntity(itemDTO);
+        saleItem.setSale(newSale);
+        saleItem.setProduct(product);
+        saleItem.setUnitPrice(itemDTO.getUnitPrice());
+        saleItem.setDiscountAmount(itemDTO.getDiscountAmount());
+        return saleItem;
     }
 
     @Override
@@ -522,7 +543,7 @@ public class InventoryServiceImpl implements InventoryService {
             throw new InvalidOperationException("Quantity for damage/loss must be positive.");
         }
 
-        // --- Advanced Inventory Item Selection for Loss ---
+        // Logic to select specific InventoryItem(s) to decrement for the loss.
         // Similar to sales, this needs careful selection of *which* specific inventory items are lost/damaged.
         // For simplicity, we find one at the location and attempt to decrement it.
         // In a real system, you might specify the batch/expiration for losses or apply a FEFO strategy.
@@ -542,6 +563,7 @@ public class InventoryServiceImpl implements InventoryService {
         damageLoss.setProduct(product);
         damageLoss.setLocation(location);
         damageLoss.setUser(user);
+        damageLoss.setReason(DamageLoss.DamageLossReason.valueOf(String.valueOf(createDTO.getReason())));
 
         DamageLoss savedDamageLoss = damageLossRepository.save(damageLoss);
         log.info("Recorded damage/loss ID {} for product ID {}", savedDamageLoss.getId(), product.getId());
@@ -735,7 +757,7 @@ public class InventoryServiceImpl implements InventoryService {
             throw new DuplicateResourceException("Location with name '" + createDTO.getName() + "' already exists.");
         }
         Location newLocation = locationMapper.toEntity(createDTO);
-        newLocation.setType(Location.LocationType.valueOf(createDTO.getType().toUpperCase())); // Ensure enum conversion
+        newLocation.setType(Location.LocationType.valueOf(String.valueOf(createDTO.getType()))); // Ensure enum conversion
         Location savedLocation = locationRepository.save(newLocation);
         log.info("Location created with ID: {}", savedLocation.getId());
         return locationMapper.toDto(savedLocation);
@@ -770,7 +792,7 @@ public class InventoryServiceImpl implements InventoryService {
         }
 
         locationMapper.updateLocationFromDto(updateDTO, existingLocation);
-        if (updateDTO.getType() != null) existingLocation.setType(Location.LocationType.valueOf(updateDTO.getType().toUpperCase()));
+        if (updateDTO.getType() != null) existingLocation.setType(Location.LocationType.valueOf(String.valueOf(updateDTO.getType())));
 
         Location updatedLocation = locationRepository.save(existingLocation);
         log.info("Location updated with ID: {}", updatedLocation.getId());
@@ -909,13 +931,14 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SaleDTO> getSalesByDateRange(LocalDate startDate, LocalDate endDate) {
+    public List<SaleDTO> getSalesByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
         log.debug("Fetching sales between {} and {}.", startDate, endDate);
         // Note: Sale.saleTimestamp is LocalDateTime, so adjust query for date range if needed
         // For production, you might need to convert LocalDate to LocalDateTime range (start of day to end of day)
-        List<Sale> sales = saleRepository.findBySaleTimestampBetween(startDate.atStartOfDay(), endDate.atTime(23, 59, 59, 999999999));
+        List<Sale> sales = saleRepository.findBySaleTimestampBetween(startDate, endDate.withHour(23).withMinute(59).withSecond(59).withNano(999999999));
         return saleMapper.toDtoList(sales);
     }
+
 
     @Override
     @Transactional(readOnly = true)
@@ -952,7 +975,7 @@ public class InventoryServiceImpl implements InventoryService {
         Discount newDiscount = discountMapper.toEntity(createDTO);
         newDiscount.setProduct(product);
         newDiscount.setCategory(category);
-        newDiscount.setType(Discount.DiscountType.valueOf(createDTO.getType().toUpperCase()));
+        newDiscount.setType(Discount.DiscountType.valueOf(String.valueOf(createDTO.getType())));
 
         Discount savedDiscount = discountRepository.save(newDiscount);
         log.info("Discount created with ID: {}", savedDiscount.getId());
@@ -991,7 +1014,7 @@ public class InventoryServiceImpl implements InventoryService {
         discountMapper.updateDiscountFromDto(updateDTO, existingDiscount);
         if (updateDTO.getProductId() != null) existingDiscount.setProduct(findProductOrThrow(updateDTO.getProductId()));
         if (updateDTO.getCategoryId() != null) existingDiscount.setCategory(findCategoryOrThrow(updateDTO.getCategoryId()));
-        if (updateDTO.getType() != null) existingDiscount.setType(Discount.DiscountType.valueOf(updateDTO.getType().toUpperCase()));
+        if (updateDTO.getType() != null) existingDiscount.setType(Discount.DiscountType.valueOf(String.valueOf(updateDTO.getType())));
 
 
         Discount updatedDiscount = discountRepository.save(existingDiscount);
@@ -1036,47 +1059,8 @@ public class InventoryServiceImpl implements InventoryService {
     // --- Damage/Loss Management ---
 
     @Override
-    @Transactional
-    public DamageLossDTO recordDamageLoss(CreateDamageLossDTO createDTO) {
-        log.info("Recording damage/loss for product ID: {}", createDTO.getProductId());
-        Product product = findProductOrThrow(createDTO.getProductId());
-        Location location = findLocationOrThrow(createDTO.getLocationId());
-        User user = findUserOrThrow(createDTO.getUserId());
-
-        if (createDTO.getQuantity() <= 0) {
-            throw new InvalidOperationException("Quantity for damage/loss must be positive.");
-        }
-
-        // Logic to select specific InventoryItem(s) to decrement for the loss.
-        // Similar to sales, this needs careful selection of *which* specific inventory items are lost/damaged.
-        // For simplicity, we find one at the location and attempt to decrement it.
-        // In a real system, you might specify the batch/expiration for losses or apply a FEFO strategy.
-        Optional<InventoryItem> itemToDecrementOpt = inventoryItemRepository.findByProductIdAndLocationId(product.getId(), location.getId())
-                .stream()
-                .filter(item -> item.getQuantity() >= createDTO.getQuantity() && item.getQuantity() > 0)
-                .findFirst(); // Find any suitable item for now
-
-        if (itemToDecrementOpt.isEmpty()) {
-            throw new InsufficientStockException("Insufficient specific stock at location " + location.getName() + " for product " + product.getName() + " to record loss.");
-        }
-
-        InventoryItem itemToDecrement = itemToDecrementOpt.get();
-        updateInventoryItemQuantity(itemToDecrement.getId(), -createDTO.getQuantity()); // Decrement stock
-
-        DamageLoss damageLoss = damageLossMapper.toEntity(createDTO);
-        damageLoss.setProduct(product);
-        damageLoss.setLocation(location);
-        damageLoss.setUser(user);
-        damageLoss.setReason(DamageLoss.DamageLossReason.valueOf(createDTO.getReason().toUpperCase()));
-
-        DamageLoss savedDamageLoss = damageLossRepository.save(damageLoss);
-        log.info("Recorded damage/loss ID {} for product ID {}", savedDamageLoss.getId(), product.getId());
-        return damageLossMapper.toDto(savedDamageLoss);
-    }
-
-    @Override
     @Transactional(readOnly = true)
-    public List<DamageLossDTO> getAllDamageLossRecords(LocalDate startDate, LocalDate endDate) {
+    public List<DamageLossDTO> getAllDamageLossRecords(LocalDateTime startDate, LocalDateTime endDate) {
         log.debug("Fetching all damage/loss records between {} and {}.", startDate, endDate);
         List<DamageLoss> records = damageLossRepository.findByDateRecordedBetween(startDate, endDate);
         return damageLossMapper.toDtoList(records);

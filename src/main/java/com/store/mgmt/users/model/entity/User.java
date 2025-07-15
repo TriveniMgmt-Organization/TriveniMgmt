@@ -3,6 +3,8 @@ package com.store.mgmt.users.model.entity;
 import com.store.mgmt.common.model.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
@@ -10,6 +12,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "users")
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class User extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String username;

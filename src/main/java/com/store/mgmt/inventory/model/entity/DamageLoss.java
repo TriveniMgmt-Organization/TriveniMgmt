@@ -4,6 +4,7 @@ import com.store.mgmt.common.model.BaseEntity;
 import com.store.mgmt.users.model.entity.User;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -15,13 +16,10 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "damage_losses")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class DamageLoss extends BaseEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
@@ -39,7 +37,7 @@ public class DamageLoss extends BaseEntity {
     private DamageLossReason reason;
 
     @Column(name = "date_recorded", nullable = false)
-    private LocalDate dateRecorded = LocalDate.now();
+    private LocalDateTime dateRecorded = LocalDateTime.now();
 
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
@@ -47,14 +45,6 @@ public class DamageLoss extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id") // Who recorded the loss
     private User user;
-
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 
     public enum DamageLossReason {
         EXPIRED,

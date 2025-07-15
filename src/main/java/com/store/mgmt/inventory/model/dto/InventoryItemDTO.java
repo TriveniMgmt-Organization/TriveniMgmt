@@ -22,5 +22,5 @@ public class InventoryItemDTO {
     private String unitOfMeasure;
 
     @Schema(description = "Location where the inventory item is stored")
-    private String location;
+    private LocationDTO location;
 }

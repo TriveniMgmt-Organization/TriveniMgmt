@@ -12,6 +12,7 @@ import java.util.Set;
 @Entity
 @Table(name = "locations")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class Location extends BaseEntity {
