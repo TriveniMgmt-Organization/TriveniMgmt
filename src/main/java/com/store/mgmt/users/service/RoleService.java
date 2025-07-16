@@ -11,4 +11,5 @@ public interface RoleService {
     RoleDTO updateRole(UUID id, RoleDTO request);
     void deleteRole(UUID id);
     RoleDTO assignPermission(UUID roleId, UUID permissionId);
+    RoleDTO removePermission(UUID roleId, UUID permissionId);
 }

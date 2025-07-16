@@ -21,44 +21,51 @@ public class RoleController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('CREATE_USER')")
+    @PreAuthorize("hasAuthority('ROLE_WRITE')")
     public ResponseEntity<RoleDTO> createRole(@RequestBody RoleDTO request) {
         RoleDTO role = roleService.createRole(request);
         return ResponseEntity.ok(role);
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('VIEW_USER')")
+    @PreAuthorize("hasAuthority('ROLE_READ')")
     public ResponseEntity<RoleDTO> getRole(@PathVariable UUID id) {
         RoleDTO role = roleService.getRole(id);
         return ResponseEntity.ok(role);
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('VIEW_USER')")
+    @PreAuthorize("hasAuthority('ROLE_READ')")
     public ResponseEntity<List<RoleDTO>> getAllRoles() {
         List<RoleDTO> roles = roleService.getAllRoles();
         return ResponseEntity.ok(roles);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('UPDATE_USER')")
+    @PreAuthorize("hasAuthority('ROLE_WRITE')")
     public ResponseEntity<RoleDTO> updateRole(@PathVariable UUID id, @RequestBody RoleDTO request) {
         RoleDTO role = roleService.updateRole(id, request);
         return ResponseEntity.ok(role);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('DELETE_USER')")
+    @PreAuthorize("hasAuthority('ROLE_WRITE')")
     public ResponseEntity<Void> deleteRole(@PathVariable UUID id) {
         roleService.deleteRole(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{id}/permissions/{permissionId}")
-    @PreAuthorize("hasAuthority('UPDATE_USER')")
+    @PreAuthorize("hasAuthority('ROLE_WRITE')")
     public ResponseEntity<RoleDTO> assignPermission(@PathVariable UUID id, @PathVariable UUID permissionId) {
         RoleDTO role = roleService.assignPermission(id, permissionId);
+        return ResponseEntity.ok(role);
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_WRITE')")
+    @DeleteMapping("/{id}/permissions/{permissionId}")
+    public ResponseEntity<RoleDTO> removePermission(@PathVariable UUID id, @PathVariable UUID permissionId) {
+        RoleDTO role = roleService.removePermission(id, permissionId);
         return ResponseEntity.ok(role);
     }
 }

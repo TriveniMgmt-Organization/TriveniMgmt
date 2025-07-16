@@ -23,14 +23,17 @@ public class User extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(name = "full_name", nullable = true)
-    private String fullName;
+    @Column(name = "first_name", nullable = true)
+    private String firstName;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "last_name", nullable = true)
+    private String lastName;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Column(name = "organization_id")
+    private UUID organizationId;
+
+    @Column(name = "store_id")
+    private UUID storeId;
 
     @Column(name = "is_active", nullable = false)
     private boolean isActive;

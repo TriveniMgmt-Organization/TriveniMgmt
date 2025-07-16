@@ -91,6 +91,22 @@ public class RoleServiceImpl implements RoleService {
         return toDTO(updated);
     }
 
+    @Override
+    @Transactional
+    public RoleDTO removePermission(UUID roleId, UUID permissionId) {
+        Role role = roleRepository.findById(roleId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found"));
+        Permission permission = permissionRepository.findById(permissionId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Permission not found"));
+
+        if (!role.getPermissions().remove(permission)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Permission not assigned to this role");
+        }
+
+        Role updated = roleRepository.save(role);
+        return toDTO(updated);
+    }
+
     private RoleDTO toDTO(Role role) {
         RoleDTO dto = new RoleDTO();
         dto.setId(role.getId());

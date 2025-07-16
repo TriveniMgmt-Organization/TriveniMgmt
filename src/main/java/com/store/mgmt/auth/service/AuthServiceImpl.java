@@ -1,12 +1,9 @@
 package com.store.mgmt.auth.service;
 
-import com.store.mgmt.auth.controller.AuthController;
-import com.store.mgmt.auth.exception.AuthenticationException;
 import com.store.mgmt.auth.model.dto.AuthCredentials;
 import com.store.mgmt.auth.model.dto.AuthResponse;
 import com.store.mgmt.auth.model.dto.RegisterCredentials;
 import com.store.mgmt.auth.model.entity.RefreshToken;
-import com.store.mgmt.common.exception.ResourceNotFoundException;
 import com.store.mgmt.users.mapper.UserMapper;
 import com.store.mgmt.users.model.dto.UserDTO;
 import com.store.mgmt.users.model.entity.Role;
@@ -15,22 +12,21 @@ import com.store.mgmt.users.repository.RefreshTokenRepository;
 import com.store.mgmt.users.repository.RoleRepository;
 import com.store.mgmt.users.repository.UserRepository;
 import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -42,64 +38,87 @@ public class AuthServiceImpl implements AuthService {
     private final JWTService jwtService;
     private final UserMapper userMapper;
     private final RefreshTokenRepository refreshTokenRepository; // New repository for refresh tokens
+    private final AuthenticationManager authenticationManager;
 
     public AuthServiceImpl(UserRepository userRepository, RoleRepository roleRepository,
                            PasswordEncoder passwordEncoder, JWTService jwtService,
+                            AuthenticationManager authenticationManager,
                            UserMapper userMapper, RefreshTokenRepository refreshTokenRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.userMapper = userMapper;
+        this.authenticationManager = authenticationManager;
         this.refreshTokenRepository = refreshTokenRepository;
     }
 
     @Override
+    @Transactional
     public AuthResponse authenticateUser(AuthCredentials credentials) {
-        logger.debug("Authenticating user: {}", credentials.getUsername());
+        logger.info("Authenticating user: {}", credentials.getUsername());
 
-        User user = userRepository.findByUsername(credentials.getUsername())
-                .orElseThrow(() -> new AuthenticationException("Invalid username or password"));
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(credentials.getUsername(), credentials.getPassword())
+            );
 
-        if (!user.isActive()) {
-            logger.warn("User account inactive: {}", credentials.getUsername());
-            throw new AuthenticationException("User account is inactive", HttpStatus.FORBIDDEN);
+//            manual check remove later
+//            if (!passwordEncoder.matches(credentials.getPassword(), user.getPasswordHash())) {
+//                logger.warn("Invalid password for user: {}", credentials.getUsername());
+//                throw new AuthenticationException("Invalid username or password");
+//            }
+            User user = userRepository.findByUsername(credentials.getUsername())
+                    .orElseThrow(() -> new BadCredentialsException("Invalid username"));
+
+            if (!user.isActive()) {
+                logger.warn("User account inactive: {}", credentials.getUsername());
+                throw new DisabledException("User account is inactive");
+            }
+
+            UserDetails userDetails = createUserDetails(user);
+            String accessToken = jwtService.generateAccessToken(userDetails);
+            String refreshToken = jwtService.generateRefreshToken(userDetails);
+
+            storeRefreshToken(user, refreshToken);
+
+            UserDTO userDTO = userMapper.toDto(user);
+            return new AuthResponse(accessToken, refreshToken, userDTO);
+        } catch (BadCredentialsException e) {
+            logger.warn("Invalid credentials for user: {}", credentials.getUsername());
+            throw e;
+        } catch (DisabledException e) {
+            logger.warn("Account disabled for user: {}", credentials.getUsername());
+            throw e;
+        } catch (Exception e) {
+            logger.error("Authentication failed for user: {}", credentials.getUsername(), e);
+            throw new BadCredentialsException("Authentication failed", e);
         }
-
-        if (!passwordEncoder.matches(credentials.getPassword(), user.getPasswordHash())) {
-            logger.warn("Invalid password for user: {}", credentials.getUsername());
-            throw new AuthenticationException("Invalid username or password");
-        }
-
-        UserDetails userDetails = createUserDetails(user);
-        String accessToken = jwtService.generateAccessToken(userDetails);
-        String refreshToken = jwtService.generateRefreshToken(userDetails);
-
-        storeRefreshToken(user, refreshToken);
-
-        UserDTO userDTO = userMapper.toDto(user);
-        return new AuthResponse(accessToken, refreshToken, userDTO);
     }
-
     @Override
+    @Transactional
     public AuthResponse registerUser(RegisterCredentials registrationData) {
+        logger.info("Registering user: {}", registrationData.getEmail());
+
         if (userRepository.findByUsername(registrationData.getEmail()).isPresent()) {
+            logger.warn("Username already taken: {}", registrationData.getEmail());
             throw new IllegalArgumentException("Username '" + registrationData.getEmail() + "' is already taken.");
         }
 
         if (userRepository.findByEmail(registrationData.getEmail()).isPresent()) {
+            logger.warn("Email already registered: {}", registrationData.getEmail());
             throw new IllegalArgumentException("Email '" + registrationData.getEmail() + "' is already registered.");
         }
 
         User newUser = new User();
-        newUser.setFullName(registrationData.getFullName());
+        newUser.setFirstName(registrationData.getFullName());
         newUser.setUsername(registrationData.getEmail());
         newUser.setEmail(registrationData.getEmail());
         newUser.setPasswordHash(passwordEncoder.encode(registrationData.getPassword()));
         newUser.setActive(true);
 
-        Role userRole = roleRepository.findByName("USER")
-                .orElseThrow(() -> new ResourceNotFoundException("Default 'USER' role not found."));
+        Role userRole = roleRepository.findByName("CUSTOMER")
+                .orElseThrow(() -> new IllegalStateException("Default 'CUSTOMER' role not found."));
         newUser.setRoles(new HashSet<>(Collections.singletonList(userRole)));
 
         User savedUser = userRepository.save(newUser);
@@ -108,47 +127,75 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtService.generateAccessToken(userDetails);
         String refreshToken = jwtService.generateRefreshToken(userDetails);
 
-        // Store refresh token
         storeRefreshToken(savedUser, refreshToken);
 
         UserDTO userDTO = userMapper.toDto(savedUser);
         return new AuthResponse(accessToken, refreshToken, userDTO);
     }
-
+    @Override
+    @Transactional
     public AuthResponse refreshToken(String refreshToken) {
-        UserDetails userDetails = loadUserByRefreshToken(refreshToken);
-        String newAccessToken = jwtService.generateAccessToken(userDetails);
-        User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        UserDTO userDTO = userMapper.toDto(user);
-        return new AuthResponse(newAccessToken, refreshToken, userDTO);
-    }
+        logger.info("Refreshing token");
 
+        UserDetails userDetails = loadUserByRefreshToken(refreshToken);
+        User user = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new IllegalStateException("User not found"));
+
+        // Invalidate old refresh token
+        refreshTokenRepository.deleteByToken(refreshToken);
+
+        // Generate new tokens
+        String newAccessToken = jwtService.generateAccessToken(userDetails);
+        String newRefreshToken = jwtService.generateRefreshToken(userDetails);
+
+        storeRefreshToken(user, newRefreshToken);
+
+        UserDTO userDTO = userMapper.toDto(user);
+        return new AuthResponse(newAccessToken, newRefreshToken, userDTO);
+    }
+    @Override
+    @Transactional
     public void logout(String refreshToken) {
+        logger.info("Logging out user");
         refreshTokenRepository.deleteByToken(refreshToken);
     }
 
-
+    @Override
     public AuthResponse validateToken(String token) {
+        logger.info("Validating token for user: {}", jwtService.extractUsername(token));
+
         String username = jwtService.extractUsername(token);
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new IllegalStateException("User not found"));
+
         if (jwtService.validateToken(token, user)) {
             UserDTO userDTO = userMapper.toDto(user);
             return new AuthResponse(token, null, userDTO);
         } else {
-            throw new AuthenticationException("Invalid or expired token", HttpStatus.UNAUTHORIZED);
+            logger.warn("Invalid or expired token for user: {}", username);
+            throw new JwtException("Invalid or expired token");
         }
-
     }
     private UserDetails createUserDetails(User user) {
-        List<GrantedAuthority> authorities = user.getRoles().stream()
-                .flatMap(role -> role.getPermissions().stream()
-                        .map(permission -> new SimpleGrantedAuthority("PERM_" + permission.getName())))
-                .collect(Collectors.toList());
+        // Include both roles (with ROLE_ prefix) and permissions (without prefix)
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.addAll(user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
+                .toList());
+        authorities.addAll(user.getRoles().stream()
+                .flatMap(role -> role.getPermissions().stream())
+                .map(permission -> new SimpleGrantedAuthority(permission.getName()))
+                .toList());
+
         return new org.springframework.security.core.userdetails.User(
-                user.getUsername(), user.getPasswordHash(), user.isActive(),
-                true, true, true, authorities);
+                user.getUsername(),
+                user.getPasswordHash(),
+                user.isActive(),
+                true, // accountNonExpired
+                true, // credentialsNonExpired
+                true, // accountNonLocked
+                authorities
+        );
     }
 
     private void storeRefreshToken(User user, String refreshToken) {

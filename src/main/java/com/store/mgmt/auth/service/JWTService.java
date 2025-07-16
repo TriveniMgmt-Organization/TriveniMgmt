@@ -3,6 +3,8 @@ package com.store.mgmt.auth.service;
 import com.store.mgmt.users.model.entity.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class JWTService {
+    private static final Logger logger = LoggerFactory.getLogger(JWTService.class);
 
     @Value("${jwt.secret}")
     private String secret;
@@ -30,10 +33,15 @@ public class JWTService {
 
     @Value("${jwt.issuer}")
     private String jwtIssuer;
+    private final SecretKey signingKey;
+
+    public JWTService(@Value("${jwt.secret}") String secret) {
+        this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    }
 
     // --- Key Management ---
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        return signingKey;
     }
 
     // --- Token Generation ---
@@ -69,6 +77,7 @@ public class JWTService {
         Claims claims = extractAllClaims(refreshToken);
         String username = claims.getSubject();
         if (!username.equals(userDetails.getUsername())) {
+            logger.warn("Refresh token username mismatch for user: {}", username);
             throw new JwtException("Refresh token username mismatch");
         }
         return generateAccessToken(userDetails);
@@ -83,7 +92,6 @@ public class JWTService {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
-
     private Claims extractAllClaims(String token) {
         try {
             return Jwts.parser()
@@ -92,12 +100,16 @@ public class JWTService {
                     .parseSignedClaims(token)
                     .getPayload();
         } catch (ExpiredJwtException e) {
+            logger.warn("Token expired: {}", e.getMessage());
             throw e;
         } catch (MalformedJwtException e) {
+            logger.warn("Malformed JWT: {}", e.getMessage());
             throw new JwtException("Malformed JWT", e);
         } catch (IllegalArgumentException e) {
+            logger.warn("Invalid JWT argument: {}", e.getMessage());
             throw new JwtException("Invalid JWT argument", e);
         } catch (Exception e) {
+            logger.error("Unknown JWT parsing error: {}", e.getMessage(), e);
             throw new JwtException("Unknown JWT parsing error", e);
         }
     }
@@ -105,10 +117,15 @@ public class JWTService {
     // --- Token Validation ---
     public boolean validateToken(String token, User userDetails) {
         try {
-            final Claims claims = extractAllClaims(token);
+            Claims claims = extractAllClaims(token);
             String username = claims.getSubject();
-            return username.equals(userDetails.getUsername());
+            boolean isValid = username.equals(userDetails.getUsername());
+            if (!isValid) {
+                logger.warn("Token username mismatch: expected {}, got {}", userDetails.getUsername(), username);
+            }
+            return isValid;
         } catch (JwtException e) {
+            logger.warn("Token validation failed: {}", e.getMessage());
             return false;
         }
     }

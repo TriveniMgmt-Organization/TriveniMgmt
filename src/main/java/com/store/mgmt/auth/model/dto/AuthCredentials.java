@@ -15,7 +15,8 @@ public class AuthCredentials {
             description = "Unique username for the user",
             example = "john.doe",
             minLength = 3,
-            maxLength = 50
+            maxLength = 50,
+            requiredMode = Schema.RequiredMode.REQUIRED
     )
     @NotBlank(message = "Username cannot be empty")
     private String username;
@@ -26,9 +27,16 @@ public class AuthCredentials {
             format = "password",
             minLength = 8,
             maxLength = 100,
-            required = true,
-            writeOnly = true
+            requiredMode = Schema.RequiredMode.REQUIRED,
+            accessMode = Schema.AccessMode.WRITE_ONLY
     )
     @NotBlank(message = "Password cannot be empty")
     private String password;
+
+    @Schema(description = "Remember me option for the user",
+            example = "true",
+            defaultValue = "false",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED
+            )
+    private boolean rememberMe;
 }

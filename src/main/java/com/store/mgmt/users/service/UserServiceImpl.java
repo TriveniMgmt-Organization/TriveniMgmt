@@ -45,7 +45,7 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = new User();
-        user.setFullName(request.getFullName());
+        user.setFirstName(request.getFullName());
         user.setUsername(request.getEmail());
         user.setPasswordHash(passwordEncoder.encode(request.getUsername())); // Default password same as username
         user.setEmail(request.getEmail());
@@ -83,7 +83,7 @@ public class UserServiceImpl implements UserService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists");
         }
 
-        if (request.getFullName() != null) user.setFullName(request.getFullName());
+        if (request.getFullName() != null) user.setFirstName(request.getFullName());
         if (request.getEmail() != null){
             user.setEmail(request.getEmail());
             user.setUsername(request.getEmail());
@@ -131,7 +131,7 @@ public class UserServiceImpl implements UserService {
     private UserDTO toDTO(User user) {
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
-        dto.setFullName(user.getFullName());
+        dto.setFullName(user.getFirstName());
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
         dto.setCreatedAt(user.getCreatedAt());

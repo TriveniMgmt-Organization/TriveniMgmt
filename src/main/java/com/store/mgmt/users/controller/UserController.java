@@ -27,7 +27,7 @@ public class UserController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('CREATE_USER')")
+    @PreAuthorize("hasAuthority('USER_WRITE')")
     @Operation(
             summary = "Create a new user",
             description = "Creates a new user account with the provided details.",
@@ -62,7 +62,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('VIEW_USER')")
+    @PreAuthorize("hasAuthority('USER_READ')")
     @Operation(
             summary = "Get a user by ID",
             description = "Retrieves a single user based on their unique identifier.",
@@ -92,7 +92,7 @@ public class UserController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('VIEW_USER')")
+    @PreAuthorize("hasAuthority('USER_READ')")
     @Operation(
             summary = "Get all users",
             description = "Retrieves a list of all available user accounts.",
@@ -115,7 +115,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('UPDATE_USER')")
+    @PreAuthorize("hasAuthority('USER_WRITE')")
     @Operation(
             summary = "Update an existing user",
             description = "Updates the details of an existing user identified by their ID.",
@@ -157,7 +157,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('DELETE_USER')")
+    @PreAuthorize("hasAuthority('USER_WRITE')")
     @Operation(
             summary = "Delete a user",
             description = "Deletes a user account based on their unique identifier. This operation is typically a hard delete.",
@@ -187,7 +187,7 @@ public class UserController {
     }
 
     @PostMapping("/{id}/roles/{roleId}")
-    @PreAuthorize("hasAuthority('UPDATE_USER')")
+    @PreAuthorize("hasAuthority('USER_WRITE')")
     @Operation(
             summary = "Assign a role to a user",
             description = "Assigns a specific role to a user identified by their IDs.",
@@ -224,7 +224,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}/roles/{roleId}")
-    @PreAuthorize("hasAuthority('UPDATE_USER')")
+    @PreAuthorize("hasAuthority('USER_WRITE')")
     @Operation(
             summary = "Remove a role from a user",
             description = "Removes a specific role from a user identified by their IDs.",

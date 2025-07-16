@@ -6,7 +6,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_PROFILES_ACTIVE=production
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/triveni_mgmt_db
       - SPRING_DATASOURCE_USERNAME=proha
       - SPRING_DATASOURCE_PASSWORD=gosaikunda
