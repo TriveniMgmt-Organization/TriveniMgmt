@@ -35,7 +35,7 @@ public class InventoryController {
     // --- Inventory Item Management (Specific stock items) ---
 
     @PostMapping("/items")
-    @PreAuthorize("hasAuthority('PERM_CREATE_INVENTORY_ITEM')")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_WRITE')")
     @Operation(
             summary = "Create or update an inventory item",
             description = "Adds a new inventory item record for a product at a specific location, batch, and expiration. If an identical item already exists, its quantity will be updated.",
@@ -79,7 +79,7 @@ public class InventoryController {
     }
 
     @GetMapping("/items/{id}")
-    @PreAuthorize("hasAuthority('PERM_VIEW_INVENTORY_ITEM')")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
     @Operation(
             summary = "Get an inventory item by ID",
             description = "Retrieves a single inventory item record based on its unique identifier.",
@@ -109,7 +109,7 @@ public class InventoryController {
     }
 
     @GetMapping("/items/by-product/{productId}")
-    @PreAuthorize("hasAuthority('PERM_VIEW_INVENTORY_ITEM')")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
     @Operation(
             summary = "Get inventory items for a specific product",
             description = "Retrieves a list of all inventory item records for a given product across all locations.",
@@ -139,7 +139,7 @@ public class InventoryController {
     }
 
     @GetMapping("/items/by-location/{locationId}")
-    @PreAuthorize("hasAuthority('PERM_VIEW_INVENTORY_ITEM')")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
     @Operation(
             summary = "Get inventory items at a specific location",
             description = "Retrieves a list of all inventory item records currently stored at a given location.",
@@ -170,7 +170,7 @@ public class InventoryController {
 
 
     @PatchMapping("/items/{id}/quantity") // Using PATCH for partial update
-    @PreAuthorize("hasAuthority('PERM_UPDATE_INVENTORY_ITEM_QUANTITY')")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_WRITE')")
     @Operation(
             summary = "Update the quantity of an inventory item",
             description = "Adjusts the quantity of an existing inventory item identified by its ID. Use positive values to add, negative to subtract.",
@@ -207,7 +207,7 @@ public class InventoryController {
     }
 
     @DeleteMapping("/items/{id}")
-    @PreAuthorize("hasAuthority('PERM_DELETE_INVENTORY_ITEM')")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_WRITE')")
     @Operation(
             summary = "Delete an inventory item",
             description = "Deletes an inventory item record based on its unique identifier. This might represent removing a specific batch/lot from stock.",
@@ -238,7 +238,7 @@ public class InventoryController {
 
     // --- Product Management ---
     @PostMapping("/products")
-    @PreAuthorize("hasAuthority('PERM_CREATE_PRODUCT')")
+//    @PreAuthorize("hasAuthority('PRODUCT_WRITE')")
     @Operation(
             summary = "Create a new product",
             description = "Adds a new product definition to the system. This is master data, not an inventory record.",
@@ -255,7 +255,7 @@ public class InventoryController {
     }
 
     @GetMapping("/products")
-    @PreAuthorize("hasAuthority('PERM_VIEW_PRODUCT')")
+//    @PreAuthorize("hasAuthority('PRODUCT_READ')")
     @Operation(
             summary = "Get all products",
             description = "Retrieves a list of all products, optionally including inactive ones.",
@@ -272,7 +272,7 @@ public class InventoryController {
     }
 
     @GetMapping("/products/{id}")
-    @PreAuthorize("hasAuthority('PERM_VIEW_PRODUCT')")
+//    @PreAuthorize("hasAuthority('PRODUCT_READ')")
     @Operation(
             summary = "Get product by ID",
             description = "Retrieves a product definition by its unique ID.",
@@ -288,7 +288,7 @@ public class InventoryController {
     }
 
     @PutMapping("/products/{id}")
-    @PreAuthorize("hasAuthority('PERM_UPDATE_PRODUCT')")
+//    @PreAuthorize("hasAuthority('PRODUCT_WRITE')")
     @Operation(
             summary = "Update an existing product",
             description = "Updates the details of an existing product definition.",
@@ -306,7 +306,7 @@ public class InventoryController {
     }
 
     @DeleteMapping("/products/{id}")
-    @PreAuthorize("hasAuthority('PERM_DELETE_PRODUCT')")
+//    @PreAuthorize("hasAuthority('PRODUCT_WRITE')")
     @Operation(
             summary = "Logically delete a product",
             description = "Marks a product as inactive. It does not physically remove it from the database.",
@@ -323,7 +323,7 @@ public class InventoryController {
 
     // --- Category Management ---
     @PostMapping("/categories")
-    @PreAuthorize("hasAuthority('PERM_CREATE_CATEGORY')")
+//    @PreAuthorize("hasAuthority('CATEGORY_WRITE')")
     @Operation(
             summary = "Create a new product category",
             description = "Adds a new category definition.",
@@ -340,7 +340,7 @@ public class InventoryController {
     }
 
     @GetMapping("/categories")
-    @PreAuthorize("hasAuthority('PERM_VIEW_CATEGORY')")
+//    @PreAuthorize("hasAuthority('CATEGORY_READ')")
     @Operation(
             summary = "Get all product categories",
             description = "Retrieves a list of all defined product categories.",
@@ -355,7 +355,7 @@ public class InventoryController {
     }
 
     @GetMapping("/categories/{id}")
-    @PreAuthorize("hasAuthority('PERM_VIEW_CATEGORY')")
+//    @PreAuthorize("hasAuthority('CATEGORY_READ')")
     @Operation(
             summary = "Get category by ID",
             description = "Retrieves a category by its unique ID.",
@@ -371,7 +371,7 @@ public class InventoryController {
     }
 
     @PutMapping("/categories/{id}")
-    @PreAuthorize("hasAuthority('PERM_UPDATE_CATEGORY')")
+//    @PreAuthorize("hasAuthority('CATEGORY_WRITE')")
     @Operation(
             summary = "Update an existing category",
             description = "Updates the details of an existing category.",
@@ -389,7 +389,7 @@ public class InventoryController {
     }
 
     @DeleteMapping("/categories/{id}")
-    @PreAuthorize("hasAuthority('PERM_DELETE_CATEGORY')")
+//    @PreAuthorize("hasAuthority('CATEGORY_WRITE')")
     @Operation(
             summary = "Delete a category",
             description = "Deletes a category by its unique ID. Fails if products are associated.",
@@ -407,7 +407,7 @@ public class InventoryController {
 
     // --- Supplier Management ---
     @PostMapping("/suppliers")
-    @PreAuthorize("hasAuthority('PERM_CREATE_SUPPLIER')")
+//    @PreAuthorize("hasAuthority('SUPPLIER_WRITE')")
     @Operation(
             summary = "Create a new supplier",
             description = "Adds a new supplier to the system.",
@@ -424,7 +424,7 @@ public class InventoryController {
     }
 
     @GetMapping("/suppliers")
-    @PreAuthorize("hasAuthority('PERM_VIEW_SUPPLIER')")
+//    @PreAuthorize("hasAuthority('SUPPLIER_READ')")
     @Operation(
             summary = "Get all suppliers",
             description = "Retrieves a list of all registered suppliers.",
@@ -439,7 +439,7 @@ public class InventoryController {
     }
 
     @GetMapping("/suppliers/{id}")
-    @PreAuthorize("hasAuthority('PERM_VIEW_SUPPLIER')")
+//    @PreAuthorize("hasAuthority('SUPPLIER_READ')")
     @Operation(
             summary = "Get supplier by ID",
             description = "Retrieves a supplier by its unique ID.",
@@ -455,7 +455,7 @@ public class InventoryController {
     }
 
     @PutMapping("/suppliers/{id}")
-    @PreAuthorize("hasAuthority('PERM_UPDATE_SUPPLIER')")
+//    @PreAuthorize("hasAuthority('SUPPLIER_WRITE')")
     @Operation(
             summary = "Update an existing supplier",
             description = "Updates the details of an existing supplier.",
@@ -473,7 +473,7 @@ public class InventoryController {
     }
 
     @DeleteMapping("/suppliers/{id}")
-    @PreAuthorize("hasAuthority('PERM_DELETE_SUPPLIER')")
+//    @PreAuthorize("hasAuthority('SUPPLIER_WRITE')")
     @Operation(
             summary = "Delete a supplier",
             description = "Deletes a supplier by its unique ID. Fails if purchase orders are associated.",
@@ -491,7 +491,7 @@ public class InventoryController {
 
     // --- Location Management ---
     @PostMapping("/locations")
-    @PreAuthorize("hasAuthority('PERM_CREATE_LOCATION')")
+//    @PreAuthorize("hasAuthority('LOCATION_WRITE')")
     @Operation(
             summary = "Create a new inventory location",
             description = "Adds a new physical or logical location for inventory.",
@@ -508,7 +508,7 @@ public class InventoryController {
     }
 
     @GetMapping("/locations")
-    @PreAuthorize("hasAuthority('PERM_VIEW_LOCATION')")
+//    @PreAuthorize("hasAuthority('LOCATION_READ')")
     @Operation(
             summary = "Get all inventory locations",
             description = "Retrieves a list of all defined inventory locations.",
@@ -523,7 +523,7 @@ public class InventoryController {
     }
 
     @GetMapping("/locations/{id}")
-    @PreAuthorize("hasAuthority('PERM_VIEW_LOCATION')")
+//    @PreAuthorize("hasAuthority('LOCATION_READ')")
     @Operation(
             summary = "Get location by ID",
             description = "Retrieves a location by its unique ID.",
@@ -539,7 +539,7 @@ public class InventoryController {
     }
 
     @PutMapping("/locations/{id}")
-    @PreAuthorize("hasAuthority('PERM_UPDATE_LOCATION')")
+//    @PreAuthorize("hasAuthority('LOCATION_WRITE')")
     @Operation(
             summary = "Update an existing location",
             description = "Updates the details of an existing location.",
@@ -557,7 +557,7 @@ public class InventoryController {
     }
 
     @DeleteMapping("/locations/{id}")
-    @PreAuthorize("hasAuthority('PERM_DELETE_LOCATION')")
+//    @PreAuthorize("hasAuthority('LOCATION_WRITE')")
     @Operation(
             summary = "Delete a location",
             description = "Deletes a location by its unique ID. Fails if inventory items or damage records are associated.",
@@ -575,14 +575,14 @@ public class InventoryController {
 
     // --- Unit of Measure Management ---
     @PostMapping("/units-of-measure")
-    @PreAuthorize("hasAuthority('PERM_CREATE_UOM')")
+//    @PreAuthorize("hasAuthority('UOM_WRITE')")
     @Operation(
             summary = "Create a new Unit of Measure",
             description = "Adds a new unit of measure (e.g., 'kilogram', 'piece').",
             responses = {
                     @ApiResponse(responseCode = "201", description = "Unit of Measure created successfully", content = @Content(schema = @Schema(implementation = UnitOfMeasureDTO.class))),
                     @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
-                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_CREATE_UOM' authority", content = @Content),
+                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'UOM_WRITE' authority", content = @Content),
                     @ApiResponse(responseCode = "409", description = "Conflict: Unit of Measure with this name or abbreviation already exists", content = @Content)
             }
     )
@@ -592,13 +592,13 @@ public class InventoryController {
     }
 
     @GetMapping("/units-of-measure")
-    @PreAuthorize("hasAuthority('PERM_VIEW_UOM')")
+//    @PreAuthorize("hasAuthority('UOM_READ')")
     @Operation(
             summary = "Get all Units of Measure",
             description = "Retrieves a list of all defined units of measure.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Units of Measure retrieved successfully", content = @Content(array = @ArraySchema(schema = @Schema(implementation = UnitOfMeasureDTO.class)))),
-                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_VIEW_UOM' authority", content = @Content)
+                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'UOM_READ' authority", content = @Content)
             }
     )
     public ResponseEntity<List<UnitOfMeasureDTO>> getAllUnitOfMeasures() {
@@ -607,14 +607,14 @@ public class InventoryController {
     }
 
     @GetMapping("/units-of-measure/{id}")
-    @PreAuthorize("hasAuthority('PERM_VIEW_UOM')")
+//    @PreAuthorize("hasAuthority('UOM_READ')")
     @Operation(
             summary = "Get Unit of Measure by ID",
             description = "Retrieves a Unit of Measure by its unique ID.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Unit of Measure retrieved successfully", content = @Content(schema = @Schema(implementation = UnitOfMeasureDTO.class))),
                     @ApiResponse(responseCode = "404", description = "Unit of Measure not found", content = @Content),
-                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_VIEW_UOM' authority", content = @Content)
+                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'UOM_READ' authority", content = @Content)
             }
     )
     public ResponseEntity<UnitOfMeasureDTO> getUnitOfMeasureById(@PathVariable UUID id) {
@@ -623,7 +623,7 @@ public class InventoryController {
     }
 
     @PutMapping("/units-of-measure/{id}")
-    @PreAuthorize("hasAuthority('PERM_UPDATE_UOM')")
+//    @PreAuthorize("hasAuthority('UOM_WRITE')")
     @Operation(
             summary = "Update an existing Unit of Measure",
             description = "Updates the details of an existing Unit of Measure.",
@@ -631,7 +631,7 @@ public class InventoryController {
                     @ApiResponse(responseCode = "200", description = "Unit of Measure updated successfully", content = @Content(schema = @Schema(implementation = UnitOfMeasureDTO.class))),
                     @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
                     @ApiResponse(responseCode = "404", description = "Unit of Measure not found", content = @Content),
-                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_UPDATE_UOM' authority", content = @Content),
+                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'UOM_WRITE' authority", content = @Content),
                     @ApiResponse(responseCode = "409", description = "Conflict: Unit of Measure name or abbreviation already in use", content = @Content)
             }
     )
@@ -641,7 +641,7 @@ public class InventoryController {
     }
 
     @DeleteMapping("/units-of-measure/{id}")
-    @PreAuthorize("hasAuthority('PERM_DELETE_UOM')")
+//    @PreAuthorize("hasAuthority('UOM_WRITE')")
     @Operation(
             summary = "Delete a Unit of Measure",
             description = "Deletes a Unit of Measure by its unique ID. Fails if products are associated.",
@@ -659,7 +659,7 @@ public class InventoryController {
 
     // --- Purchase Order Management ---
     @PostMapping("/purchase-orders")
-    @PreAuthorize("hasAuthority('PERM_CREATE_PO')")
+//    @PreAuthorize("hasAuthority('PO_WRITE')")
     @Operation(
             summary = "Create a new purchase order",
             description = "Submits a new purchase order to a supplier for specific products.",
@@ -676,7 +676,7 @@ public class InventoryController {
     }
 
     @GetMapping("/purchase-orders")
-    @PreAuthorize("hasAuthority('PERM_VIEW_PO')")
+//    @PreAuthorize("hasAuthority('PO_READ')")
     @Operation(
             summary = "Get all purchase orders",
             description = "Retrieves a list of all purchase orders, with optional status filtering.",
@@ -693,7 +693,7 @@ public class InventoryController {
     }
 
     @GetMapping("/purchase-orders/{id}")
-    @PreAuthorize("hasAuthority('PERM_VIEW_PO')")
+//    @PreAuthorize("hasAuthority('PO_READ')")
     @Operation(
             summary = "Get purchase order by ID",
             description = "Retrieves a purchase order by its unique ID.",
@@ -709,7 +709,7 @@ public class InventoryController {
     }
 
     @PutMapping("/purchase-orders/{id}")
-    @PreAuthorize("hasAuthority('PERM_UPDATE_PO')")
+//    @PreAuthorize("hasAuthority('PO_WRITE')")
     @Operation(
             summary = "Update an existing purchase order",
             description = "Updates the details of an existing purchase order. Cannot update completed or cancelled orders.",
@@ -727,7 +727,7 @@ public class InventoryController {
     }
 
     @PostMapping("/purchase-orders/{id}/receipt")
-    @PreAuthorize("hasAuthority('PERM_RECEIVE_PO')")
+//    @PreAuthorize("hasAuthority('PO_WRITE')")
     @Operation(
             summary = "Process receipt of items for a purchase order",
             description = "Records the reception of items for a specific purchase order, updating inventory stock.",
@@ -749,7 +749,7 @@ public class InventoryController {
     }
 
     @PatchMapping("/purchase-orders/{id}/cancel")
-    @PreAuthorize("hasAuthority('PERM_CANCEL_PO')")
+//    @PreAuthorize("hasAuthority('PO_WRITE')")
     @Operation(
             summary = "Cancel a purchase order",
             description = "Changes the status of a purchase order to 'CANCELLED'. Fails if already completed.",
@@ -767,7 +767,7 @@ public class InventoryController {
 
     // --- Sales Management ---
     @PostMapping("/sales")
-    @PreAuthorize("hasAuthority('PERM_PROCESS_SALE')")
+//    @PreAuthorize("hasAuthority('SALE_WRITE')")
     @Operation(
             summary = "Process a new sale transaction",
             description = "Records a sale, decrements inventory stock, and calculates total amount. This is a transactional operation.",
@@ -784,7 +784,7 @@ public class InventoryController {
     }
 
     @GetMapping("/sales/{id}")
-    @PreAuthorize("hasAuthority('PERM_VIEW_SALE')")
+//    @PreAuthorize("hasAuthority('SALE_READ')")
     @Operation(
             summary = "Get sale by ID",
             description = "Retrieves details of a specific sale transaction.",
@@ -800,14 +800,14 @@ public class InventoryController {
     }
 
     @GetMapping("/sales/by-date-range")
-    @PreAuthorize("hasAuthority('PERM_VIEW_SALE_REPORT')")
+//    @PreAuthorize("hasAuthority('SALE_READ')")
     @Operation(
             summary = "Get sales within a date range",
             description = "Retrieves a list of sales that occurred between the specified start and end dates.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Sales retrieved successfully", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SaleDTO.class)))),
                     @ApiResponse(responseCode = "400", description = "Invalid date format", content = @Content),
-                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_VIEW_SALE_REPORT' authority", content = @Content)
+                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'SALE_READ' authority", content = @Content)
             }
     )
     public ResponseEntity<List<SaleDTO>> getSalesByDateRange(
@@ -820,14 +820,14 @@ public class InventoryController {
     }
 
     @GetMapping("/sales/by-product/{productId}")
-    @PreAuthorize("hasAuthority('PERM_VIEW_SALE_REPORT')")
+//    @PreAuthorize("hasAuthority('SALE_READ')")
     @Operation(
             summary = "Get sales for a specific product",
             description = "Retrieves all sales that included a particular product.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Sales retrieved successfully", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SaleDTO.class)))),
                     @ApiResponse(responseCode = "404", description = "Product not found", content = @Content),
-                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_VIEW_SALE_REPORT' authority", content = @Content)
+                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'SALE_READ' authority", content = @Content)
             }
     )
     public ResponseEntity<List<SaleDTO>> getSalesForProduct(@PathVariable UUID productId) {
@@ -837,7 +837,7 @@ public class InventoryController {
 
     // --- Discount Management ---
     @PostMapping("/discounts")
-    @PreAuthorize("hasAuthority('PERM_CREATE_DISCOUNT')")
+//    @PreAuthorize("hasAuthority('DISCOUNT_WRITE')")
     @Operation(
             summary = "Create a new discount",
             description = "Adds a new discount for a product or category.",
@@ -855,13 +855,13 @@ public class InventoryController {
     }
 
     @GetMapping("/discounts")
-    @PreAuthorize("hasAuthority('PERM_VIEW_DISCOUNT')")
+//    @PreAuthorize("hasAuthority('DISCOUNT_READ')")
     @Operation(
             summary = "Get all discounts",
             description = "Retrieves a list of all discounts, with an option to include inactive ones.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Discounts retrieved successfully", content = @Content(array = @ArraySchema(schema = @Schema(implementation = DiscountDTO.class)))),
-                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_VIEW_DISCOUNT' authority", content = @Content)
+                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'DISCOUNT_READ' authority", content = @Content)
             }
     )
     public ResponseEntity<List<DiscountDTO>> getAllDiscounts(
@@ -872,14 +872,14 @@ public class InventoryController {
     }
 
     @GetMapping("/discounts/{id}")
-    @PreAuthorize("hasAuthority('PERM_VIEW_DISCOUNT')")
+//    @PreAuthorize("hasAuthority('DISCOUNT_READ')")
     @Operation(
             summary = "Get discount by ID",
             description = "Retrieves a discount by its unique ID.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Discount retrieved successfully", content = @Content(schema = @Schema(implementation = DiscountDTO.class))),
                     @ApiResponse(responseCode = "404", description = "Discount not found", content = @Content),
-                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_VIEW_DISCOUNT' authority", content = @Content)
+                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'DISCOUNT_READ' authority", content = @Content)
             }
     )
     public ResponseEntity<DiscountDTO> getDiscountById(@PathVariable UUID id) {
@@ -888,7 +888,7 @@ public class InventoryController {
     }
 
     @PutMapping("/discounts/{id}")
-    @PreAuthorize("hasAuthority('PERM_UPDATE_DISCOUNT')")
+//    @PreAuthorize("hasAuthority('DISCOUNT_WRITE')")
     @Operation(
             summary = "Update an existing discount",
             description = "Updates the details of an existing discount.",
@@ -906,7 +906,7 @@ public class InventoryController {
     }
 
     @PatchMapping("/discounts/{id}/deactivate")
-    @PreAuthorize("hasAuthority('PERM_DEACTIVATE_DISCOUNT')")
+//    @PreAuthorize("hasAuthority('DISCOUNT_WRITE')")
     @Operation(
             summary = "Deactivate a discount",
             description = "Sets a discount's active status to false.",
@@ -922,14 +922,14 @@ public class InventoryController {
     }
 
     @GetMapping("/discounts/active/by-product/{productId}")
-    @PreAuthorize("hasAuthority('PERM_VIEW_DISCOUNT')")
+//    @PreAuthorize("hasAuthority('DISCOUNT_READ')")
     @Operation(
             summary = "Get active discounts for a product",
             description = "Retrieves active discounts currently applicable to a specific product.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Discounts retrieved successfully", content = @Content(array = @ArraySchema(schema = @Schema(implementation = DiscountDTO.class)))),
                     @ApiResponse(responseCode = "404", description = "Product not found", content = @Content),
-                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_VIEW_DISCOUNT' authority", content = @Content)
+                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'DISCOUNT_READ' authority", content = @Content)
             }
     )
     public ResponseEntity<List<DiscountDTO>> getActiveDiscountsForProduct(@PathVariable UUID productId) {
@@ -938,14 +938,14 @@ public class InventoryController {
     }
 
     @GetMapping("/discounts/active/by-category/{categoryId}")
-    @PreAuthorize("hasAuthority('PERM_VIEW_DISCOUNT')")
+//    @PreAuthorize("hasAuthority('DISCOUNT_READ')")
     @Operation(
             summary = "Get active discounts for a category",
             description = "Retrieves active discounts currently applicable to a specific product category.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Discounts retrieved successfully", content = @Content(array = @ArraySchema(schema = @Schema(implementation = DiscountDTO.class)))),
                     @ApiResponse(responseCode = "404", description = "Category not found", content = @Content),
-                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_VIEW_DISCOUNT' authority", content = @Content)
+                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'DISCOUNT_READ' authority", content = @Content)
             }
     )
     public ResponseEntity<List<DiscountDTO>> getActiveDiscountsForCategory(@PathVariable UUID categoryId) {
@@ -955,7 +955,7 @@ public class InventoryController {
 
     // --- Damage/Loss Management ---
     @PostMapping("/damage-losses")
-    @PreAuthorize("hasAuthority('PERM_RECORD_DAMAGE_LOSS')")
+//    @PreAuthorize("hasAuthority('DAMAGE_LOSS_WRITE')")
     @Operation(
             summary = "Record a damage or loss event",
             description = "Records a quantity of a product as damaged or lost, decrementing inventory stock.",
@@ -972,14 +972,14 @@ public class InventoryController {
     }
 
     @GetMapping("/damage-losses")
-    @PreAuthorize("hasAuthority('PERM_VIEW_DAMAGE_LOSS')")
+//    @PreAuthorize("hasAuthority('DAMAGE_LOSS_READ')")
     @Operation(
             summary = "Get all damage/loss records",
             description = "Retrieves a list of all recorded damage and loss events within a date range.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Damage/Loss records retrieved successfully", content = @Content(array = @ArraySchema(schema = @Schema(implementation = DamageLossDTO.class)))),
                     @ApiResponse(responseCode = "400", description = "Invalid date format", content = @Content),
-                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_VIEW_DAMAGE_LOSS' authority", content = @Content)
+                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'DAMAGE_LOSS_READ' authority", content = @Content)
             }
     )
     public ResponseEntity<List<DamageLossDTO>> getAllDamageLossRecords(
@@ -992,14 +992,14 @@ public class InventoryController {
     }
 
     @GetMapping("/damage-losses/{id}")
-    @PreAuthorize("hasAuthority('PERM_VIEW_DAMAGE_LOSS')")
+//    @PreAuthorize("hasAuthority('DAMAGE_LOSS_READ')")
     @Operation(
             summary = "Get damage/loss record by ID",
             description = "Retrieves a specific damage or loss record by its unique ID.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Damage/Loss record retrieved successfully", content = @Content(schema = @Schema(implementation = DamageLossDTO.class))),
                     @ApiResponse(responseCode = "404", description = "Damage/Loss record not found", content = @Content),
-                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_VIEW_DAMAGE_LOSS' authority", content = @Content)
+                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'DAMAGE_LOSS_READ' authority", content = @Content)
             }
     )
     public ResponseEntity<DamageLossDTO> getDamageLossRecordById(@PathVariable UUID id) {
@@ -1009,9 +1009,9 @@ public class InventoryController {
 
     // --- Stock Information & Checks ---
     @GetMapping("/stock/total/{productId}")
-    @PreAuthorize("hasAuthority('PERM_VIEW_STOCK_LEVELS')")
+//    @PreAuthorize("hasAuthority('STOCK_CHECK_READ')")
     @Operation(
-            summary = "Get total stock quantity for a product",
+//            summary = "Get total stock quantity for a product",
             description = "Retrieves the aggregated quantity of a specific product across all inventory locations.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Total stock quantity retrieved successfully", content = @Content(schema = @Schema(implementation = Integer.class))),
@@ -1025,7 +1025,7 @@ public class InventoryController {
     }
 
     @GetMapping("/stock/at-location/{productId}/{locationId}")
-    @PreAuthorize("hasAuthority('PERM_VIEW_STOCK_LEVELS')")
+//    @PreAuthorize("hasAuthority('STOCK_CHECK_READ')")
     @Operation(
             summary = "Get stock quantity for a product at a specific location",
             description = "Retrieves the quantity of a specific product available at a particular inventory location.",
@@ -1043,7 +1043,7 @@ public class InventoryController {
     }
 
     @GetMapping("/stock/check-availability")
-    @PreAuthorize("hasAuthority('PERM_CHECK_STOCK_AVAILABILITY')")
+//    @PreAuthorize("hasAuthority('STOCK_CHECK_READ')")
     @Operation(
             summary = "Check overall stock availability for a product",
             description = "Checks if a requested quantity of a product is available across all locations.",
@@ -1064,7 +1064,7 @@ public class InventoryController {
     }
 
     @GetMapping("/stock/check-availability-at-location")
-    @PreAuthorize("hasAuthority('PERM_CHECK_STOCK_AVAILABILITY')")
+//    @PreAuthorize("hasAuthority('STOCK_CHECK_READ')")
     @Operation(
             summary = "Check stock availability for a product at a specific location",
             description = "Checks if a requested quantity of a product is available at a particular location.",
@@ -1087,7 +1087,7 @@ public class InventoryController {
     }
 
     @GetMapping("/stock/product-retail-price/{productId}")
-    @PreAuthorize("hasAuthority('PERM_VIEW_PRODUCT_PRICES')")
+//    @PreAuthorize("hasAuthority('STOCK_CHECK_READ')")
     @Operation(
             summary = "Get retail price of a product",
             description = "Retrieves the retail price of a product.",

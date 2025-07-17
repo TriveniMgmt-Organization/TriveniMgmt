@@ -56,6 +56,7 @@ import java.io.IOException;
 
         private String extractTokenFromCookie(HttpServletRequest request) {
             Cookie[] cookies = request.getCookies();
+            System.out.println("Extracting cookies from request: " + (cookies != null ? cookies.length : 0) + " cookies found.");
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
                     logger.debug("Cookie Name: {}, Cookie Value: {}", cookie.getName(), cookie.getValue());
@@ -65,6 +66,12 @@ import java.io.IOException;
             }
 
             Cookie cookie = WebUtils.getCookie(request, ACCESS_TOKEN_COOKIE_NAME);
-            return cookie.getValue();
+            if (cookie != null) {
+                logger.debug("Found session_token cookie with value: {}", cookie.getValue());
+                return cookie.getValue();
+            } else {
+                logger.debug("session_token cookie not found");
+                return null;
+            }
         }
     }

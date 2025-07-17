@@ -67,12 +67,6 @@ public class AuthServiceImpl implements AuthService {
             User user = userRepository.findByUsername(credentials.getUsername())
                     .orElseThrow(() -> new BadCredentialsException("Invalid username"));
 
-//            manual check remove later
-//            if (!passwordEncoder.matches(credentials.getPassword(), user.getPasswordHash())) {
-//                logger.warn("Invalid password for user: {}", credentials.getUsername());
-//                throw new BadCredentialsException("Invalid credentials for user ");
-//            }
-
             if (!user.isActive()) {
                 logger.warn("User account inactive: {}", credentials.getUsername());
                 throw new DisabledException("User account is inactive");

@@ -87,17 +87,15 @@ public class SecurityConfig {
                         .requestMatchers(SWAGGER_WHITELIST).permitAll()
                         // Role-based endpoint restrictions
                         .requestMatchers("/api/v1/admin/**").hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ADMIN")
-                        .requestMatchers("/api/v1/manager/**").hasAnyAuthority("ROLE_MANAGER")
-                        .requestMatchers("/api/v1/cashier/**").hasAnyAuthority("ROLE_CASHIER")
-                        .requestMatchers("/api/v1/support/**").hasAnyAuthority("ROLE_SUPPORT")
-                        .requestMatchers("/api/v1/customer/**").hasAnyAuthority("ROLE_CUSTOMER")
+//                        .requestMatchers("/api/v1/manager/**").hasAnyAuthority("ROLE_MANAGER")
+//                        .requestMatchers("/api/v1/cashier/**").hasAnyAuthority("ROLE_CASHIER")
+//                        .requestMatchers("/api/v1/support/**").hasAnyAuthority("ROLE_SUPPORT")
+//                        .requestMatchers("/api/v1/customer/**").hasAnyAuthority("ROLE_CUSTOMER")
                         // Permission-based restrictions (optional, for finer control)
-                        .requestMatchers("/api/v1/products/**").hasAnyAuthority("PRODUCT_READ", "PRODUCT_WRITE")
-//                        .requestMatchers("/api/v1/users/**").hasAnyAuthority("USER_READ", "USER_WRITE")
-
-                        .requestMatchers("/api/v1/users/**").permitAll()
+                        .requestMatchers("/api/v1/users/**").hasAnyAuthority("USER_READ", "USER_WRITE")
                         .requestMatchers("/api/v1/roles/**").hasAnyAuthority("ROLE_READ", "ROLE_WRITE")
-                        .requestMatchers("/api/v1/inventory/**").hasAnyAuthority("INVENTORY_ITEM_READ", "INVENTORY_ITEM_WRITE")
+//                        .requestMatchers("/api/v1/inventory/**").hasAnyAuthority("INVENTORY_ITEM_READ", "INVENTORY_ITEM_WRITE")
+                        .requestMatchers("/api/v1/inventory/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JWTCookieAuthenticationFilter(jwtDecoder(), jwtAuthenticationConverter()), UsernamePasswordAuthenticationFilter.class)
@@ -110,6 +108,7 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
                             logger.warn("Unauthorized access attempt: {}", authException.getMessage());
+                            authException.printStackTrace();
                             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
                         })
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
@@ -130,8 +129,10 @@ public class SecurityConfig {
 
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(frontendUrl));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
+//        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+//        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With"));
+        configuration.setAllowedMethods(List.of("*"));
+        configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Set-Cookie")); // Important for cookies
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);

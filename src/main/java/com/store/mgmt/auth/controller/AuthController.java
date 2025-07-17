@@ -226,6 +226,7 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(isProduction)
                 .path("/")
+                .domain(domain)
                 .maxAge(Duration.ofMinutes(15)) // Short-lived access token
                 .sameSite(isProduction ? "Strict" : "Lax")
                 .build();
@@ -235,6 +236,7 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(isProduction)
                 .path("/")
+                .domain(domain)
                 .maxAge(Duration.ofDays(7)) // Longer-lived refresh token
                 .sameSite(isProduction ? "Strict" : "Lax")
                 .build();
@@ -267,11 +269,19 @@ public class AuthController {
     }
     private String getAccessTokenFromCookies(HttpServletRequest request) {
         Cookie cookie = WebUtils.getCookie(request, ACCESS_TOKEN_COOKIE_NAME);
-        return cookie.getValue();
+        if (cookie != null) {
+            return cookie.getValue();
+        }
+        logger.debug("No access token cookie found");
+        return null;
     }
 
     private String getRefreshTokenFromCookies(HttpServletRequest request) {
         Cookie cookie = WebUtils.getCookie(request, REFRESH_TOKEN_COOKIE_NAME);
-        return cookie.getValue();
+        if (cookie != null) {
+            return cookie.getValue();
+        }
+        logger.debug("No refresh token cookie found");
+        return null;
     }
 }
