@@ -37,7 +37,8 @@ dependencies {
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
 	// MapStruct Core Dependency
 	implementation("org.mapstruct:mapstruct:1.5.5.Final") // Use the latest stable version
-
+// Rate Limiting with Bucket4j
+//	implementation("com.github.vladimir-bukhtoyarov:bucket4j-core:8.15.0")
 	// MapStruct Processor (for annotation processing)
 	annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final") // Must match core version
 
@@ -52,9 +53,10 @@ dependencies {
 	testImplementation("org.springframework.security:spring-security-test")
   testImplementation("com.h2database:h2")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-	implementation("io.jsonwebtoken:jjwt-api:0.12.5")
-	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.5")
-	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.5")}
+//	implementation("io.jsonwebtoken:jjwt-api:0.12.5")
+//	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.5")
+//	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.5")
+	}
 
 tasks.withType<Test> {
 	useJUnitPlatform()

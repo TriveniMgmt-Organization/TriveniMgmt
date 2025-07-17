@@ -92,7 +92,7 @@ public class UserController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('USER_READ')")
+//    @PreAuthorize("hasAuthority('USER_READ')")
     @Operation(
             summary = "Get all users",
             description = "Retrieves a list of all available user accounts.",

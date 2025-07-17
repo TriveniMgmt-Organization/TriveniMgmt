@@ -1,5 +1,6 @@
 package com.store.mgmt.users.model.dto;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -56,9 +57,15 @@ public class UserDTO {
     )
     private boolean isActive;
 
-    @Schema(
-            description = "Set of roles assigned to the user",
-            implementation = RoleDTO.class // Important for documenting the type of elements in the Set
+    @ArraySchema(
+            schema = @Schema(implementation = RoleDTO.class),
+            arraySchema = @Schema(description = "Set of roles assigned to the user")
     )
     private Set<RoleDTO> roles;
+
+    @ArraySchema(
+            schema = @Schema(implementation = PermissionDTO.class),
+            arraySchema = @Schema(description = "Set of permissions assigned to the user")
+    )
+    private Set<PermissionDTO> permissions;
 }

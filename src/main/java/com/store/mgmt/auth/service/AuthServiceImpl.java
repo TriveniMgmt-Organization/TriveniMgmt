@@ -11,9 +11,9 @@ import com.store.mgmt.users.model.entity.User;
 import com.store.mgmt.users.repository.RefreshTokenRepository;
 import com.store.mgmt.users.repository.RoleRepository;
 import com.store.mgmt.users.repository.UserRepository;
-import io.jsonwebtoken.JwtException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -23,6 +23,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,13 +64,14 @@ public class AuthServiceImpl implements AuthService {
                     new UsernamePasswordAuthenticationToken(credentials.getUsername(), credentials.getPassword())
             );
 
+            User user = userRepository.findByUsername(credentials.getUsername())
+                    .orElseThrow(() -> new BadCredentialsException("Invalid username"));
+
 //            manual check remove later
 //            if (!passwordEncoder.matches(credentials.getPassword(), user.getPasswordHash())) {
 //                logger.warn("Invalid password for user: {}", credentials.getUsername());
-//                throw new AuthenticationException("Invalid username or password");
+//                throw new BadCredentialsException("Invalid credentials for user ");
 //            }
-            User user = userRepository.findByUsername(credentials.getUsername())
-                    .orElseThrow(() -> new BadCredentialsException("Invalid username"));
 
             if (!user.isActive()) {
                 logger.warn("User account inactive: {}", credentials.getUsername());

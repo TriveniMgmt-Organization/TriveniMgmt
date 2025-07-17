@@ -1,19 +1,27 @@
 package com.store.mgmt.auth.service;
 
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import com.store.mgmt.users.model.entity.User;
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
 
 import org.springframework.security.core.GrantedAuthority;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -33,12 +41,26 @@ public class JWTService {
 
     @Value("${jwt.issuer}")
     private String jwtIssuer;
-    private final SecretKey signingKey;
 
+    @Value("${jwt.audience:store-api}")
+    private String jwtAudience;
+    private SecretKey signingKey;
     public JWTService(@Value("${jwt.secret}") String secret) {
-        this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        if (secret == null || secret.isEmpty()) {
+            logger.error("JWT secret is not configured");
+            throw new IllegalStateException("JWT secret is not configured");
+        }
+        this.signingKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
     }
-
+    @PostConstruct
+    public void init() {
+        if (this.secret == null || this.secret.isEmpty()) {
+            logger.error("JWT secret is still not configured after properties loaded.");
+            throw new IllegalStateException("JWT secret is not configured!");
+        }
+        this.signingKey = new SecretKeySpec(this.secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+        logger.info("JWTService initialized with secret. Key length: {} bytes", this.secret.getBytes(StandardCharsets.UTF_8).length);
+    }
     // --- Key Management ---
     private SecretKey getSigningKey() {
         return signingKey;
@@ -52,84 +74,111 @@ public class JWTService {
     public String generateRefreshToken(UserDetails userDetails) {
         return generateToken(userDetails, refreshTokenExpiration, true);
     }
-
     private String generateToken(UserDetails userDetails, long expiration, boolean isRefreshToken) {
-        Map<String, Object> claims = new HashMap<>();
-        if (!isRefreshToken) {
-            // Add authorities (roles/permissions) only to access tokens
-            claims.put("authorities", userDetails.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .collect(Collectors.toList()));
-        }
+        try {
+            JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);
+            JWTClaimsSet.Builder claimsBuilder = new JWTClaimsSet.Builder()
+                    .subject(userDetails.getUsername())
+                    .issuer(jwtIssuer)
+                    .audience(jwtAudience)
+                    .issueTime(new Date())
+                    .expirationTime(new Date(System.currentTimeMillis() + expiration));
 
-        return Jwts.builder()
-                .claims(claims)
-                .subject(userDetails.getUsername())
-                .issuer(jwtIssuer)
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSigningKey(), Jwts.SIG.HS256)
-                .compact();
+            if (!isRefreshToken) {
+                List<String> authorities = userDetails.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.toList());
+                claimsBuilder.claim("authorities", authorities);
+                logger.debug("--- JWTService: Access Token Claims (before encoding) ---");
+                logger.debug("Subject: {}", userDetails.getUsername());
+                logger.debug("Issuer: {}", jwtIssuer);
+                logger.debug("Audience: {}", jwtAudience);
+                logger.debug("Expiration: {}", new Date(System.currentTimeMillis() + expiration));
+                logger.debug("Authorities: {}", authorities);
+                logger.debug("-------------------------------------------------------");
+            } else {
+                logger.debug("--- JWTService: Refresh Token Claims (before encoding) ---");
+                logger.debug("Subject: {}", userDetails.getUsername());
+                logger.debug("Issuer: {}", jwtIssuer);
+                logger.debug("Audience: {}", jwtAudience);
+                logger.debug("Expiration: {}", new Date(System.currentTimeMillis() + expiration));
+                logger.debug("-------------------------------------------------------");
+            }
+            JWTClaimsSet claims = claimsBuilder.build();
+            SignedJWT signedJWT = new SignedJWT(header, claims);
+            signedJWT.sign(new MACSigner(signingKey));
+            return signedJWT.serialize();
+        } catch (Exception e) {
+            logger.error("Failed to generate JWT: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to generate JWT", e);
+        }
     }
 
-    // --- Token Refresh ---
     public String refreshAccessToken(String refreshToken, UserDetails userDetails) {
-        Claims claims = extractAllClaims(refreshToken);
-        String username = claims.getSubject();
-        if (!username.equals(userDetails.getUsername())) {
-            logger.warn("Refresh token username mismatch for user: {}", username);
-            throw new JwtException("Refresh token username mismatch");
+        try {
+            SignedJWT signedJWT = SignedJWT.parse(refreshToken);
+            if (!signedJWT.verify(new MACVerifier(signingKey))) {
+                logger.warn("Invalid refresh token signature");
+                throw new JwtException("Invalid refresh token");
+            }
+            JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
+            String username = claims.getSubject();
+            if (!username.equals(userDetails.getUsername())) {
+                logger.warn("Refresh token username mismatch for user: {}", username);
+                throw new JwtException("Refresh token username mismatch");
+            }
+            if (claims.getExpirationTime().before(new Date())) {
+                logger.warn("Refresh token expired for user: {}", username);
+                throw new JwtException("Refresh token expired");
+            }
+            return generateAccessToken(userDetails);
+        } catch (Exception e) {
+            logger.error("Failed to refresh access token: {}", e.getMessage(), e);
+            throw new JwtException("Failed to refresh access token", e);
         }
-        return generateAccessToken(userDetails);
     }
-
     // --- Claim Extraction ---
     public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
-    }
-
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
-    }
-    private Claims extractAllClaims(String token) {
         try {
-            return Jwts.parser()
-                    .verifyWith(getSigningKey())
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
-        } catch (ExpiredJwtException e) {
-            logger.warn("Token expired: {}", e.getMessage());
-            throw e;
-        } catch (MalformedJwtException e) {
-            logger.warn("Malformed JWT: {}", e.getMessage());
-            throw new JwtException("Malformed JWT", e);
-        } catch (IllegalArgumentException e) {
-            logger.warn("Invalid JWT argument: {}", e.getMessage());
-            throw new JwtException("Invalid JWT argument", e);
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            return signedJWT.getJWTClaimsSet().getSubject();
         } catch (Exception e) {
-            logger.error("Unknown JWT parsing error: {}", e.getMessage(), e);
-            throw new JwtException("Unknown JWT parsing error", e);
+            logger.warn("Failed to extract username from token: {}", e.getMessage());
+            throw new JwtException("Invalid token", e);
         }
     }
 
-    // --- Token Validation ---
     public boolean validateToken(String token, User userDetails) {
         try {
-            Claims claims = extractAllClaims(token);
-            String username = claims.getSubject();
-            boolean isValid = username.equals(userDetails.getUsername());
-            if (!isValid) {
-                logger.warn("Token username mismatch: expected {}, got {}", userDetails.getUsername(), username);
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            if (!signedJWT.verify(new MACVerifier(signingKey))) {
+                logger.warn("Invalid token signature for user: {}", userDetails.getUsername());
+                return false;
             }
-            return isValid;
-        } catch (JwtException e) {
-            logger.warn("Token validation failed: {}", e.getMessage());
+            JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
+            if (!claims.getIssuer().equals(jwtIssuer)) {
+                logger.warn("Invalid issuer for token: expected {}, got {}", jwtIssuer, claims.getIssuer());
+                return false;
+            }
+            if (!claims.getAudience().contains(jwtAudience)) {
+                logger.warn("Invalid audience for token: expected {}, got {}", jwtAudience, claims.getAudience());
+                return false;
+            }
+            if (claims.getExpirationTime().before(new Date())) {
+                logger.warn("Token expired for user: {}", userDetails.getUsername());
+                return false;
+            }
+            String username = claims.getSubject();
+            if (!username.equals(userDetails.getUsername())) {
+                logger.warn("Token username mismatch: expected {}, got {}", userDetails.getUsername(), username);
+                return false;
+            }
+            return true;
+        } catch (Exception e) {
+            logger.warn("Token validation failed for user: {}: {}", userDetails.getUsername(), e.getMessage());
             return false;
         }
     }
-
     public long getRefreshTokenExpiration() {
         return refreshTokenExpiration;
     }

@@ -2,8 +2,6 @@ package com.store.mgmt.auth.controller;
 
 import com.store.mgmt.auth.model.dto.*;
 import com.store.mgmt.auth.service.AuthService;
-import com.store.mgmt.auth.service.JWTService;
-import io.jsonwebtoken.JwtException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -18,10 +16,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.util.WebUtils;
 
+import java.net.URI;
 import java.time.Duration;
 
 @RestController
@@ -34,8 +35,9 @@ public class AuthController {
     private final String ACCESS_TOKEN_COOKIE_NAME = "session_token";
     private final String REFRESH_TOKEN_COOKIE_NAME = "refresh_token";
 
-    @Value("${spring.profiles.active:dev}")
-    private String activeProfile;
+    @Value("${FRONTEND_URL:http://localhost:3000}")
+    private String frontendUrl;
+
     public AuthController(AuthService authService) {
         this.authService = authService;
     }
@@ -173,17 +175,12 @@ public class AuthController {
             String accessToken = getAccessTokenFromCookies(request);
 
             if (accessToken == null) {
+                logger.warn("No access token found in cookies");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
 
             AuthResponse authResponse = authService.validateToken(accessToken);
-
-            // Return only user data
-            AuthResponse sanitizedResponse = new AuthResponse(
-                    null,
-                    null,
-                    authResponse.getUser()
-            );
+            AuthResponse sanitizedResponse = new AuthResponse( null, null, authResponse.getUser() );
 
             return ResponseEntity.ok(sanitizedResponse);
         } catch (JwtException e) {
@@ -192,33 +189,23 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/validate")
-    @Operation(summary = "Validate JWT token", description = "Validates a JWT token and returns user details if valid")
+    @GetMapping("/validate-token")
+    @Operation(summary = "Validate access token", description = "Validates the access token from cookies without returning user data")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Token is valid, user details returned",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = AuthResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Invalid or expired token",
+            @ApiResponse(responseCode = "200", description = "Token is valid",
+                    content = @Content),
+            @ApiResponse(responseCode = "401", description = "Invalid or missing token",
                     content = @Content)
     })
-    public ResponseEntity<AuthResponse> validateToken(HttpServletRequest request) {
+    public ResponseEntity<Void> validateToken(HttpServletRequest request) {
         try {
             String accessToken = getAccessTokenFromCookies(request);
-
             if (accessToken == null) {
+                logger.warn("No access token found in cookies");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
-
-            AuthResponse authResponse = authService.validateToken(accessToken);
-
-            // Return only user data
-            AuthResponse sanitizedResponse = new AuthResponse(
-                    null,
-                    null,
-                    authResponse.getUser()
-            );
-
-            return ResponseEntity.ok(sanitizedResponse);
+            authService.validateToken(accessToken);
+            return ResponseEntity.ok().build();
         } catch (JwtException e) {
             logger.error("Token validation failed: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -227,7 +214,13 @@ public class AuthController {
 
     private void setAuthCookies(AuthResponse authResponse, HttpServletResponse response) {
         boolean isProduction = "production".equals(System.getenv("SPRING_PROFILES_ACTIVE"));
+        URI frontendUri = URI.create(frontendUrl);
+        String domain = frontendUri.getHost();
 
+        // For local development with ports (like localhost:3000)
+        if (!isProduction && domain.startsWith("localhost")) {
+            domain = null; // Let browser handle localhost domain
+        }
         // Set access token cookie (shorter expiration)
         ResponseCookie accessTokenCookie = ResponseCookie.from(ACCESS_TOKEN_COOKIE_NAME, authResponse.getAccessToken())
                 .httpOnly(true)
@@ -241,7 +234,6 @@ public class AuthController {
         ResponseCookie refreshTokenCookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, authResponse.getRefreshToken())
                 .httpOnly(true)
                 .secure(isProduction)
-                .secure(false)
                 .path("/")
                 .maxAge(Duration.ofDays(7)) // Longer-lived refresh token
                 .sameSite(isProduction ? "Strict" : "Lax")
@@ -257,7 +249,6 @@ public class AuthController {
                 .httpOnly(true)
 //                .secure("production".equals(System.getenv("SPRING_PROFILES_ACTIVE")))
                 .secure(isProduction)
-                .secure(false)
                 .path("/")
                 .maxAge(0)
                 .sameSite(isProduction ? "Strict" : "Lax")
@@ -266,7 +257,6 @@ public class AuthController {
         ResponseCookie refreshTokenCookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, "")
                 .httpOnly(true)
                 .secure(isProduction)
-                .secure(false)
                 .path("/")
                 .maxAge(0)
                 .sameSite(isProduction ? "Strict" : "Lax")
@@ -275,26 +265,13 @@ public class AuthController {
         response.addHeader("Set-Cookie", accessTokenCookie.toString());
         response.addHeader("Set-Cookie", refreshTokenCookie.toString());
     }
-
     private String getAccessTokenFromCookies(HttpServletRequest request) {
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if (ACCESS_TOKEN_COOKIE_NAME.equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        return null;
+        Cookie cookie = WebUtils.getCookie(request, ACCESS_TOKEN_COOKIE_NAME);
+        return cookie.getValue();
     }
 
     private String getRefreshTokenFromCookies(HttpServletRequest request) {
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if (REFRESH_TOKEN_COOKIE_NAME.equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        return null;
+        Cookie cookie = WebUtils.getCookie(request, REFRESH_TOKEN_COOKIE_NAME);
+        return cookie.getValue();
     }
 }

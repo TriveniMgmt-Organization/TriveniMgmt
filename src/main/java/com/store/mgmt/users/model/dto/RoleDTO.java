@@ -1,5 +1,6 @@
 package com.store.mgmt.users.model.dto;
 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import lombok.Data;
 import java.util.Set;
 import java.util.UUID;
@@ -30,9 +31,9 @@ public class RoleDTO {
     )
     private String description;
 
-    @Schema(
-            description = "Set of permissions assigned to the user",
-            implementation = PermissionDTO.class
+    @ArraySchema(
+            schema = @Schema(implementation = PermissionDTO.class),
+            arraySchema = @Schema(description = "Set of permissions assigned to the user")
     )
     private Set<PermissionDTO> permissions;
 }

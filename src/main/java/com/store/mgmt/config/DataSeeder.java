@@ -90,6 +90,7 @@ public class DataSeeder {
                 Permission permission = new Permission();
                 permission.setName(entry.getKey());
                 permission.setDescription(entry.getValue());
+                newPermissions.add(permission);
             }
         } else {
             // Table has data, check for missing permissions
@@ -179,9 +180,9 @@ public class DataSeeder {
                         .filter(Objects::nonNull)
                         .collect(Collectors.toSet());
 
-                if (permissionSet.isEmpty()) {
-                    continue;
-                }
+//                if (permissionSet.isEmpty()) {
+//                    continue;
+//                }
 
                 role.setPermissions(permissionSet);
                 rolesToSave.add(role);
@@ -204,9 +205,9 @@ public class DataSeeder {
                         .filter(Objects::nonNull)
                         .collect(Collectors.toSet());
 
-                if (permissionSet.isEmpty()) {
-                    continue;
-                }
+//                if (permissionSet.isEmpty()) {
+//                    continue;
+//                }
 
                 role.setPermissions(permissionSet);
                 rolesToSave.add(role);
@@ -248,9 +249,9 @@ public class DataSeeder {
                 user.setCreatedBy("system");
 
                 Role role = roleMap.get(userData[3]);
-                if (role == null) {
-                    continue;
-                }
+//                if (role == null) {
+//                    continue;
+//                }
                 user.setRoles(new HashSet<>(Collections.singletonList(role)));
                 newUsers.add(user);
             }
@@ -273,15 +274,14 @@ public class DataSeeder {
                     user.setCreatedBy("system");
 
                     Role role = roleMap.get(userData[3]);
-                    if (role == null) {
-                        continue;
-                    }
+//                    if (role == null) {
+//                        continue;
+//                    }
                     user.setRoles(new HashSet<>(Collections.singletonList(role)));
                     newUsers.add(user);
                 }
             }
         }
-
         if (!newUsers.isEmpty()) {
             userRepository.saveAll(newUsers);
             logger.info("Seeded {} new users", newUsers.size());

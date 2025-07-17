@@ -9,7 +9,6 @@ import com.store.mgmt.users.repository.UserRepository;
 import com.store.mgmt.users.repository.RoleRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -23,12 +22,10 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, BCryptPasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -47,7 +44,6 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         user.setFirstName(request.getFullName());
         user.setUsername(request.getEmail());
-        user.setPasswordHash(passwordEncoder.encode(request.getUsername())); // Default password same as username
         user.setEmail(request.getEmail());
         user.setCreatedAt(LocalDateTime.now());
         user.setActive(true);
@@ -137,20 +133,28 @@ public class UserServiceImpl implements UserService {
         dto.setCreatedAt(user.getCreatedAt());
         dto.setUpdatedAt(user.getUpdatedAt());
         dto.setActive(user.isActive());
-        dto.setRoles(user.getRoles().stream().map(r -> {
-            RoleDTO roleDTO = new RoleDTO();
-            roleDTO.setId(r.getId());
-            roleDTO.setName(r.getName());
-            roleDTO.setDescription(r.getDescription());
-            roleDTO.setPermissions(r.getPermissions().stream().map(p -> {
-                PermissionDTO permissionDTO = new PermissionDTO();
-                permissionDTO.setId(p.getId());
-                permissionDTO.setName(p.getName());
-                permissionDTO.setDescription(p.getDescription());
-                return permissionDTO;
-            }).collect(Collectors.toSet()));
-            return roleDTO;
-        }).collect(Collectors.toSet()));
+        dto.setRoles(
+                user.getRoles().stream()
+                        .map(role -> {
+                            RoleDTO roleDTO = new RoleDTO();
+                            roleDTO.setId(role.getId());
+                            roleDTO.setName(role.getName());
+                            roleDTO.setDescription(role.getDescription());
+                            return roleDTO;
+                        })
+                        .collect(Collectors.toSet()));
+        dto.setPermissions(
+                user.getRoles().stream()
+                        .flatMap(role -> role.getPermissions().stream())
+                        .map(permission -> {
+                            PermissionDTO permissionDTO = new PermissionDTO();
+                            permissionDTO.setId(permission.getId());
+                            permissionDTO.setName(permission.getName());
+                            permissionDTO.setDescription(permission.getDescription());
+                            return permissionDTO;
+                        }) // Close the map function here
+                        .collect(Collectors.toSet()) // Collect the stream into a Set
+        );
         return dto;
     }
 }
