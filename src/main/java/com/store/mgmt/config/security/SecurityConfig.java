@@ -94,8 +94,8 @@ public class SecurityConfig {
                         // Permission-based restrictions (optional, for finer control)
                         .requestMatchers("/api/v1/users/**").hasAnyAuthority("USER_READ", "USER_WRITE")
                         .requestMatchers("/api/v1/roles/**").hasAnyAuthority("ROLE_READ", "ROLE_WRITE")
-//                        .requestMatchers("/api/v1/inventory/**").hasAnyAuthority("INVENTORY_ITEM_READ", "INVENTORY_ITEM_WRITE")
-                        .requestMatchers("/api/v1/inventory/**").permitAll()
+                        .requestMatchers("/api/v1/inventory/**").hasAnyAuthority("INVENTORY_ITEM_READ", "INVENTORY_ITEM_WRITE")
+//                        .requestMatchers("/api/v1/inventory/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JWTCookieAuthenticationFilter(jwtDecoder(), jwtAuthenticationConverter()), UsernamePasswordAuthenticationFilter.class)
@@ -129,10 +129,10 @@ public class SecurityConfig {
 
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(frontendUrl));
-//        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-//        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With"));
-        configuration.setAllowedMethods(List.of("*"));
-        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With"));
+//        configuration.setAllowedMethods(List.of("*"));
+//        configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Set-Cookie")); // Important for cookies
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
