@@ -267,6 +267,7 @@ public class DataSeeder {
                 if (!existingUserEmails.contains(email)) {
                     User user = new User();
                     user.setFirstName(userData[0]);
+                    user.setLastName(userData[0]);
                     user.setUsername(userData[1]);
                     user.setEmail(email);
                     user.setPasswordHash(passwordEncoder.encode(userData[2]));

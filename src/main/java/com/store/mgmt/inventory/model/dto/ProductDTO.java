@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 @Data
-@Schema(name = "Product", description = "Data Transfer Object for a product item available for sale")
+@Schema(name = "product", description = "Data Transfer Object for a product item available for sale")
 public class ProductDTO {
 
     @Schema(
@@ -39,7 +39,7 @@ public class ProductDTO {
     @Schema( description = "Selling price of the product" )
     private BigDecimal price;
 
-    @Schema( description = "Current stock quantity of the product" )
+    @Schema( description = "Current stock quantity of the product", minimum = "0", maximum = "1000000")
     private Integer quantity;
 
     @Schema(
@@ -51,6 +51,7 @@ public class ProductDTO {
     private String barcode;
 
     @Schema(
+            name="category_id",
             description = "Unique identifier of the category this product belongs to",
             example = "fedcba98-7654-3210-fedc-ba9876543210",
             requiredMode = Schema.RequiredMode.REQUIRED
@@ -64,6 +65,7 @@ public class ProductDTO {
     private CategoryDTO category; // Embedded Category DTO
 
     @Schema(
+            name="image_url",
             description = "Image Url of this product",
             accessMode = Schema.AccessMode.READ_ONLY
     )

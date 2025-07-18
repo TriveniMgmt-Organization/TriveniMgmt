@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 @Data
-@Schema(name = "CreateProduct", description = "Data Transfer Object for a product item available for sale")
+@Schema(name = "create_product", description = "Data Transfer Object for a product item available for sale")
 public class CreateProductDTO {
 
     @Schema(
@@ -42,7 +42,8 @@ public class CreateProductDTO {
             description = "Selling price of the product",
             example = "1200.50",
             requiredMode = Schema.RequiredMode.REQUIRED,
-            minimum = "0.01" // Price must be greater than zero
+            minimum = "0.01", // Price must be greater than zero
+            maximum = "1000000.00" // Reasonable upper limit for product price
     )
     private BigDecimal price;
 
@@ -50,7 +51,8 @@ public class CreateProductDTO {
             description = "Current stock quantity of the product",
             example = "50",
             requiredMode = Schema.RequiredMode.REQUIRED,
-            minimum = "0" // Quantity can be zero if out of stock
+            minimum = "0" ,// Quantity can be zero if out of stock
+            maximum = "1000000"
     )
     private Integer quantity;
 
@@ -63,6 +65,7 @@ public class CreateProductDTO {
     private String barcode;
 
     @Schema(
+            name="category_id",
             description = "Unique identifier of the category this product belongs to",
             example = "fedcba98-7654-3210-fedc-ba9876543210",
             requiredMode = Schema.RequiredMode.REQUIRED
@@ -70,6 +73,7 @@ public class CreateProductDTO {
     private UUID categoryId;
 
     @Schema(
+            name="unit_of_measure",
             description = "Unique identifier of the Unit measure of id this product belongs to",
             example = "fedcba98-7654-3210-fedc-ba9876543210",
             requiredMode = Schema.RequiredMode.REQUIRED
@@ -77,11 +81,13 @@ public class CreateProductDTO {
     private UUID unitOfMeasureId;
 
     @Schema(
+            name="image_url",
             description = "Image Url of this product"
     )
     private String imageUrl;
 
     @Schema(
+            name="image_file",
             description = "Image file of the product",
             requiredMode = Schema.RequiredMode.NOT_REQUIRED
     )

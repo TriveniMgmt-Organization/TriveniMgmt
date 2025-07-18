@@ -17,6 +17,7 @@ public class RegisterCredentials {
     @NotBlank(message = "Full Name cannot be empty")
     @Size(min = 3, max = 50, message = "Full Name must be between 3 and 50 characters")
     @Schema(
+            name= "full_name",
             example = "John Doe",
             required = true,
             minLength = 3,

@@ -3,7 +3,6 @@ package com.store.mgmt.config.security;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import com.store.mgmt.users.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +50,6 @@ public class SecurityConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
     private final CustomUserDetailsService userService;
-//    private final JwtDecoder jwtDecoder;
-//    private final JwtAuthenticationConverter jwtAuthenticationConverter;
     private static final String[] SWAGGER_WHITELIST = {
             "/v3/api-docs/**",
             "/swagger-ui/**",
@@ -72,8 +69,6 @@ public class SecurityConfig {
     public SecurityConfig(CustomUserDetailsService userService
     ) {
         this.userService = userService;
-//        this.jwtDecoder = jwtDecoder;
-//        this.jwtAuthenticationConverter = jwtAuthenticationConverter;
     }
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -113,6 +108,7 @@ public class SecurityConfig {
                         })
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
                             logger.warn("Access denied: {}", accessDeniedException.getMessage());
+                            accessDeniedException.printStackTrace();
                             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied");
                         })
                 );
@@ -127,12 +123,11 @@ public class SecurityConfig {
             throw new IllegalStateException("FRONTEND_URL is not configured");
         }
 
+        System.out.println("Configuring CORS with frontend URL: " + frontendUrl);
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(frontendUrl));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With"));
-//        configuration.setAllowedMethods(List.of("*"));
-//        configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Set-Cookie")); // Important for cookies
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
@@ -167,6 +162,7 @@ public class SecurityConfig {
         JWKSource<SecurityContext> jwkSource = new ImmutableSecret<>(key);
         return new NimbusJwtEncoder(jwkSource);
     }
+
     private SecretKey getSigningKey() {
         return new SecretKeySpec(jwtSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
     }

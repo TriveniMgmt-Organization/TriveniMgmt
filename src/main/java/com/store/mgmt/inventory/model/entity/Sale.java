@@ -1,5 +1,6 @@
 package com.store.mgmt.inventory.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.ser.Serializers;
 import com.store.mgmt.common.model.BaseEntity;
 import com.store.mgmt.users.model.entity.User;
@@ -50,11 +51,22 @@ public class Sale extends BaseEntity {
     private Set<SaleItem> saleItems;
 
     public enum PaymentMethod {
-        CASH,
-        CREDIT_CARD,
-        DEBIT_CARD,
-        MOBILE_PAY,
-        GIFT_CARD,
-        OTHER
+        CASH("cash"),
+        CREDIT_CARD("credit_card"),
+        DEBIT_CARD("debit_card"),
+        MOBILE_PAY("mobile_pay"),
+        GIFT_CARD("gift_card"),
+        OTHER("other");
+
+        private final String value;
+
+        PaymentMethod(String value) {
+            this.value = value;
+        }
+
+        @JsonValue
+        public String getValue() {
+            return value;
+        }
     }
 }

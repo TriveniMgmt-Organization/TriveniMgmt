@@ -1,5 +1,6 @@
 package com.store.mgmt.inventory.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.store.mgmt.common.model.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -58,9 +59,24 @@ public class Discount extends BaseEntity {
     private Integer minimumItemQuantity;
 
     public enum DiscountType {
-        PERCENTAGE,
-        FIXED_AMOUNT,
-        BOGO, // Buy One Get One (specific logic handled in service)
-        BUNDLE // Bundle discount (specific logic handled in service)
+        PERCENTAGE(
+            "percentage" // e.g., 10% off
+        ),
+        FIXED_AMOUNT(
+            "fixed_amount" // e.g., $5 off
+        ),
+        BOGO("bogo"), // Buy One Get One (specific logic handled in service)
+        BUNDLE("bundle"); // Bundle discount (specific logic handled in service)
+
+        private final String value;
+
+        DiscountType(String value) {
+            this.value = value;
+        }
+
+        @JsonValue
+        public String getValue() {
+            return value;
+        }
     }
 }

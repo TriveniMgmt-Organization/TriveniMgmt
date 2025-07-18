@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
-@Schema(name = "CreateLocation", description = "Data Transfer Object for a product category")
+@Schema(name = "create_location", description = "Data Transfer Object for a product category")
 public class CreateLocationDTO {
     @Schema(description = "Name of the location", required = true)
     private String name;
@@ -16,7 +16,7 @@ public class CreateLocationDTO {
     @Schema(description = "Address of the location", required = true)
     private String address;
 
-    @Schema(description = "Contact number for the location")
+    @Schema(name="contact_number", description = "Contact number for the location")
     private String contactNumber;
 
     @Schema(description = "Type of the location", required = true)

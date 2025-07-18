@@ -32,7 +32,7 @@ public class RoleDTO {
     private String description;
 
     @ArraySchema(
-            schema = @Schema(implementation = PermissionDTO.class),
+            schema = @Schema(required = true,implementation = PermissionDTO.class),
             arraySchema = @Schema(description = "Set of permissions assigned to the user")
     )
     private Set<PermissionDTO> permissions;

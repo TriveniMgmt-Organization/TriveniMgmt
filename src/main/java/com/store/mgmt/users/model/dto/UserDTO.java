@@ -35,36 +35,27 @@ public class UserDTO {
 
     @Schema(
             description = "Full name of the user",
-            example = "john doe"
+            example = "john doe",
+            name = "full_name"
     )
     private String fullName;
 
-    @Schema(
-            description = "Timestamp when the user account was created (ISO 8601 format)",
-            example = "2024-01-15T10:30:00.123456"
-    )
-    private LocalDateTime createdAt;
 
     @Schema(
-            description = "Timestamp when the user account was last updated (ISO 8601 format)",
-            example = "2024-07-13T22:09:18.789012"
-    )
-    private LocalDateTime updatedAt;
-
-    @Schema(
+            name="is_active",
             description = "Status indicating if the user account is active",
             example = "true"
     )
     private boolean isActive;
 
     @ArraySchema(
-            schema = @Schema(implementation = RoleDTO.class),
+            schema = @Schema(required = true, implementation = RoleDTO.class),
             arraySchema = @Schema(description = "Set of roles assigned to the user")
     )
     private Set<RoleDTO> roles;
 
     @ArraySchema(
-            schema = @Schema(implementation = PermissionDTO.class),
+            schema = @Schema(required = true,implementation = PermissionDTO.class),
             arraySchema = @Schema(description = "Set of permissions assigned to the user")
     )
     private Set<PermissionDTO> permissions;

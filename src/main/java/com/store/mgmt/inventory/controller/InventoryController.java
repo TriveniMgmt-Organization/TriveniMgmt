@@ -117,7 +117,7 @@ public class InventoryController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "List of inventory items retrieved successfully",
-                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = InventoryItemDTO.class)))
+                            content = @Content(array = @ArraySchema(schema = @Schema(required = true, implementation = InventoryItemDTO.class)))
                     ),
                     @ApiResponse(
                             responseCode = "404",

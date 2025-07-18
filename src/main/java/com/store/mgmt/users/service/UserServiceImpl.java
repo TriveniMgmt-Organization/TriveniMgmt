@@ -130,8 +130,6 @@ public class UserServiceImpl implements UserService {
         dto.setFullName(user.getFirstName());
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
-        dto.setCreatedAt(user.getCreatedAt());
-        dto.setUpdatedAt(user.getUpdatedAt());
         dto.setActive(user.isActive());
         dto.setRoles(
                 user.getRoles().stream()

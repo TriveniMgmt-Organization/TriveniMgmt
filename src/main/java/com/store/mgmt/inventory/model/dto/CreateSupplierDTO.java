@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
-@Schema(name = "CreateSupplier", description = "Data Transfer Object for a product category")
+@Schema(name = "create_supplier", description = "Data Transfer Object for a product category")
 public class CreateSupplierDTO {
     @Schema(description = "Name of the supplier", required = true)
     private String name;
@@ -12,7 +12,7 @@ public class CreateSupplierDTO {
     @Schema(description = "Description of the supplier")
     private String description;
 
-    @Schema(description = "Contact number of the supplier")
+    @Schema(name="contact_number",description = "Contact number of the supplier")
     private String contactNumber;
 
     @Schema(description = "Email address of the supplier")

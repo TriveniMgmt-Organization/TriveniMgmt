@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
-@Schema(name = "UnitOfMeasure", description = "Data Transfer Object for a product category")
+@Schema(name = "unit_of_measure", description = "Data Transfer Object for a product category")
 public class UnitOfMeasureDTO {
     @Schema(description = "Unique identifier for the unit of measure")
     private UUID id;
@@ -17,6 +17,6 @@ public class UnitOfMeasureDTO {
     @Schema(description = "Description of the unit of measure")
     private String description;
 
-    @Schema(description = "Conversion factor to the base unit")
+    @Schema(name="conversion_factor", description = "Conversion factor to the base unit")
     private double conversionFactor;
 }

@@ -44,7 +44,9 @@ public class JWTService {
 
     @Value("${jwt.audience:store-api}")
     private String jwtAudience;
+
     private SecretKey signingKey;
+
     public JWTService(@Value("${jwt.secret}") String secret) {
         if (secret == null || secret.isEmpty()) {
             logger.error("JWT secret is not configured");
@@ -89,22 +91,9 @@ public class JWTService {
                         .map(GrantedAuthority::getAuthority)
                         .collect(Collectors.toList());
                 claimsBuilder.claim("authorities", authorities);
-                logger.debug("--- JWTService: Access Token Claims (before encoding) ---");
-                logger.debug("Subject: {}", userDetails.getUsername());
-                logger.debug("Issuer: {}", jwtIssuer);
-                logger.debug("Audience: {}", jwtAudience);
-                logger.debug("Expiration: {}", new Date(System.currentTimeMillis() + expiration));
-                logger.debug("Authorities: {}", authorities);
-                logger.debug("-------------------------------------------------------");
-            } else {
-                logger.debug("--- JWTService: Refresh Token Claims (before encoding) ---");
-                logger.debug("Subject: {}", userDetails.getUsername());
-                logger.debug("Issuer: {}", jwtIssuer);
-                logger.debug("Audience: {}", jwtAudience);
-                logger.debug("Expiration: {}", new Date(System.currentTimeMillis() + expiration));
-                logger.debug("-------------------------------------------------------");
             }
-            JWTClaimsSet claims = claimsBuilder.build();
+
+      JWTClaimsSet claims = claimsBuilder.build();
             SignedJWT signedJWT = new SignedJWT(header, claims);
             signedJWT.sign(new MACSigner(signingKey));
             return signedJWT.serialize();
@@ -137,6 +126,7 @@ public class JWTService {
             throw new JwtException("Failed to refresh access token", e);
         }
     }
+  
     // --- Claim Extraction ---
     public String extractUsername(String token) {
         try {
@@ -148,11 +138,11 @@ public class JWTService {
         }
     }
 
-    public boolean validateToken(String token, User userDetails) {
+    public boolean validateToken(String token, User user) {
         try {
             SignedJWT signedJWT = SignedJWT.parse(token);
             if (!signedJWT.verify(new MACVerifier(signingKey))) {
-                logger.warn("Invalid token signature for user: {}", userDetails.getUsername());
+                logger.warn("Invalid token signature for user: {}", user.getUsername());
                 return false;
             }
             JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
@@ -165,17 +155,17 @@ public class JWTService {
                 return false;
             }
             if (claims.getExpirationTime().before(new Date())) {
-                logger.warn("Token expired for user: {}", userDetails.getUsername());
+                logger.warn("Token expired for user: {}", user.getUsername());
                 return false;
             }
             String username = claims.getSubject();
-            if (!username.equals(userDetails.getUsername())) {
-                logger.warn("Token username mismatch: expected {}, got {}", userDetails.getUsername(), username);
+            if (!username.equals(user.getUsername())) {
+                logger.warn("Token username mismatch: expected {}, got {}", user.getUsername(), username);
                 return false;
             }
             return true;
         } catch (Exception e) {
-            logger.warn("Token validation failed for user: {}: {}", userDetails.getUsername(), e.getMessage());
+            logger.warn("Token validation failed for user: {}: {}", user.getUsername(), e.getMessage());
             return false;
         }
     }

@@ -3,14 +3,12 @@ package com.store.mgmt.inventory.model.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-@Data
-@Schema(name = "UpdateSupplier", description = "Data Transfer Object for a product category")
-public class UpdateSupplierDTO {
+import java.util.UUID;
 
-    private String name;
-    private String address;
-    private String contactNumber;
-    private String email;
-    private String website;
-    private String notes;
+@Data
+@Schema(name = "update_supplier", description = "Data Transfer Object for a product category")
+public class UpdateSupplierDTO extends CreateSupplierDTO{
+
+    @Schema(description = "Unique identifier for the location", required = true)
+    private UUID id;
 }

@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
-@Schema(name = "Discount", description = "Data Transfer Object for a product category")
+@Schema(name = "discount", description = "Data Transfer Object for a product category")
 public class DiscountDTO {
     @Schema(description = "Unique identifier for the discount")
     private String id;
@@ -18,9 +18,9 @@ public class DiscountDTO {
     @Schema(description = "Percentage value of the discount")
     private double percentage;
 
-    @Schema(description = "Start date of the discount validity")
+    @Schema(name="start_date",description = "Start date of the discount validity")
     private String startDate;
 
-    @Schema(description = "End date of the discount validity")
+    @Schema(name="end_date",description = "End date of the discount validity")
     private String endDate;
 }

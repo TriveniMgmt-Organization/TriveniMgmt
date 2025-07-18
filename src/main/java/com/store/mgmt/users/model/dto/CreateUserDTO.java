@@ -29,12 +29,14 @@ public class CreateUserDTO {
     private String email;
 
     @Schema(
+            name = "full_name",
             description = "Full name of the user",
             example = "john doe"
     )
     private String fullName;
 
     @Schema(
+            name= "is_active",
             description = "Status indicating if the user account is active",
             example = "true"
     )

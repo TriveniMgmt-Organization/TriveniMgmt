@@ -1,5 +1,6 @@
 package com.store.mgmt.inventory.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.ser.Serializers;
 import com.store.mgmt.common.model.BaseEntity;
 import com.store.mgmt.users.model.entity.User;
@@ -57,10 +58,29 @@ public class PurchaseOrder extends BaseEntity {
     private Set<PurchaseOrderItem> purchaseOrderItems;
 
     public enum PurchaseOrderStatus {
-        PENDING,
-        ORDERED,
-        RECEIVED_PARTIAL, // Some items received
-        RECEIVED_COMPLETE, // All items received
-        CANCELLED
+        PENDING(
+            "pending"
+        ),
+        ORDERED(
+            "ordered"
+        ),
+        RECEIVED_PARTIAL(
+            "received_partial"
+        ),
+        RECEIVED_COMPLETE(
+            "received_complete"),
+        CANCELLED(
+            "cancelled"
+        );
+        private final String value;
+        PurchaseOrderStatus(String value) {
+            this.value = value;
+        }
+        @JsonValue
+public String getValue() {
+            return value;
+        }
+
+
     }
 }
