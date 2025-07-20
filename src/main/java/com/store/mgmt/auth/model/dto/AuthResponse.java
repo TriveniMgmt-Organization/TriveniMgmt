@@ -16,7 +16,7 @@ public class AuthResponse {
             description = "JWT access token for authenticated requests",
             example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
             required = true,
-            name="access_token"
+            name="accessToken"
     )
     private String accessToken;
 
@@ -24,7 +24,7 @@ public class AuthResponse {
              description = "JWT refresh token for obtaining new access tokens",
              example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
              nullable = true,
-             name="refresh_token"
+             name="refreshToken"
      )
      private String refreshToken;
 

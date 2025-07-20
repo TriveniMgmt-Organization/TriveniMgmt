@@ -32,6 +32,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("com.github.f4b6a3:uuid-creator:6.1.0")
+	implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
 	implementation("org.springframework.boot:spring-boot-starter-mail")
 	// implementation("org.flywaydb:flyway-core:11.10.2")
 //	implementation("org.liquibase:liquibase-core")

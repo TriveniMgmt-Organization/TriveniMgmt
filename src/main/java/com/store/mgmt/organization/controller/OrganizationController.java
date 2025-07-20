@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -34,6 +35,7 @@ public class OrganizationController {
                             @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content)
     }
     )
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<OrganizationDTO> createOrganization(
             @Parameter(description = "User details to be created", required = true)
             @RequestBody CreateOrganizationDTO request) {
@@ -56,7 +58,7 @@ public class OrganizationController {
             @PathVariable UUID id,
             @Parameter(description = "Organization details to be updated", required = true)
             @RequestBody UpdateOrganizationDTO request) {
-        OrganizationDTO updatedOrganization = organizationService.updateOrganization(request);
+        OrganizationDTO updatedOrganization = organizationService.updateOrganization(id, request);
         return ResponseEntity.ok(updatedOrganization);
     }
 }

@@ -263,6 +263,7 @@ public class UserController {
     public StoreDTO createStore(@RequestBody CreateStoreDTO createDTO) {
         return userService.createStore(createDTO);
     }
+
     @PostMapping("/invite")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN')")
    @Operation(

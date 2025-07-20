@@ -5,7 +5,8 @@ import com.store.mgmt.auth.model.dto.AuthResponse;
 import com.store.mgmt.auth.exception.AuthenticationException;
 import com.store.mgmt.auth.model.dto.RegisterCredentials;
 import com.store.mgmt.organization.model.dto.OrganizationDTO;
-import com.store.mgmt.organization.model.dto.TenantDTO;
+import com.store.mgmt.organization.model.dto.CreateTenantDTO;
+import com.store.mgmt.users.model.dto.UserDTO;
 
 import java.util.List;
 
@@ -20,12 +21,19 @@ public interface AuthService {
      */
     AuthResponse authenticateUser(AuthCredentials credentials);
 
+    /**
+     * Retrieves the currently authenticated user.
+     *
+     * @return UserDTO containing the details of the current user.
+     */
+    UserDTO getCurrentUser();
+
     AuthResponse registerUser(RegisterCredentials registrationData);
     AuthResponse refreshToken(String refreshToken);
-    AuthResponse validateToken(String token);
+    UserDTO validateToken(String token);
     void logout(String refreshToken);
 
     List<OrganizationDTO> getOrganizations();
 
-    AuthResponse selectTenant(TenantDTO selectDTO);
+    AuthResponse selectTenant(CreateTenantDTO selectDTO);
 }

@@ -1,5 +1,7 @@
 package com.store.mgmt.users.model.dto;
 
+import com.store.mgmt.organization.model.dto.OrganizationDTO;
+import com.store.mgmt.organization.model.dto.StoreDTO;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -35,33 +37,51 @@ public class UserDTO {
     @Schema(
             description = "First name of the user",
             example = "john",
-            name = "first_name"
+            name = "firstName"
     )
     private String firstName;
 
     @Schema(
             description = "Last name of the user",
             example = "doe",
-            name = "last_name"
+            name = "lastName"
     )
     private String lastName;
 
     @Schema(
-            name="is_active",
+            name="imageUrl",
+            description = "Image Url of this product"
+    )
+    private String imageUrl;
+
+    @Schema(
+            name="isActive",
             description = "Status indicating if the user account is active",
             example = "true"
     )
     private boolean isActive;
 
-    @ArraySchema(
-            schema = @Schema(required = true, implementation = RoleDTO.class),
-            arraySchema = @Schema(description = "Set of roles assigned to the user")
+    @Schema(
+            name = "activeOrganization",
+            description = "Active organization of the user"
     )
-    private Set<RoleDTO> roles;
+    private OrganizationDTO activeOrganization;
+
+    @Schema(
+            name = "activeStore",
+            description = "Active organization of the user"
+    )
+    private StoreDTO activeStore;
 
     @ArraySchema(
-            schema = @Schema(required = true,implementation = PermissionDTO.class),
+            schema = @Schema(required = true, implementation = String.class),
+            arraySchema = @Schema(description = "Set of roles assigned to the user")
+    )
+    private Set<String> roles;
+
+    @ArraySchema(
+            schema = @Schema(required = true,implementation = String.class),
             arraySchema = @Schema(description = "Set of permissions assigned to the user")
     )
-    private Set<PermissionDTO> permissions;
+    private Set<String> permissions;
 }

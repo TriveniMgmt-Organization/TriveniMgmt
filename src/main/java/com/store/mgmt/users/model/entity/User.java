@@ -3,6 +3,7 @@ package com.store.mgmt.users.model.entity;
 import com.store.mgmt.common.model.BaseEntity;
 import com.store.mgmt.organization.model.entity.Organization;
 import com.store.mgmt.organization.model.entity.UserOrganizationRole;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -33,6 +34,8 @@ public class User extends BaseEntity {
     @Column(name = "last_name", nullable = true)
     private String lastName;
 
+    @Column(name = "image_url", nullable = true)
+    private String imageUrl;
 //    @ManyToOne
 //    @JoinColumn(name = "organization_id", nullable = false)
 //    private Organization organization;

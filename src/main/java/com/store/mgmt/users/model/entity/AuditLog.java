@@ -3,9 +3,11 @@ package com.store.mgmt.users.model.entity;
 import com.store.mgmt.common.model.BaseEntity;
 import com.store.mgmt.organization.model.entity.Organization;
 import com.store.mgmt.organization.model.entity.Store;
+import com.vladmihalcea.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.Type;
 
 import java.util.Set;
 import java.util.UUID;
@@ -36,6 +38,7 @@ public class AuditLog extends BaseEntity {
     @Column(name = "entity_id", nullable = false)
     private UUID entityId;
 
+    @Type(JsonType.class)
     @Column(name = "details", nullable = false, columnDefinition = "jsonb")
     private String details;
 

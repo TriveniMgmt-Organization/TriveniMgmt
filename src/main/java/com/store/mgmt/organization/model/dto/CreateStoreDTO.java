@@ -20,8 +20,7 @@ public class CreateStoreDTO {
     @Schema(
             description = "First name of the user",
             example = "john",
-            name = "name",
-            required=true
+            requiredMode = Schema.RequiredMode.REQUIRED
     )
     private String name;
 
@@ -29,7 +28,7 @@ public class CreateStoreDTO {
             description = "Unique email address of the user",
             example = "john.doe@example.com",
             format = "location",
-            required=true
+            requiredMode = Schema.RequiredMode.REQUIRED
     )
     private String location;
 

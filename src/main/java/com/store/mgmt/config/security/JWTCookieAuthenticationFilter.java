@@ -32,7 +32,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.util.WebUtils;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -77,26 +79,31 @@ public class JWTCookieAuthenticationFilter  extends OncePerRequestFilter{
                     UserDetails userDetails = jwtService.createUserDetails(user);
                     System.out.println("User Details: " + userDetails.getUsername() + ", Authorities: " +
                             userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(", ")));
+                    Map<String, Object> claims = new HashMap<>();
+                    claims.put("org_id", orgId != null ? orgId.toString() : null);
+                    claims.put("store_id", storeId != null ? storeId.toString() : null);
+
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     System.out.println("Authentication: " + authentication.getName() + ", Authorities: " +
                             authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(", ")));
+                    authentication.setDetails(claims);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
                     System.out.println("SecurityContextHolder: " + SecurityContextHolder.getContext().getAuthentication());
                     System.out.println("Organization ID: " + orgId + ", Store ID: " + storeId);
                     // Set TenantContext
-                    if (orgId != null) {
-                        Organization organization = organizationRepository.findById(orgId)
-                                .orElseThrow(() -> new IllegalStateException("Organization not found for id: " + orgId));
-                        TenantContext.setCurrentOrganization(organization);
-                    }
-                    if (storeId != null) {
-                        Store store = storeRepository.findById(storeId)
-                                .orElseThrow(() -> new IllegalStateException("Store not found for id: " + storeId));
-                        TenantContext.setCurrentStore(store);
-                    }
-                    TenantContext.setCurrentUser(user);
+//                    if (orgId != null) {
+//                        Organization organization = organizationRepository.findById(orgId)
+//                                .orElseThrow(() -> new IllegalStateException("Organization not found for id: " + orgId));
+//                        TenantContext.setCurrentOrganization(organization);
+//                    }
+//                    if (storeId != null) {
+//                        Store store = storeRepository.findById(storeId)
+//                                .orElseThrow(() -> new IllegalStateException("Store not found for id: " + storeId));
+//                        TenantContext.setCurrentStore(store);
+//                    }
+//                    TenantContext.setCurrentUser(user);
 
                     logger.debug("Authenticated user: {} with organization_id: {} and store_id: {}",
                             email, orgId, storeId);

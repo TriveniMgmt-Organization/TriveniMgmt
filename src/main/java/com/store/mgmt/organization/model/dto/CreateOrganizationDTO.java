@@ -19,22 +19,13 @@ public class CreateOrganizationDTO {
     @Schema(
             description = "First name of the user",
             example = "john",
-            name = "name",
-            required = true
+            requiredMode = Schema.RequiredMode.REQUIRED
     )
     private String name;
 
     @Schema(
             description = "First name of the user",
-            example = "john",
-            name = "name"
+            example = "john"
     )
     private String contactInfo;
-
-    @Schema(
-            description = "Unique identifier of the initial admin user",
-            example = "123e4567-e89b-12d3-a456-426614174000",
-            requiredMode = Schema.RequiredMode.REQUIRED
-    )
-    private UUID initialAdminId;
 }

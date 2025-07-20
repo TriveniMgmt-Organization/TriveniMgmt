@@ -243,11 +243,13 @@ public class UserServiceImpl implements UserService {
         Organization savedOrganization = organizationRepository.save(organization);
 
         // Assign ORG_ADMIN role to the creator
-        User currentUser = TenantContext.getCurrentUser();
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalStateException("Current user not found."));
         Role orgAdminRole = roleRepository.findByName(RoleType.ADMIN.toString())
                 .orElseThrow(() -> new IllegalStateException("ORG_ADMIN role not found."));
         UserOrganizationRole userOrgRole = new UserOrganizationRole();
-        userOrgRole.setUser(currentUser);
+        userOrgRole.setUser(user);
         userOrgRole.setOrganization(savedOrganization);
         userOrgRole.setRole(orgAdminRole);
         userOrganizationRoleRepository.save(userOrgRole);
@@ -268,7 +270,9 @@ public class UserServiceImpl implements UserService {
         }
 
         // Check if user has ORG_ADMIN role for the organization
-        User currentUser = TenantContext.getCurrentUser();
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalStateException("Current user not found."));
         if (!hasRoleInOrganization(currentUser, RoleType.ADMIN.toString(), createDTO.getOrganizationId()) &&
                 !hasRole(currentUser, RoleType.SUPER_ADMIN.toString())) {
             throw new SecurityException("User not authorized to create stores in this organization.");
@@ -286,7 +290,9 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void assignUserToOrganization(CreateUserAssignmentDTO dto) {
         log.info("Assigning user ID: {} to organization ID: {} with role: {}", dto.getUserId(), dto.getOrganizationId(), dto.getRoleId());
-        User currentUser = TenantContext.getCurrentUser();
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalStateException("Current user not found."));
         Organization organization = organizationRepository.findById(dto.getOrganizationId())
                 .orElseThrow(() -> new IllegalArgumentException("Organization not found"));
         // Check if user is already assign to organization
@@ -315,7 +321,9 @@ public class UserServiceImpl implements UserService {
     public void assignUserToStore(CreateUserAssignmentDTO dto) {
         log.info("Assigning user ID: {} to store ID: {} with role: {}", dto.getUserId(), dto.getStoreId(), dto.getRoleId());
 
-        User currentUser = TenantContext.getCurrentUser();
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalStateException("Current user not found."));
         Store store = storeRepository.findById(dto.getStoreId())
                 .orElseThrow(() -> new IllegalArgumentException("Store not found"));
 

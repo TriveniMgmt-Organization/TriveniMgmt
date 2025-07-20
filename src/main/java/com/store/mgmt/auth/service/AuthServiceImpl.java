@@ -4,8 +4,8 @@ import com.store.mgmt.auth.model.dto.AuthCredentials;
 import com.store.mgmt.auth.model.dto.AuthResponse;
 import com.store.mgmt.auth.model.dto.RegisterCredentials;
 import com.store.mgmt.auth.model.entity.RefreshToken;
-import com.store.mgmt.config.TenantContext;
 import com.store.mgmt.organization.mapper.OrganizationMapper;
+import com.store.mgmt.organization.mapper.StoreMapper;
 import com.store.mgmt.organization.model.dto.*;
 import com.store.mgmt.organization.model.entity.Invitation;
 import com.store.mgmt.organization.model.entity.Organization;
@@ -14,6 +14,7 @@ import com.store.mgmt.organization.model.entity.UserOrganizationRole;
 import com.store.mgmt.organization.repository.InvitationRepository;
 import com.store.mgmt.organization.repository.OrganizationRepository;
 import com.store.mgmt.organization.repository.StoreRepository;
+import com.store.mgmt.organization.repository.UserOrganizationRoleRepository;
 import com.store.mgmt.users.mapper.UserMapper;
 import com.store.mgmt.users.model.RoleType;
 import com.store.mgmt.users.model.dto.UserDTO;
@@ -23,9 +24,12 @@ import com.store.mgmt.users.repository.RefreshTokenRepository;
 import com.store.mgmt.users.repository.RoleRepository;
 import com.store.mgmt.users.repository.UserRepository;
 import com.store.mgmt.users.service.AuditLogService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -33,11 +37,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -58,28 +65,32 @@ public class AuthServiceImpl implements AuthService {
     private final InvitationRepository invitationRepository;
     private final AuditLogService auditLogService;
     private final OrganizationRepository organizationRepository;
+private final UserOrganizationRoleRepository userOrganizationRoleRepository;
     private final OrganizationMapper organizationMapper;
+    private final StoreMapper storeMapper;
     private final StoreRepository storeRepository;
 
     public AuthServiceImpl(UserRepository userRepository, RoleRepository roleRepository,
                            PasswordEncoder passwordEncoder, JWTService jwtService,
                             AuthenticationManager authenticationManager,
                             InvitationRepository invitationRepository, StoreRepository storeRepository,
-                            OrganizationRepository organizationRepository,
+                            OrganizationRepository organizationRepository, UserOrganizationRoleRepository userOrganizationRoleRepository,
                             AuditLogService auditLogService,
-                           OrganizationMapper organizationMapper,
+                           OrganizationMapper organizationMapper, StoreMapper storeMapper,
                            UserMapper userMapper, RefreshTokenRepository refreshTokenRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
-        this.userMapper = userMapper;
-        this.organizationMapper = organizationMapper;
+        this.userOrganizationRoleRepository = userOrganizationRoleRepository;
         this.storeRepository = storeRepository;
-        this.authenticationManager = authenticationManager;
         this.refreshTokenRepository = refreshTokenRepository;
         this.invitationRepository = invitationRepository;
         this.organizationRepository = organizationRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+        this.userMapper = userMapper;
+        this.storeMapper = storeMapper;
+        this.organizationMapper = organizationMapper;
+        this.authenticationManager = authenticationManager;
         this.auditLogService = auditLogService;
     }
 
@@ -318,7 +329,63 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthResponse validateToken(String token) {
+    @Transactional(readOnly = true)
+    public UserDTO getCurrentUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new SecurityException("User not found: " + username));
+
+        Object details = SecurityContextHolder.getContext().getAuthentication().getDetails();
+        String organizationId = null;
+        String storeId = null;
+        if (details instanceof Map) {
+            Map<String, Object> claims = (Map<String, Object>) details;
+            organizationId = (String) claims.get("org_id");
+            storeId = (String) claims.get("store_id");
+        } else {
+            throw new IllegalStateException("Invalid JWT claims format in Authentication details");
+        }
+
+        log.info("Retrieving current user: {}, organizationId: {}, storeId: {}", username, organizationId, storeId);
+        UUID orgId = organizationId != null ? UUID.fromString(organizationId) : null;
+        UUID storeUuid = storeId != null ? UUID.fromString(storeId) : null;
+
+        if (orgId == null) {
+            throw new IllegalStateException("No organization selected.");
+        }
+
+        // Validate user has access to the organization
+        boolean hasAccess = userOrganizationRoleRepository.existsByUserIdAndOrganizationId(user.getId(), orgId);
+        if (!hasAccess) {
+            throw new SecurityException("User does not have access to organization: " + orgId);
+        }
+
+//        Object[] organizationArray = organizationRepository.findOrganizationAndStore(orgId, storeUuid)
+//                .orElseThrow(() -> new EntityNotFoundException("Organization not found: " + orgId));
+//
+//        UserDTO userDTO = userMapper.toDto(user);
+//        userDTO.setActiveOrganization(organizationMapper.toDto((Organization) organizationArray[0]));
+//        userDTO.setActiveStore(storeMapper.toDto((Store) organizationArray[1]));
+        UserDTO userDTO = userMapper.toDto(user);
+        Organization organization = organizationRepository.findById(orgId)
+                .orElseThrow(() -> new EntityNotFoundException("Organization not found: " + orgId));
+        userDTO.setActiveOrganization(organizationMapper.toDto(organization));
+
+        if (storeUuid != null) {
+            boolean hasStoreAccess = userOrganizationRoleRepository.existsByUserIdAndStoreId(user.getId(), storeUuid);
+            if (!hasStoreAccess) {
+                throw new SecurityException("User does not have access to store: " + storeUuid);
+            }
+            Store store = storeRepository.findById(storeUuid)
+                    .orElseThrow(() -> new EntityNotFoundException("Store not found: " + storeUuid));
+            userDTO.setActiveStore(storeMapper.toDto(store));
+        }
+
+        return userDTO;
+    }
+
+    @Override
+    public UserDTO validateToken(String token) {
         JWTService.JwtData jwtData = jwtService.extractJwtData(token);
         String email = jwtData.username;
         UUID orgId = jwtData.organizationId;
@@ -329,8 +396,7 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new IllegalStateException("User not found"));
 
         if (jwtService.validateToken(token, user)) {
-            UserDTO userDTO = userMapper.toDto(user);
-            return new AuthResponse(token, null, userDTO);
+            return userMapper.toDto(user);
         } else {
             log.warn("Invalid or expired token for user: {}", email);
             throw new JwtException("Invalid or expired token");
@@ -364,9 +430,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional(readOnly = true)
     public List<OrganizationDTO> getOrganizations() {
-        log.info("Retrieving organizations for user ID: {}", TenantContext.getCurrentUser().getId());
-        User user = TenantContext.getCurrentUser();
-        return user.getOrganizationRoles().stream()
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info("Retrieving organizations for user : {}", username);
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalStateException("Current user not found."));
+        return currentUser.getOrganizationRoles().stream()
                 .map(UserOrganizationRole::getOrganization)
                 .map(organizationMapper::toDto)
                 .collect(Collectors.toList());
@@ -374,12 +442,14 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public AuthResponse selectTenant(TenantDTO selectDTO) {
+    public AuthResponse selectTenant(CreateTenantDTO selectDTO) {
         log.info("Selecting tenant with organization ID: {} and store ID: {}",
                 selectDTO.getOrganizationId(), selectDTO.getStoreId());
 
-        User user = TenantContext.getCurrentUser();
-        boolean hasAccess = user.getOrganizationRoles().stream()
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalStateException("Current user not found."));
+        boolean hasAccess = currentUser.getOrganizationRoles().stream()
                 .anyMatch(uor -> uor.getOrganization().getId().equals(selectDTO.getOrganizationId()) &&
                         (selectDTO.getStoreId() == null ||
                                 (uor.getStore() != null && uor.getStore().getId().equals(selectDTO.getStoreId()))));
@@ -399,19 +469,19 @@ public class AuthServiceImpl implements AuthService {
                 throw new IllegalArgumentException("Store does not belong to the specified organization.");
             }
         }
-        List<GrantedAuthority> authoritiesForToken = user.getOrganizationRoles().stream()
+        List<GrantedAuthority> authoritiesForToken = currentUser.getOrganizationRoles().stream()
                 .filter(uor -> uor.getOrganization().getId().equals(organization.getId()))
                 .map(uor -> new SimpleGrantedAuthority(uor.getRole().getName()))
                 .collect(Collectors.toList());
-        auditLogService.log("SELECT_TENANT", user.getId(),
+        auditLogService.log("SELECT_TENANT", currentUser.getId(),
                 "Selected organization ID: " + selectDTO.getOrganizationId() +
                         (selectDTO.getStoreId() != null ? ", store ID: " + selectDTO.getStoreId() : ""));
 
-        AuthToken aT = generateAndStoreAuthToken(user,
+        AuthToken aT = generateAndStoreAuthToken(currentUser,
                 organization != null ? organization.getId() : null,
                 store != null ? store.getId() : null,
                 authoritiesForToken);
-        return new AuthResponse(aT.getAccessToken(), aT.getRefreshToken(), userMapper.toDto(user));
+        return new AuthResponse(aT.getAccessToken(), aT.getRefreshToken(), userMapper.toDto(currentUser));
     }
 
 

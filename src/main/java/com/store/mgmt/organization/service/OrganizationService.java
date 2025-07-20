@@ -22,7 +22,7 @@ public interface OrganizationService {
      * @param request the updated details of the organization
      * @return the updated organization
      */
-    OrganizationDTO updateOrganization(UpdateOrganizationDTO request);
+    OrganizationDTO updateOrganization(UUID id, UpdateOrganizationDTO request);
 
     /**
      * Deletes an organization by its ID.

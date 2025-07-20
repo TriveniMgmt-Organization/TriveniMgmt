@@ -24,15 +24,13 @@ public class OrganizationDTO {
 
     @Schema(
             description = "First name of the user",
-            example = "john",
-            name = "name"
+            example = "john"
     )
     private String name;
 
     @Schema(
             description = "First name of the user",
-            example = "john",
-            name = "name"
+            example = "john"
     )
     private String contactInfo;
 }

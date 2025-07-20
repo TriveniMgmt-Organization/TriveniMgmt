@@ -22,8 +22,7 @@ public class StoreDTO {
 
     @Schema(
             description = "First name of the user",
-            example = "john",
-            name = "name"
+            example = "john"
     )
     private String name;
 
@@ -43,8 +42,7 @@ public class StoreDTO {
 
     @Schema(
             description = "First name of the user",
-            example = "john",
-            name = "status"
+            example = "john"
     )
     private Store.StoreStatus status;
 }

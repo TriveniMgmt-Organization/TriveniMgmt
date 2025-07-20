@@ -3,7 +3,8 @@ package com.store.mgmt.auth.controller;
 import com.store.mgmt.auth.model.dto.*;
 import com.store.mgmt.auth.service.AuthService;
 import com.store.mgmt.organization.model.dto.OrganizationDTO;
-import com.store.mgmt.organization.model.dto.TenantDTO;
+import com.store.mgmt.organization.model.dto.CreateTenantDTO;
+import com.store.mgmt.users.model.dto.UserDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -175,8 +176,15 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    @Operation(summary = "Get current user", description = "Returns the current authenticated user's information")
-    public ResponseEntity<AuthResponse> getCurrentUser(HttpServletRequest request) {
+    @Operation(summary = "Get current user", description = "Returns the current authenticated user's information",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "User information retrieved successfully",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = UserDTO.class))),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized access - no valid token found",
+                            content = @Content)
+            })
+    public ResponseEntity<UserDTO> getCurrentUser(HttpServletRequest request) {
         try {
             String accessToken = getAccessTokenFromCookies(request);
 
@@ -185,10 +193,8 @@ public class AuthController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
 
-            AuthResponse authResponse = authService.validateToken(accessToken);
-            AuthResponse sanitizedResponse = new AuthResponse( null, null, authResponse.getUser() );
-
-            return ResponseEntity.ok(sanitizedResponse);
+            UserDTO authResponse = authService.getCurrentUser();
+            return ResponseEntity.ok(authResponse);
         } catch (JwtException e) {
             logger.error("Token validation failed", e);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -325,9 +331,9 @@ public class AuthController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Tenant selection data",
                     required = true,
-                    content = @Content(schema = @Schema(implementation = TenantDTO.class))
+                    content = @Content(schema = @Schema(implementation = CreateTenantDTO.class))
             )
-            @Valid @RequestBody TenantDTO selectDTO,
+            @Valid @RequestBody CreateTenantDTO selectDTO,
             HttpServletResponse response) {
         try {
             AuthResponse authResponse = authService.selectTenant(selectDTO);
