@@ -14,8 +14,8 @@ public class CreateSaleDTO {
     @Schema(name="sale_id", description = "Unique identifier for the sale", required = true)
     private String saleId;
 
-    @Schema(name="product_id", description = "Identifier for the product being sold", required = true)
-    private String productId;
+    @Schema(name="product_template_id", description = "Identifier for the product being sold", required = true)
+    private String productTemplateId;
 
     @Schema(description = "Quantity of the product sold", required = true, minimum = "1", maximum = "1000000000")
     private Integer quantity;

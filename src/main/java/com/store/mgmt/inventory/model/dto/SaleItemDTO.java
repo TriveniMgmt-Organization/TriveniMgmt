@@ -24,10 +24,10 @@ public class SaleItemDTO {
     private Double price;
 
     @Schema(
-            name="product_id",
+            name="product_template_id",
             description = "Unique identifier of the Product of id this product belongs to",
             example = "fedcba98-7654-3210-fedc-ba9876543210",
             required = true // Assuming a product must always belong to a category
     )
-    private UUID productId;
+    private UUID productTemplateId;
 }

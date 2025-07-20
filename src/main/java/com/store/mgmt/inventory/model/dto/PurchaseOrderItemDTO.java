@@ -3,6 +3,7 @@ package com.store.mgmt.inventory.model.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -15,14 +16,20 @@ public class PurchaseOrderItemDTO {
     @Schema(name = "purchase_order_id",description = "Unique identifier for the purchase order", required = true)
     private UUID purchaseOrderId;
 
-    @Schema(name="product_id",description = "Unique identifier of the product in the purchase order item", required = true)
-    private UUID productId;
+    @Schema(name="product_template_id",description = "Unique identifier of the product in the purchase order item", required = true)
+    private UUID productTemplateId;
 
     @Schema(description = "Quantity of the product in the purchase order item", required = true, minimum = "0", maximum = "1000000")
     private Integer quantity;
 
     @Schema(description = "Price of the product in the purchase order item", required = true)
     private Double price;
+
+    @Schema(name="cost_price", description = "Cost price of the inventory item", required = true, minimum = "0.01", maximum = "1000000.00")
+    private BigDecimal costPrice;
+
+    @Schema(name="retail_price", description = "Retail price of the inventory item", required = true, minimum = "0.01", maximum = "1000000.00")
+    private BigDecimal retailPrice;
 
     @Schema(name="batch_number", description = "Batch number of the product in the purchase order item", required = true)
     private String batchNumber;

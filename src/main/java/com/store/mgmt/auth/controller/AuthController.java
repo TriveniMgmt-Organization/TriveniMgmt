@@ -2,6 +2,8 @@ package com.store.mgmt.auth.controller;
 
 import com.store.mgmt.auth.model.dto.*;
 import com.store.mgmt.auth.service.AuthService;
+import com.store.mgmt.organization.model.dto.OrganizationDTO;
+import com.store.mgmt.organization.model.dto.TenantDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,6 +26,7 @@ import org.springframework.web.util.WebUtils;
 
 import java.net.URI;
 import java.time.Duration;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -67,6 +70,9 @@ public class AuthController {
         try {
             AuthResponse authResponse = authService.authenticateUser(request);
             setAuthCookies(authResponse, response);
+            System.out.println("Controller: Response cookies set: " +
+                    "Access Token Cookie: " + authResponse.getAccessToken() +
+                    ", Refresh Token Cookie: " + authResponse.getRefreshToken());
 
             // Don't expose tokens in response body for security
             AuthResponse sanitizedResponse = new AuthResponse(
@@ -283,5 +289,61 @@ public class AuthController {
         }
         logger.debug("No refresh token cookie found");
         return null;
+    }
+
+    @GetMapping("/organizations")
+    @Operation(summary = "Get organizations", description = "Returns a list of organizations the user belongs to")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "List of organizations returned",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = OrganizationDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access",
+                    content = @Content)
+    })
+    public ResponseEntity<List<OrganizationDTO>> getOrganizations() {
+        try {
+            List<OrganizationDTO> organizations = authService.getOrganizations();
+            return ResponseEntity.ok(organizations);
+        } catch (Exception e) {
+            logger.error("Failed to retrieve organizations", e);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+    @PostMapping("/select-tenant")
+    @Operation(summary = "Select tenant", description = "Sets the current tenant for the user")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Tenant selected successfully",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = AuthResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request: Invalid tenant data",
+                    content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access",
+                    content = @Content)
+    })
+    public ResponseEntity<AuthResponse> selectTenant(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Tenant selection data",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = TenantDTO.class))
+            )
+            @Valid @RequestBody TenantDTO selectDTO,
+            HttpServletResponse response) {
+        try {
+            AuthResponse authResponse = authService.selectTenant(selectDTO);
+            setAuthCookies(authResponse, response);
+
+            // Don't expose tokens in response body
+            AuthResponse sanitizedResponse = new AuthResponse(
+                    null,
+                    null,
+                    authResponse.getUser()
+            );
+
+            return ResponseEntity.ok(sanitizedResponse);
+        } catch (Exception e) {
+            logger.error("Failed to select tenant", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 }

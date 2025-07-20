@@ -3,7 +3,6 @@ package com.store.mgmt.users.model.dto;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
@@ -34,12 +33,18 @@ public class UserDTO {
     private String email;
 
     @Schema(
-            description = "Full name of the user",
-            example = "john doe",
-            name = "full_name"
+            description = "First name of the user",
+            example = "john",
+            name = "first_name"
     )
-    private String fullName;
+    private String firstName;
 
+    @Schema(
+            description = "Last name of the user",
+            example = "doe",
+            name = "last_name"
+    )
+    private String lastName;
 
     @Schema(
             name="is_active",

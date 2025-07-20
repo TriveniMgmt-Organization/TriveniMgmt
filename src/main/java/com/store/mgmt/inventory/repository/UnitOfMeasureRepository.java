@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -17,4 +18,9 @@ public interface UnitOfMeasureRepository extends JpaRepository<UnitOfMeasure, UU
 
     @Query("SELECT u FROM UnitOfMeasure u WHERE u.code = :code AND u.deletedAt IS NULL")
     Optional<UnitOfMeasure> findByCode(@NonNull String code);
+    List<UnitOfMeasure> findByOrganizationId(UUID organizationId);
+
+    Optional<UnitOfMeasure> findByIdAndOrganizationId(UUID id, UUID organizationId);
+    Optional<UnitOfMeasure> findByNameAndOrganizationId(String name, UUID organizationId);
+    Optional<UnitOfMeasure> findByCodeAndOrganizationId(String name, UUID organizationId);
 }

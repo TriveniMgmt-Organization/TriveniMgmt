@@ -1,5 +1,10 @@
 package com.store.mgmt.config;
 
+import com.store.mgmt.organization.model.entity.Organization;
+import com.store.mgmt.organization.model.entity.Store;
+import com.store.mgmt.organization.model.entity.UserOrganizationRole;
+import com.store.mgmt.organization.repository.OrganizationRepository;
+import com.store.mgmt.organization.repository.UserOrganizationRoleRepository;
 import com.store.mgmt.users.model.entity.Permission;
 import com.store.mgmt.users.model.entity.Role;
 import com.store.mgmt.users.model.entity.User;
@@ -14,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,14 +31,20 @@ public class DataSeeder {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
+    private final OrganizationRepository organizationRepository;
+    private final UserOrganizationRoleRepository userOrganizationRoleRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public DataSeeder(UserRepository userRepository, RoleRepository roleRepository,
+                      OrganizationRepository organizationRepository,
+                        UserOrganizationRoleRepository userOrganizationRoleRepository,
                       PermissionRepository permissionRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.permissionRepository = permissionRepository;
+        this.organizationRepository = organizationRepository;
+        this.userOrganizationRoleRepository = userOrganizationRoleRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -120,13 +132,8 @@ public class DataSeeder {
 
     private void seedRoles() {
         logger.debug("Seeding roles...");
-        Map<String, String> roles = new HashMap<>();
-        roles.put("SUPER_ADMIN", "Role with all permissions and administrative access");
-        roles.put("ADMIN", "Role with administrative access to manage users and resources");
-        roles.put("MANAGER", "Role with permissions to manage sales and inventory");
-        roles.put("CASHIER", "Role with permissions to handle sales transactions");
-        roles.put("SUPPORT", "Role with permissions to assist users");
-        roles.put("CUSTOMER", "Role with permissions to view discounts and stock availability");
+
+        Map<String, String> roles = getRolesMap();
 
         Map<String, List<String>> rolePermissions = new HashMap<>();
         rolePermissions.put("SUPER_ADMIN", Arrays.asList(
@@ -134,7 +141,21 @@ public class DataSeeder {
                 "INVENTORY_ITEM_READ", "INVENTORY_ITEM_WRITE", "CATEGORY_READ", "CATEGORY_WRITE",
                 "SUPPLIER_READ", "SUPPLIER_WRITE", "LOCATION_READ", "LOCATION_WRITE", "UOM_READ", "UOM_WRITE",
                 "PO_READ", "PO_WRITE", "SALE_READ", "SALE_WRITE", "DISCOUNT_READ", "DISCOUNT_WRITE",
-                "DAMAGE_LOSS_READ", "DAMAGE_LOSS_WRITE", "STOCK_CHECK_READ", "REPORT_READ"
+                "DAMAGE_LOSS_READ", "DAMAGE_LOSS_WRITE", "STOCK_CHECK_READ", "REPORT_READ", "ORG_READ", "ORG_WRITE", "STORE_WRITE", "STORE_READ"
+        ));
+        rolePermissions.put("ORG_ADMIN", Arrays.asList(
+                "USER_READ", "USER_WRITE", "ROLE_READ", "ROLE_WRITE",
+                "INVENTORY_ITEM_READ", "INVENTORY_ITEM_WRITE", "CATEGORY_READ", "CATEGORY_WRITE",
+                "SUPPLIER_READ", "SUPPLIER_WRITE", "LOCATION_READ", "LOCATION_WRITE", "UOM_READ", "UOM_WRITE",
+                "PO_READ", "PO_WRITE", "SALE_READ", "SALE_WRITE", "DISCOUNT_READ", "DISCOUNT_WRITE",
+                "DAMAGE_LOSS_READ", "DAMAGE_LOSS_WRITE", "STOCK_CHECK_READ","ORG_READ", "ORG_WRITE", "STORE_WRITE", "STORE_READ"
+        ));
+        rolePermissions.put("STORE_MANAGER", Arrays.asList(
+                "USER_READ", "USER_WRITE",
+                "INVENTORY_ITEM_READ", "INVENTORY_ITEM_WRITE",
+                "SUPPLIER_READ", "SUPPLIER_WRITE", "LOCATION_READ", "LOCATION_WRITE", "UOM_READ",
+                "PO_READ", "PO_WRITE", "SALE_READ", "SALE_WRITE", "DISCOUNT_READ",
+                "DAMAGE_LOSS_READ", "DAMAGE_LOSS_WRITE", "STOCK_CHECK_READ", "STORE_WRITE", "STORE_READ"
         ));
         rolePermissions.put("ADMIN", Arrays.asList(
                 "PRODUCT_READ", "PRODUCT_WRITE", "USER_READ", "USER_WRITE", "ROLE_READ", "ROLE_WRITE",
@@ -189,29 +210,30 @@ public class DataSeeder {
             }
         } else {
             // Table has data, check for missing roles
-            Map<String, Role> existingRoles = roleRepository.findAll()
-                    .stream()
-                    .collect(Collectors.toMap(Role::getName, r -> r));
-
-            for (Map.Entry<String, String> entry : roles.entrySet()) {
-                String roleName = entry.getKey();
-                Role role = existingRoles.getOrDefault(roleName, new Role());
-                role.setName(roleName);
-                role.setDescription(entry.getValue());
-
-                List<String> permissionNames = rolePermissions.getOrDefault(roleName, Collections.emptyList());
-                Set<Permission> permissionSet = permissionNames.stream()
-                        .map(name -> permissionMap.get(name))
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toSet());
-
-//                if (permissionSet.isEmpty()) {
-//                    continue;
-//                }
-
-                role.setPermissions(permissionSet);
-                rolesToSave.add(role);
-            }
+            logger.debug("Existing roles found, No need for seed...");
+//            Map<String, Role> existingRoles = roleRepository.findAll()
+//                    .stream()
+//                    .collect(Collectors.toMap(Role::getName, r -> r));
+//
+//            for (Map.Entry<String, String> entry : roles.entrySet()) {
+//                String roleName = entry.getKey();
+//                Role role = existingRoles.getOrDefault(roleName, new Role());
+//                role.setName(roleName);
+//                role.setDescription(entry.getValue());
+//
+//                List<String> permissionNames = rolePermissions.getOrDefault(roleName, Collections.emptyList());
+//                Set<Permission> permissionSet = permissionNames.stream()
+//                        .map(name -> permissionMap.get(name))
+//                        .filter(Objects::nonNull)
+//                        .collect(Collectors.toSet());
+//
+////                if (permissionSet.isEmpty()) {
+////                    continue;
+////                }
+//
+//                role.setPermissions(permissionSet);
+//                rolesToSave.add(role);
+//            }
         }
 
         if (!rolesToSave.isEmpty()) {
@@ -222,72 +244,147 @@ public class DataSeeder {
         }
     }
 
+    private static Map<String, String> getRolesMap() {
+        Map<String, String> roles = new HashMap<>();
+        roles.put("SUPER_ADMIN", "Role with all permissions and administrative access");
+        roles.put("ORG_ADMIN", "Role with administrative access to manage organization settings and users");
+        roles.put("STORE_MANAGER", "Role with permissions to manage store operations and inventory");
+        roles.put("ADMIN", "Role with administrative access to manage users and resources");
+        roles.put("MANAGER", "Role with permissions to manage sales and inventory");
+        roles.put("CASHIER", "Role with permissions to handle sales transactions");
+        roles.put("SUPPORT", "Role with permissions to assist users");
+        roles.put("CUSTOMER", "Role with permissions to view discounts and stock availability");
+        return roles;
+    }
+
     private void seedUsers() {
         logger.debug("Seeding users...");
+
+        // Note: Changed "STORE_MANAGER" to "MANAGER" to match your roles map
         String[][] users = {
                 {"admin", "admin@store.com", "admin123", "SUPER_ADMIN"},
-                {"manager", "manager@store.com", "manager123", "MANAGER"}
+                {"manager", "manager@store.com", "manager123", "STORE_MANAGER"} // Use "MANAGER" from your role map
         };
 
         long userCount = userRepository.count();
-        List<User> newUsers = new ArrayList<>();
+        // We will directly save individual entities, not a list in one go for users
+        // as we are creating associated organizations and roles
+        List<User> usersToCreate = new ArrayList<>();
 
-        // Fetch all roles in one query if needed
-        Map<String, Role> roleMap = roleRepository.findAll()
+        List<UserOrganizationRole> allUserOrgRolesToSave = new ArrayList<>();
+        // Fetch all roles in one query
+        Map<String, Role> roleMap = roleRepository.findAllWithPermissions()
                 .stream()
                 .collect(Collectors.toMap(Role::getName, r -> r));
+        Set<String> existingUserEmails = userRepository.findAll()
+                .stream()
+                .map(User::getEmail)
+                .collect(Collectors.toSet());
 
-        if (userCount == 0) {
-            // Table is empty, seed all users
-            for (String[] userData : users) {
-                User user = new User();
-                user.setFirstName(userData[0]);
-                user.setUsername(userData[1]);
-                user.setEmail(userData[1]);
-                user.setPasswordHash(passwordEncoder.encode(userData[2]));
-                user.setActive(true);
-                user.setCreatedBy("system");
+        try{
+        for (String[] userData : users) {
+            String firstName = userData[0];
+            String email = userData[1];
+            String password = userData[2];
+            String roleName = userData[3];
 
-                Role role = roleMap.get(userData[3]);
-//                if (role == null) {
-//                    continue;
-//                }
-                user.setRoles(new HashSet<>(Collections.singletonList(role)));
-                newUsers.add(user);
+            if (existingUserEmails.contains(email)) {
+                logger.debug("User {} already exists, skipping.", email);
+                continue; // Skip if user already exists
             }
-        } else {
-            // Table has data, check for missing users
-            Set<String> existingUserEmails = userRepository.findAll()
-                    .stream()
-                    .map(User::getEmail)
-                    .collect(Collectors.toSet());
 
-            for (String[] userData : users) {
-                String email = userData[1];
-                if (!existingUserEmails.contains(email)) {
-                    User user = new User();
-                    user.setFirstName(userData[0]);
-                    user.setLastName(userData[0]);
-                    user.setUsername(userData[1]);
-                    user.setEmail(email);
-                    user.setPasswordHash(passwordEncoder.encode(userData[2]));
-                    user.setActive(true);
-                    user.setCreatedBy("system");
-
-                    Role role = roleMap.get(userData[3]);
-//                    if (role == null) {
-//                        continue;
-//                    }
-                    user.setRoles(new HashSet<>(Collections.singletonList(role)));
-                    newUsers.add(user);
-                }
+            Role role = roleMap.get(roleName);
+            if (role == null) {
+                logger.warn("Role {} not found, skipping user {}", roleName, email);
+                continue;
             }
+
+            // 1. Create and Save User
+            User user = new User();
+            user.setFirstName(firstName);
+            user.setLastName(firstName); // Assuming last name is same as first for seeding
+            user.setEmail(email);
+            user.setUsername(email); // Assuming email is username
+            user.setPasswordHash(passwordEncoder.encode(password));
+            user.setActive(true);
+            user.setCreatedBy("system");
+            user.setCreatedAt(LocalDateTime.now()); // Set creation timestamp
+
+            // Save the user FIRST to get an ID
+//            user = userRepository.save(user); // Important: Persist User before linking roles
+            usersToCreate.add(user);
+
+            // 2. Create and Save Organization (for this user as owner)
+            // Ensure the organization name is unique
+            String baseOrgName = firstName + "'s Organization";
+            String orgName = baseOrgName;
+            int suffix = 1;
+            while (organizationRepository.findByName(orgName).isPresent()) {
+                orgName = baseOrgName + " " + suffix++;
+            }
+
+            Organization organization = new Organization();
+            organization.setName(orgName);
+            organization.setCreatedAt(LocalDateTime.now()); // Set creation timestamp
+            organization.setCreatedBy(user.getEmail()); // The user is creating it
+            organization = organizationRepository.save(organization); // Save the organization
+
+            // 3. Create and Save UserOrganizationRole
+            UserOrganizationRole userOrgRole = new UserOrganizationRole();
+            userOrgRole.setUser(user); // Set the already saved user
+            userOrgRole.setOrganization(organization); // Set the already saved organization
+            userOrgRole.setRole(role); // Set the role fetched from DB
+            userOrgRole.setCreatedAt(LocalDateTime.now());
+            userOrgRole.setCreatedBy("system");
+            // 4. Set up bidirectional relationship
+            user.setOrganizationRoles(new HashSet<>(Collections.singletonList(userOrgRole)));
+
+            // 5. Add to users to create
+            usersToCreate.add(user);
+
+            // Log creation
+//            auditLogService.log("CREATE_ORGANIZATION", organization.getId(),
+//                    "Auto-created organization: " + organization.getName() + " for user: " + user.getEmail());
+//            allUserOrgRolesToSave.add(userOrgRole); // Collect for batch save
+            logger.info("Seeding {} new UserOrganizationRoles.", userOrgRole.getOrganization().getName());
+
+//            userOrganizationRoleRepository.save(userOrgRole);
         }
-        if (!newUsers.isEmpty()) {
-            userRepository.saveAll(newUsers);
-            logger.info("Seeded {} new users", newUsers.size());
+
+        if (!usersToCreate.isEmpty()) {
+            userRepository.saveAll(usersToCreate);
+//            usersToCreate.forEach(user ->
+//                    auditLogService.log("SEED_USER", user.getId(), "Seeded user: " + user.getEmail()));
+            logger.info("Seeded {} new users.", usersToCreate.size());
         } else {
-            logger.debug("No new users to seed");
+            logger.debug("No new users to seed.");
         }
+
+//        if (!allUserOrgRolesToSave.isEmpty()) {
+//            logger.info("Seeding {} new UserOrganizationRoles.", allUserOrgRolesToSave.size());
+////            userOrganizationRoleRepository.saveAll(allUserOrgRolesToSave);
+//            logger.info("Seeding successful.");
+//        }
+//
+//        if (!usersToCreate.isEmpty()) {
+//            logger.info("Seeded {} new users.", usersToCreate.size());
+//        } else {
+//            logger.debug("No new users to seed.");
+//        }
+    } catch (Exception e) {
+        logger.error("Data seeding failed: {}", e.getMessage(), e);
+        throw new RuntimeException("Data seeding failed", e);
+    }
+    }
+
+    private Organization createOrganization(User user){
+        String orgName = user.getFirstName() + "'s Organization";
+        // Ensure the organization name is unique if you reuse this elsewhere, or handle it in seedUsers directly.
+        // The loop for unique name is now inside seedUsers.
+        Organization organization = new Organization();
+        organization.setName(orgName);
+        organization.setCreatedAt(LocalDateTime.now()); // Set creation timestamp
+        organization.setCreatedBy(user.getEmail()); // The user is creating it
+        return organizationRepository.save(organization);
     }
 }

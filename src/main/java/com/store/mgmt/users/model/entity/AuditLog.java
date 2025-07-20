@@ -1,6 +1,8 @@
 package com.store.mgmt.users.model.entity;
 
 import com.store.mgmt.common.model.BaseEntity;
+import com.store.mgmt.organization.model.entity.Organization;
+import com.store.mgmt.organization.model.entity.Store;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -13,7 +15,19 @@ import java.util.UUID;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class AuditLog extends BaseEntity {
-    @Column(name="action", nullable = true )
+    @ManyToOne
+    @JoinColumn(name = "organization_id", nullable = false)
+    private Organization organization;
+
+    @ManyToOne
+    @JoinColumn(name = "store_id")
+    private Store store; // Nullable for organization-level actions
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+
+    private User user;
+    @Column(name="action", nullable = false )
     private String action; //-- e.g., 'ASSIGNED_ROLE', 'UPDATED_PERMISSION'
 
     @Column(name = "entity_type", nullable = false)
@@ -25,7 +39,4 @@ public class AuditLog extends BaseEntity {
     @Column(name = "details", nullable = false, columnDefinition = "jsonb")
     private String details;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
 }

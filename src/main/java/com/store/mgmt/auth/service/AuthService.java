@@ -4,6 +4,10 @@ import com.store.mgmt.auth.model.dto.AuthCredentials;
 import com.store.mgmt.auth.model.dto.AuthResponse;
 import com.store.mgmt.auth.exception.AuthenticationException;
 import com.store.mgmt.auth.model.dto.RegisterCredentials;
+import com.store.mgmt.organization.model.dto.OrganizationDTO;
+import com.store.mgmt.organization.model.dto.TenantDTO;
+
+import java.util.List;
 
 public interface AuthService {
 
@@ -20,4 +24,8 @@ public interface AuthService {
     AuthResponse refreshToken(String refreshToken);
     AuthResponse validateToken(String token);
     void logout(String refreshToken);
+
+    List<OrganizationDTO> getOrganizations();
+
+    AuthResponse selectTenant(TenantDTO selectDTO);
 }

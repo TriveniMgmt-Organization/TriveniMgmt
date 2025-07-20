@@ -1,6 +1,7 @@
 package com.store.mgmt.inventory.model.entity;
 
 import com.store.mgmt.common.model.BaseEntity;
+import com.store.mgmt.organization.model.entity.Organization;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,6 +20,10 @@ import java.util.Set; // For OneToMany relationship
 @NoArgsConstructor
 @AllArgsConstructor
 public class UnitOfMeasure extends BaseEntity {
+
+    @ManyToOne
+    @JoinColumn(name = "organization_id", nullable = false)
+    private Organization organization;
 
     @Column(name = "name", unique = true, nullable = false, length = 100)
     private String name; // e.g., "Kilogram", "Piece"

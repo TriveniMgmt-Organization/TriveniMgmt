@@ -1,12 +1,10 @@
 package com.store.mgmt.pos.model.entity;
 
 import com.store.mgmt.common.model.BaseEntity;
-import com.store.mgmt.inventory.model.entity.Product;
+import com.store.mgmt.inventory.model.entity.ProductTemplate;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.math.BigDecimal;
 
@@ -20,8 +18,8 @@ public class PosSaleItem extends BaseEntity {
     private PosSale sale;
 
     @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    @JoinColumn(name = "product_template_id", nullable = false)
+    private ProductTemplate productTemplate;
 
     @Column(nullable = false)
     private int quantity;

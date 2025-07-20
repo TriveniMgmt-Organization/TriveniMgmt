@@ -32,7 +32,8 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("com.github.f4b6a3:uuid-creator:6.1.0")
-  // implementation("org.flywaydb:flyway-core:11.10.2")
+	implementation("org.springframework.boot:spring-boot-starter-mail")
+	// implementation("org.flywaydb:flyway-core:11.10.2")
 //	implementation("org.liquibase:liquibase-core")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
 	// MapStruct Core Dependency
@@ -51,7 +52,7 @@ dependencies {
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.security:spring-security-test")
-  testImplementation("com.h2database:h2")
+	testImplementation("com.h2database:h2")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 //	implementation("io.jsonwebtoken:jjwt-api:0.12.5")
 //	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.5")

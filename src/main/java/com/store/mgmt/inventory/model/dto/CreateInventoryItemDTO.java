@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -14,12 +15,12 @@ import java.util.UUID;
 @NoArgsConstructor
 public class CreateInventoryItemDTO {
     @Schema(
-            name="product_id",
+            name="product_template_id",
             description = "Unique identifier of the Product of id this product belongs to",
             example = "fedcba98-7654-3210-fedc-ba9876543210",
             required = true // Assuming a product must always belong to a category
     )
-    private UUID productId;
+    private UUID productTemplateId;
 
     @Schema(
             name="location_id",
@@ -31,6 +32,12 @@ public class CreateInventoryItemDTO {
 
     @Schema(description = "Quantity of the inventory item", required = true, minimum = "0", maximum = "1000000")
     private int quantity;
+
+    @Schema(name="cost_price", description = "Cost price of the inventory item", required = true, minimum = "0.01", maximum = "1000000.00")
+    private BigDecimal costPrice;
+
+    @Schema(name="retail_price", description = "Retail price of the inventory item", required = true, minimum = "0.01", maximum = "1000000.00")
+    private BigDecimal retailPrice;
 
     @Schema(name="expiration_date", description = "Quantity of the inventory item", required = true)
     private LocalDateTime expirationDate;

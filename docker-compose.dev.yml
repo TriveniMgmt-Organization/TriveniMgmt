@@ -7,13 +7,14 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/triveni_mgmt_db
-      - SPRING_DATASOURCE_USERNAME=proha
-      - SPRING_DATASOURCE_PASSWORD=gosaikunda
+      - SPRING_DATASOURCE_URL=${DB_HOST}
+      - SPRING_DATASOURCE_USERNAME=${DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - JWT_SECRET
       - JWT_EXPIRATION_MS
       - JWT_ISSUER
-      - FRONTEND_URL=http://localhost:3000
+      - JWT_REFRESH_EXPIRATION_MS
+      - FRONTEND_URL=${FRONTEND_URL}
     volumes:
       - ./src:/app/src
       - ./.gradle:/root/.gradle
@@ -28,15 +29,15 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_DB=triveni_mgmt_db
-      - POSTGRES_USER=proha
-      - POSTGRES_PASSWORD=gosaikunda
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
       - store-network
     healthcheck: 
-      test: ["CMD-SHELL", "pg_isready -U proha -d triveni_mgmt_db"]
+      test: ["CMD-SHELL", "pg_isready -U proha -d ${DB_NAME}"]
       interval: 5s
       timeout: 5s
       retries: 5

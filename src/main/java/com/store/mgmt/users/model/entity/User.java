@@ -1,9 +1,12 @@
 package com.store.mgmt.users.model.entity;
 
 import com.store.mgmt.common.model.BaseEntity;
+import com.store.mgmt.organization.model.entity.Organization;
+import com.store.mgmt.organization.model.entity.UserOrganizationRole;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -13,6 +16,7 @@ import java.util.UUID;
 @Table(name = "users")
 @Data
 @EqualsAndHashCode(callSuper = true)
+@ToString(exclude = "organizationRoles")
 public class User extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String username;
@@ -29,20 +33,14 @@ public class User extends BaseEntity {
     @Column(name = "last_name", nullable = true)
     private String lastName;
 
-    @Column(name = "organization_id")
-    private UUID organizationId;
-
-    @Column(name = "store_id")
-    private UUID storeId;
+//    @ManyToOne
+//    @JoinColumn(name = "organization_id", nullable = false)
+//    private Organization organization;
 
     @Column(name = "is_active", nullable = false)
     private boolean isActive;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<Role> roles;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UserOrganizationRole> organizationRoles;
 }

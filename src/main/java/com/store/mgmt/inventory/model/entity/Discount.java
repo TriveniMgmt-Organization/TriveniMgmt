@@ -2,17 +2,16 @@ package com.store.mgmt.inventory.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.store.mgmt.common.model.BaseEntity;
+import com.store.mgmt.organization.model.entity.Organization;
+import com.store.mgmt.organization.model.entity.Store;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "discounts")
@@ -21,6 +20,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Discount extends BaseEntity {
+    @ManyToOne
+    @JoinColumn(name = "organization_id", nullable = false)
+    private Organization organization;
+
+    @ManyToOne
+    @JoinColumn(name = "store_id", nullable = false)
+    private Store store;
 
     @Column(name = "name", unique = true, nullable = false, length = 255)
     private String name;
@@ -39,8 +45,8 @@ public class Discount extends BaseEntity {
     private LocalDate endDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id") // Nullable if store-wide or category specific
-    private Product product;
+    @JoinColumn(name = "product_template_id") // Nullable if store-wide or category specific
+    private ProductTemplate productTemplate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id") // Nullable if store-wide or product specific

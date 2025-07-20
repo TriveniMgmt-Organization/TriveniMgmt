@@ -29,11 +29,18 @@ public class CreateUserDTO {
     private String email;
 
     @Schema(
-            name = "full_name",
-            description = "Full name of the user",
-            example = "john doe"
+            name = "first_name",
+            description = "First name of the user",
+            example = "john"
     )
-    private String fullName;
+    private String firstName;
+
+    @Schema(
+            name = "last_name",
+            description = "Last name of the user",
+            example = "doe"
+    )
+    private String lastName;
 
     @Schema(
             name= "is_active",

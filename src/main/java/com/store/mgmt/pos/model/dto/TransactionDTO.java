@@ -17,7 +17,7 @@ public class TransactionDTO {
     private UUID id;
 
     @Schema(
-            name="product_id",
+            name="product_template_id",
             description = "Unique identifier of the product involved in the transaction",
             example = "09876543-21ab-cdef-1234-567890fedcba"
     )

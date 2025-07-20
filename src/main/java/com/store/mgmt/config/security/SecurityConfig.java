@@ -3,6 +3,10 @@ package com.store.mgmt.config.security;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import com.store.mgmt.auth.service.JWTService;
+import com.store.mgmt.organization.repository.OrganizationRepository;
+import com.store.mgmt.organization.repository.StoreRepository;
+import com.store.mgmt.users.repository.UserRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +14,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.event.AbstractAuthenticationEvent;
 import org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent;
@@ -41,6 +47,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 
 @Configuration
 @EnableWebSecurity
@@ -50,6 +57,10 @@ public class SecurityConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
     private final CustomUserDetailsService userService;
+    private final JWTService jwtService;
+    private final UserRepository userRepository;
+    private final OrganizationRepository organizationRepository;
+    private final StoreRepository storeRepository;
     private static final String[] SWAGGER_WHITELIST = {
             "/v3/api-docs/**",
             "/swagger-ui/**",
@@ -66,9 +77,15 @@ public class SecurityConfig {
 
     @Value("${jwt.issuer}")
     private String jwtIssuer;
-    public SecurityConfig(CustomUserDetailsService userService
+    public SecurityConfig(CustomUserDetailsService userService, JWTService jwtService,
+                          UserRepository userRepository, OrganizationRepository organizationRepository,
+                          StoreRepository storeRepository
     ) {
         this.userService = userService;
+        this.jwtService = jwtService;
+        this.userRepository = userRepository;
+        this.organizationRepository = organizationRepository;
+        this.storeRepository = storeRepository;
     }
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -77,23 +94,28 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers(SWAGGER_WHITELIST).permitAll()
-                        // Role-based endpoint restrictions
-                        .requestMatchers("/api/v1/admin/**").hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ADMIN")
+                                // Public endpoints
+                                .requestMatchers("/api/v1/auth/**").permitAll()
+                                .requestMatchers(SWAGGER_WHITELIST).permitAll()
+                                .requestMatchers("/api/v1/organizations/**").hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ORG_ADMIN")
+                                .requestMatchers("/api/v1/stores/**").hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ORG_ADMIN", "ROLE_STORE_MANAGER")
+                                .requestMatchers("/api/v1/user-organizations/**").hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ORG_ADMIN")
+                                // Role-based endpoint restrictions
+                                .requestMatchers("/api/v1/admin/**").hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ADMIN")
 //                        .requestMatchers("/api/v1/manager/**").hasAnyAuthority("ROLE_MANAGER")
 //                        .requestMatchers("/api/v1/cashier/**").hasAnyAuthority("ROLE_CASHIER")
 //                        .requestMatchers("/api/v1/support/**").hasAnyAuthority("ROLE_SUPPORT")
 //                        .requestMatchers("/api/v1/customer/**").hasAnyAuthority("ROLE_CUSTOMER")
-                        // Permission-based restrictions (optional, for finer control)
-                        .requestMatchers("/api/v1/users/**").hasAnyAuthority("USER_READ", "USER_WRITE")
-                        .requestMatchers("/api/v1/roles/**").hasAnyAuthority("ROLE_READ", "ROLE_WRITE")
-                        .requestMatchers("/api/v1/inventory/**").hasAnyAuthority("INVENTORY_ITEM_READ", "INVENTORY_ITEM_WRITE")
+                                // Permission-based restrictions (optional, for finer control)
+                                .requestMatchers("/api/v1/users/**").hasAnyAuthority("USER_READ", "USER_WRITE")
+                                .requestMatchers("/api/v1/roles/**").hasAnyAuthority("ROLE_READ", "ROLE_WRITE")
+                                .requestMatchers("/api/v1/inventory/**").hasAnyAuthority("INVENTORY_ITEM_READ", "INVENTORY_ITEM_WRITE")
 //                        .requestMatchers("/api/v1/inventory/**").permitAll()
-                        .anyRequest().authenticated()
+                                .anyRequest().authenticated()
                 )
-                .addFilterBefore(new JWTCookieAuthenticationFilter(jwtDecoder(), jwtAuthenticationConverter()), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JWTCookieAuthenticationFilter(jwtService, userRepository,
+                        organizationRepository, storeRepository,
+                        jwtDecoder(), jwtAuthenticationConverter()), UsernamePasswordAuthenticationFilter.class)
                 .userDetailsService(userService)
                 .headers(headers -> headers
                         .xssProtection(xss -> xss.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))
@@ -108,8 +130,12 @@ public class SecurityConfig {
                         })
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
                             logger.warn("Access denied: {}", accessDeniedException.getMessage());
+                            if (accessDeniedException.getMessage().contains("No resources available")) {
+                                response.sendError(HttpServletResponse.SC_NOT_FOUND, "No resources available");
+                            } else {
+                                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied");
+                            }
                             accessDeniedException.printStackTrace();
-                            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied");
                         })
                 );
 
@@ -128,6 +154,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of(frontendUrl));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With"));
+//        configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setExposedHeaders(List.of("Set-Cookie")); // Important for cookies
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
@@ -212,5 +239,22 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Bean
+    public JavaMailSender mailSender() {
+        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+        mailSender.setHost("smtp.gmail.com"); // Replace with your SMTP host
+        mailSender.setPort(587); // Replace with your SMTP port
+        mailSender.setUsername("prasubd@gmail.com"); // Replace with your email
+        mailSender.setPassword("prasubd@123"); // Replace with your email password
+
+        Properties props = mailSender.getJavaMailProperties();
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.debug", "true");
+
+        return mailSender;
     }
 }

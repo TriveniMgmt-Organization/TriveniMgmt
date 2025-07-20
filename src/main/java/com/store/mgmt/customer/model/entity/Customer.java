@@ -1,9 +1,8 @@
 package com.store.mgmt.customer.model.entity;
 
 import com.store.mgmt.common.model.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import com.store.mgmt.organization.model.entity.Organization;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,20 +11,21 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Customer extends BaseEntity {
-    @Column(nullable = false)
-    private String firstName;
+    @ManyToOne
+    @JoinColumn(name = "organization_id", nullable = false)
+    private Organization organization;
 
-    @Column
-    private String lastName;
-
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(unique = true)
+    @Column(name = "name")
+    private String name;
+
+    @Column(name = "phone")
     private String phone;
 
-    @Column
-    private String loyaltyId;
+    @Column(name = "loyalty_points", nullable = false)
+    private int loyaltyPoints = 0;
 
     @Column(nullable = false)
     private boolean isActive = true;

@@ -2,6 +2,7 @@ package com.store.mgmt.inventory.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.store.mgmt.common.model.BaseEntity;
+import com.store.mgmt.organization.model.entity.Store;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -17,6 +18,10 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Location extends BaseEntity {
+    @ManyToOne
+    @JoinColumn(name = "store_id", nullable = false)
+    private Store store;
+
     @Column(name = "name", unique = true, nullable = false, length = 255)
     private String name; // e.g., "Main Store Floor", "Backroom Storage", "Store #123"
 

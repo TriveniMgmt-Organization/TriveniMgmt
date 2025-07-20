@@ -14,14 +14,14 @@ public interface InventoryService {
     // --- Product Management ---
     ProductDTO createProduct(CreateProductDTO createDTO);
     List<ProductDTO> getAllProducts(boolean includeInactive); // Added param for filtering
-    ProductDTO getProductById(UUID productId);
-    ProductDTO updateProduct(UUID productId, UpdateProductDTO updateDTO);
-    void deleteProduct(UUID productId); // Logical delete (isActive = false)
+    ProductDTO getProductById(UUID productTemplateId);
+    ProductDTO updateProduct(UUID productTemplateId, UpdateProductDTO updateDTO);
+    void deleteProduct(UUID productTemplateId); // Logical delete (isActive = false)
 
     // --- Inventory Item Management (Stock specific) ---
     InventoryItemDTO createInventoryItem(CreateInventoryItemDTO createDTO); // Adding new stock
     InventoryItemDTO getInventoryItemById(UUID inventoryItemId);
-    List<InventoryItemDTO> getInventoryItemsForProduct(UUID productId);
+    List<InventoryItemDTO> getInventoryItemsForProduct(UUID productTemplateId);
     List<InventoryItemDTO> getInventoryItemsAtLocation(UUID locationId);
     InventoryItemDTO updateInventoryItemQuantity(UUID inventoryItemId, Integer quantityChange); // Adjust specific item stock
     void deleteInventoryItem(UUID inventoryItemId); // Remove a specific inventory item record
@@ -33,7 +33,7 @@ public interface InventoryService {
     // --- Stock Check & Information ---
     int getTotalStockQuantity(UUID productId);
     int getStockQuantityAtLocation(UUID productId, UUID locationId);
-    BigDecimal getProductRetailPrice(UUID productId);
+    BigDecimal getInventoryItemRetailPrice(UUID productId);
     boolean checkStockAvailability(UUID roductId, int quantityNeeded);
     boolean checkStockAvailabilityAtLocation(UUID productId, UUID locationId, int quantityNeeded);
 

@@ -21,4 +21,8 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
     @Query("SELECT u FROM Category u WHERE u.deletedAt IS NULL ORDER BY u.createdAt DESC")
     @NonNull
     List<Category> findAll();
+
+    List<Category> findByOrganizationId(UUID organizationId);
+    Optional<Category> findByIdAndOrganizationId(UUID id, UUID organizationId);
+    Optional<Category> findByNameAndOrganizationId( String name, UUID organizationId);
 }

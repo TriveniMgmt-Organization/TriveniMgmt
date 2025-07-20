@@ -1,5 +1,8 @@
 package com.store.mgmt.users.controller;
 
+import com.store.mgmt.organization.model.dto.*;
+import com.store.mgmt.users.model.dto.CreateUserDTO;
+import com.store.mgmt.users.model.dto.UpdateUserDTO;
 import com.store.mgmt.users.model.dto.UserDTO;
 import com.store.mgmt.users.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -56,8 +59,8 @@ public class UserController {
     )
     public ResponseEntity<UserDTO> createUser(
             @Parameter(description = "User details to be created", required = true)
-            @RequestBody UserDTO request) {
-        UserDTO user = userService.createUser(request);
+            @RequestBody CreateUserDTO dto) {
+        UserDTO user = userService.createUser(dto);
         return ResponseEntity.ok(user);
     }
 
@@ -148,8 +151,8 @@ public class UserController {
             @Parameter(description = "Unique ID of the user to update", required = true)
             @PathVariable UUID id,
             @Parameter(description = "Updated user details", required = true)
-            @RequestBody UserDTO request) {
-        UserDTO user = userService.updateUser(id, request);
+            @RequestBody UpdateUserDTO dto) {
+        UserDTO user = userService.updateUser(id, dto);
         return ResponseEntity.ok(user);
     }
 
@@ -247,5 +250,98 @@ public class UserController {
             @PathVariable UUID roleId) {
         UserDTO user = userService.removeRole(id, roleId);
         return ResponseEntity.ok(user);
+    }
+
+    @PostMapping("/organization")
+    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN')")
+    public OrganizationDTO createOrganization(@RequestBody CreateOrganizationDTO createDTO) {
+        return userService.createOrganization(createDTO);
+    }
+
+    @PostMapping("/store")
+    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN')")
+    public StoreDTO createStore(@RequestBody CreateStoreDTO createDTO) {
+        return userService.createStore(createDTO);
+    }
+    @PostMapping("/invite")
+    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN')")
+   @Operation(
+            summary = "Invite a new user",
+            description = "Sends an invitation to a new user to join the platform.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Invitation sent successfully",
+                            content = @Content
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Invalid input or missing required fields",
+                            content = @Content
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "Forbidden: User does not have 'INVITE_USER' authority",
+                            content = @Content
+                    )
+            }
+    )
+    public void inviteUser(@RequestBody InviteUserDTO inviteDTO) {
+        userService.inviteUser(inviteDTO);
+    }
+
+    @PostMapping("/assign/organization")
+    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN')")
+    @Operation(
+            summary = "Assign a user to an organization",
+            description = "Assigns a user to a specific organization.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "User assigned to organization successfully",
+                            content = @Content
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Invalid input or missing required fields",
+                            content = @Content
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "Forbidden: User does not have 'ASSIGN_USER_TO_ORGANIZATION' authority",
+                            content = @Content
+                    )
+            }
+    )
+    public void assignUserToOrganization(@RequestBody CreateUserAssignmentDTO dto) {
+        userService.assignUserToOrganization(dto);
+    }
+
+
+    @PostMapping("/assign/store")
+    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN')")
+    @Operation(
+            summary = "Assign a user to a store",
+            description = "Assigns a user to a specific store.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "User assigned to store successfully",
+                            content = @Content
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Invalid input or missing required fields",
+                            content = @Content
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "Forbidden: User does not have 'ASSIGN_USER_TO_STORE' authority",
+                            content = @Content
+                    )
+            }
+    )
+    public void assignUserToStore(@RequestBody CreateUserAssignmentDTO dto) {
+        userService.assignUserToStore(dto);
     }
 }

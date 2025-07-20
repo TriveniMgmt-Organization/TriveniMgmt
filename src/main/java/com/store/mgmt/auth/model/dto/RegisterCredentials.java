@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Schema(name = "RegisterCredentials", description = "Request object for user registration")
 public class RegisterCredentials {
 
-    @NotBlank(message = "Full Name cannot be empty")
+    @NotBlank(message = "First Name cannot be empty")
     @Size(min = 3, max = 50, message = "Full Name must be between 3 and 50 characters")
     @Schema(
             name= "full_name",
@@ -23,7 +23,18 @@ public class RegisterCredentials {
             minLength = 3,
             maxLength = 50
     )
-    private String fullName;
+    private String firstName;
+
+    @NotBlank(message = "Last Name cannot be empty")
+    @Size(min = 3, max = 50, message = "Last Name must be between 3 and 50 characters")
+    @Schema(
+            name= "last_name",
+            example = "Smith",
+            required = true,
+            minLength = 3,
+            maxLength = 50
+    )
+    private String lastName;
 
     @NotBlank(message = "Email cannot be empty")
     @Email(message = "Email should be valid")
@@ -46,14 +57,14 @@ public class RegisterCredentials {
             required = true,
             minLength = 8,
             maxLength = 100,
-            writeOnly = true // Crucial: This field is only for requests, never for responses
+            accessMode = Schema.AccessMode.WRITE_ONLY
     )
     private String password;
 
-    // Optional: Add other fields required for registration, e.g.,
-    // @Schema(description = "User's first name", example = "Jane")
-    // private String firstName;
-
-    // @Schema(description = "User's last name", example = "Doe")
-    // private String lastName;
+    @Schema(
+            name="invitation_token",
+            description = "Optional invitation token for registration",
+            example = "abc123xyz456"
+    )
+    private String invitationToken;
 }

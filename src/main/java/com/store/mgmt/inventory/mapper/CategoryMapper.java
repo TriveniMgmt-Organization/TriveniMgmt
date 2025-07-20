@@ -2,7 +2,6 @@ package com.store.mgmt.inventory.mapper;
 
 import com.store.mgmt.inventory.model.dto.*;
 import com.store.mgmt.inventory.model.entity.Category;
-import com.store.mgmt.inventory.model.entity.Product;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;

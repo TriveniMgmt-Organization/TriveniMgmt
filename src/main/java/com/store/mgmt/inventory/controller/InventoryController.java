@@ -108,7 +108,7 @@ public class InventoryController {
         return ResponseEntity.ok(inventoryItem);
     }
 
-    @GetMapping("/items/by-product/{productId}")
+    @GetMapping("/items/by-product/{productTemplateId}")
     @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
     @Operation(
             summary = "Get inventory items for a specific product",
@@ -133,8 +133,8 @@ public class InventoryController {
     )
     public ResponseEntity<List<InventoryItemDTO>> getInventoryItemsByProduct(
             @Parameter(description = "ID of the product to retrieve inventory items for", required = true)
-            @PathVariable UUID productId) {
-        List<InventoryItemDTO> inventoryItems = inventoryService.getInventoryItemsForProduct(productId);
+            @PathVariable UUID productTemplateId) {
+        List<InventoryItemDTO> inventoryItems = inventoryService.getInventoryItemsForProduct(productTemplateId);
         return ResponseEntity.ok(inventoryItems);
     }
 
@@ -819,7 +819,7 @@ public class InventoryController {
         return ResponseEntity.ok(sales);
     }
 
-    @GetMapping("/sales/by-product/{productId}")
+    @GetMapping("/sales/by-product/{productTemplateId}")
 //    @PreAuthorize("hasAuthority('SALE_READ')")
     @Operation(
             summary = "Get sales for a specific product",
@@ -830,8 +830,8 @@ public class InventoryController {
                     @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'SALE_READ' authority", content = @Content)
             }
     )
-    public ResponseEntity<List<SaleDTO>> getSalesForProduct(@PathVariable UUID productId) {
-        List<SaleDTO> sales = inventoryService.getSalesForProduct(productId);
+    public ResponseEntity<List<SaleDTO>> getSalesForProduct(@PathVariable UUID productTemplateId) {
+        List<SaleDTO> sales = inventoryService.getSalesForProduct(productTemplateId);
         return ResponseEntity.ok(sales);
     }
 
@@ -1097,8 +1097,8 @@ public class InventoryController {
                     @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_VIEW_PRODUCT_PRICES' authority", content = @Content)
             }
     )
-    public ResponseEntity<java.math.BigDecimal> getProductRetailPrice(@PathVariable UUID productId) {
-        java.math.BigDecimal retailPrice = inventoryService.getProductRetailPrice(productId);
+    public ResponseEntity<java.math.BigDecimal> getInventoryItemRetailPrice(@PathVariable UUID productId) {
+        java.math.BigDecimal retailPrice = inventoryService.getInventoryItemRetailPrice(productId);
         return ResponseEntity.ok(retailPrice);
     }
 }

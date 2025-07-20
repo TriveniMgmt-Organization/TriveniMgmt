@@ -15,8 +15,8 @@ public class CreatePurchaseOrderDTO {
     @Schema(name="location_id", description = "Location ID where the items will be delivered", required = true)
     private UUID locationId;
 
-    @Schema(name="product_id", description = "Location ID where the items will be delivered", required = true)
-    private UUID productId;
+    @Schema(name="product_template_id", description = "Location ID where the items will be delivered", required = true)
+    private UUID productTemplateId;
 
 @Schema(name="user_id", description = "Unique identifier of the user creating the purchase order", required = true)
     private UUID userId;

@@ -17,24 +17,35 @@ import java.util.UUID;
 @Repository
 public interface InventoryItemRepository extends JpaRepository<InventoryItem, UUID> {
 
-    List<InventoryItem> findByProductId(UUID productId);
+    List<InventoryItem> findByProductTemplateId(UUID productTemplateId);
 
     List<InventoryItem> findByLocationId(UUID locationId);
-    List<InventoryItem> findByProductIdAndLocationId(UUID productId, UUID locationId);
+    List<InventoryItem> findByProductTemplateIdAndLocationId(UUID productTemplateId, UUID locationId);
 
     // For optimistic locking when updating stock
     @Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT) // Ensures version is incremented
     Optional<InventoryItem> findById(@NonNull UUID id);
 
     // Custom query to sum quantities for a product across all locations
-    @Query("SELECT SUM(ii.quantity) FROM InventoryItem ii WHERE ii.product.id = :productId")
-    Optional<Integer> getTotalQuantityByProductId(@Param("productId") UUID productId);
+    @Query("SELECT SUM(ii.quantity) FROM InventoryItem ii WHERE ii.productTemplate.id = :productTemplateId")
+    Optional<Integer> getTotalQuantityByProductTemplateId(@Param("productTemplateId") UUID productTemplateId);
 
     // Custom query to sum quantities for a product at a specific location
-    @Query("SELECT SUM(ii.quantity) FROM InventoryItem ii WHERE ii.product.id = :productId AND ii.location.id = :locationId")
-    Optional<Integer> getTotalQuantityByProductIdAndLocationId(@Param("productId") UUID productId, @Param("locationId") UUID locationId);
+    @Query("SELECT SUM(ii.quantity) FROM InventoryItem ii WHERE ii.productTemplate.id = :productTemplateId AND ii.location.id = :locationId")
+    Optional<Integer> getTotalQuantityByProductTemplateIdAndLocationId(@Param("productTemplateId") UUID productTemplateId, @Param("locationId") UUID locationId);
 
-    // Find specific inventory item by its unique constraint components
-    Optional<InventoryItem> findByProductIdAndLocationIdAndBatchNumberAndExpirationDate(
-            UUID productId, UUID locationId, String batchNumber, LocalDateTime expirationDate);
+    @Query("SELECT i FROM InventoryItem i WHERE i.store.id = :storeId AND i.store.organization.id = :orgId")
+    List<InventoryItem> findByStoreIdAndOrganizationId(@Param("storeId") UUID storeId, @Param("organizationId") UUID orgId);
+
+    Optional<InventoryItem> findByIdAndStoreId(UUID id, UUID storeId);
+    Optional<InventoryItem> findByProductTemplateIdAndStoreIdAndBatchNumberAndExpirationDate(
+            UUID productTemplateId, UUID storeId, String batchNumber, LocalDateTime expirationDate);
+    List<InventoryItem> findByProductTemplateIdAndStoreId(UUID productTemplateId, UUID storeId);
+    List<InventoryItem> findByLocationIdAndStoreId( UUID locationId, UUID storeId );
+    List<InventoryItem> findByProductTemplateIdAndStoreIdAndLocationId(
+            UUID productTemplateId, UUID storeId, UUID locationId);
+    Optional<Integer> getTotalQuantityByProductTemplateIdAndStoreId(
+            UUID productTemplateId, UUID storeId);
+    Optional<Integer> getTotalQuantityByProductTemplateIdAndStoreIdAndLocationId(
+            UUID productTemplateId, UUID storeId, UUID locationId);
 }

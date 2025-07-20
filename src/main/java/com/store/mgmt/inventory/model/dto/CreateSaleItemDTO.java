@@ -34,7 +34,7 @@ public class CreateSaleItemDTO {
             description = "Unique identifier of the Product of id this product belongs to",
             example = "fedcba98-7654-3210-fedc-ba9876543210",
             required = true, // Assuming a product must always belong to a category
-            name="product_id"
+            name="product_template_id"
     )
-    private UUID productId;
+    private UUID productTemplateId;
 }

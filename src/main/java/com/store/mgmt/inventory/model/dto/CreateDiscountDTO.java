@@ -21,8 +21,8 @@ public class CreateDiscountDTO {
     @Schema(description = "Type of the discount", required = true)
     private Discount.DiscountType type;
 
-    @Schema(name="product_id", description = "Unique identifier of the product to which the discount applies", required = true)
-    private UUID productId;
+    @Schema(name="product_template_id", description = "Unique identifier of the product to which the discount applies", required = true)
+    private UUID productTemplateId;
 
     @Schema(name="category_id", description = "Unique identifier of the category to which the discount applies", required = true)
     private UUID categoryId;

@@ -11,5 +11,6 @@ import java.util.UUID;
 public interface SaleItemRepository extends JpaRepository<SaleItem, UUID> {
     List<SaleItem> findBySaleId(UUID saleId);
 
-    List<SaleItem> findByProductId(UUID productId);
+    List<SaleItem> findByProductTemplateId(UUID productTemplateId);
+    List<SaleItem> findByProductTemplateIdAndStoreId(UUID productTemplateId, UUID storeId);
 }

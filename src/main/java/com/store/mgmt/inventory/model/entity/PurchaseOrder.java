@@ -3,6 +3,7 @@ package com.store.mgmt.inventory.model.entity;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.ser.Serializers;
 import com.store.mgmt.common.model.BaseEntity;
+import com.store.mgmt.organization.model.entity.Organization;
 import com.store.mgmt.users.model.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,6 +22,10 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PurchaseOrder extends BaseEntity {
+    @ManyToOne
+    @JoinColumn(name = "organization_id", nullable = false)
+    private Organization organization;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "supplier_id", nullable = false)
     private Supplier supplier;
