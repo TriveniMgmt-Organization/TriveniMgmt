@@ -43,7 +43,6 @@ dependencies {
 //	implementation("com.github.vladimir-bukhtoyarov:bucket4j-core:8.15.0")
 	// MapStruct Processor (for annotation processing)
 	annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final") // Must match core version
-
 	// If you are using Lombok, add lombok-mapstruct-binding
 	annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
 	compileOnly("org.projectlombok:lombok")

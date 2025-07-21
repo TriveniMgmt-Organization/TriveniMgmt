@@ -1,6 +1,7 @@
 package com.store.mgmt.inventory.model.entity;
 
 import com.store.mgmt.common.model.BaseEntity;
+import com.store.mgmt.inventory.model.enums.StockStatus;
 import com.store.mgmt.organization.model.entity.Store;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -29,11 +30,5 @@ public class StockTransfer extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
-    private Status status;
-
-    public enum Status {
-        PENDING,
-        COMPLETED,
-        CANCELLED
-    }
+    private StockStatus status;
 }

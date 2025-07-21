@@ -6,6 +6,7 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
+@Schema(name = "CreatePermission", description = "Data Transfer Object for a user role")
 public class CreatePermissionDTO {
     @Schema(
             description = "Unique identifier of the role",

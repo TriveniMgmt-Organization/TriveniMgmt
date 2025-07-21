@@ -3,6 +3,7 @@ package com.store.mgmt.inventory.model.entity;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.ser.Serializers;
 import com.store.mgmt.common.model.BaseEntity;
+import com.store.mgmt.inventory.model.enums.PurchaseOrderStatus;
 import com.store.mgmt.organization.model.entity.Organization;
 import com.store.mgmt.users.model.entity.User;
 import jakarta.persistence.*;
@@ -61,31 +62,4 @@ public class PurchaseOrder extends BaseEntity {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<PurchaseOrderItem> purchaseOrderItems;
-
-    public enum PurchaseOrderStatus {
-        PENDING(
-            "pending"
-        ),
-        ORDERED(
-            "ordered"
-        ),
-        RECEIVED_PARTIAL(
-            "received_partial"
-        ),
-        RECEIVED_COMPLETE(
-            "received_complete"),
-        CANCELLED(
-            "cancelled"
-        );
-        private final String value;
-        PurchaseOrderStatus(String value) {
-            this.value = value;
-        }
-        @JsonValue
-public String getValue() {
-            return value;
-        }
-
-
-    }
 }

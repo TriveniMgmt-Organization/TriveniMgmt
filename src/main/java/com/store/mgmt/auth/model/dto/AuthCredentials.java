@@ -8,7 +8,7 @@ import java.util.UUID;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
-@Schema(name = "AuthCredentials", description = "Data Transfer Object for a Auth Credential")
+@Schema(name = "auth_credentials", description = "Data Transfer Object for a Auth Credential")
 public class AuthCredentials {
 
     @Schema(

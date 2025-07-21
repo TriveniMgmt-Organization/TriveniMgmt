@@ -2,6 +2,7 @@ package com.store.mgmt.inventory.service;
 
 import com.store.mgmt.inventory.model.dto.*;
 import com.store.mgmt.inventory.model.entity.PurchaseOrder;
+import com.store.mgmt.inventory.model.enums.PurchaseOrderStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -61,14 +62,14 @@ public interface InventoryService {
 
     // --- Purchase Order Management ---
     PurchaseOrderDTO createPurchaseOrder(CreatePurchaseOrderDTO createDTO);
-    List<PurchaseOrderDTO> getAllPurchaseOrders(PurchaseOrder.PurchaseOrderStatus statusFilter);
+    List<PurchaseOrderDTO> getAllPurchaseOrders(PurchaseOrderStatus statusFilter);
     PurchaseOrderDTO getPurchaseOrderById(UUID purchaseOrderId);
     PurchaseOrderDTO updatePurchaseOrder(UUID purchaseOrderId, UpdatePurchaseOrderDTO updateDTO);
     void cancelPurchaseOrder(UUID purchaseOrderId); // Changes status to cancelled
 
     // --- Sales History (read-only for Inventory) ---
     SaleDTO getSaleById(UUID saleId);
-    List<SaleDTO> getSalesByDateRange(LocalDateTime startDate, LocalDateTime endDate);
+    List<SaleDTO> getSalesByDateRange(SalesDateRangeDTO dateRange);
     List<SaleDTO> getSalesForProduct(UUID productId);
 
     // --- Discount Management ---

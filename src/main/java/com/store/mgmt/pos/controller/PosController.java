@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/pos")
-@Tag(name = "Pos", description = "Operations related to Point-of-Sale transactions")
+@Tag(name = "PosController", description = "Operations related to Point-of-Sale transactions")
 public class PosController {
 //    private final PosService posService;
 //

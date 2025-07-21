@@ -1,6 +1,7 @@
 package com.store.mgmt.inventory.model.dto;
 
 import com.store.mgmt.inventory.model.entity.Location;
+import com.store.mgmt.inventory.model.enums.LocationType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -20,5 +21,5 @@ public class CreateLocationDTO {
     private String contactNumber;
 
     @Schema(description = "Type of the location", required = true)
-    private Location.LocationType type;
+    private LocationType type;
 }

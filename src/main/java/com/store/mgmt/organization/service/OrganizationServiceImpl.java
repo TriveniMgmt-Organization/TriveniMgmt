@@ -97,13 +97,19 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     @Transactional
     public OrganizationDTO updateOrganization(UUID id, UpdateOrganizationDTO request) {
+        System.out.println("Updateing Organization for id: " + id  );
+        System.out.println("Request to update Organization: " + request.getName() + "///"+ request.getDescription());
         Organization organization = organizationRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Organization not found"));
 
+        System.out.println("Found Organization: " + organization.getName() + " for id: " + id);
          organizationMapper.updateEntityFromDto(request, organization);
+
+        System.out.println("Updating Organization: " + organization.getName() + " with new details: " + request);
 
         Organization updatedOrganization = organizationRepository.save(organization);
 
+        System.out.println("Updated Organization: " + updatedOrganization.getName() + " with id: " + updatedOrganization.getId());
         // Log in AuditLog
         auditLogService.log("UPDATE_ORGANIZATION", updatedOrganization.getId(), "Updated organization: " + updatedOrganization.getName());
 

@@ -8,6 +8,7 @@ import com.store.mgmt.inventory.exceptions.InvalidOperationException;
 import com.store.mgmt.inventory.mapper.*;
 import com.store.mgmt.inventory.model.dto.*;
 import com.store.mgmt.inventory.model.entity.*;
+import com.store.mgmt.inventory.model.enums.*;
 import com.store.mgmt.inventory.repository.*;
 import com.store.mgmt.organization.model.entity.UserOrganizationRole;
 import com.store.mgmt.organization.repository.UserOrganizationRoleRepository;
@@ -383,7 +384,7 @@ public class InventoryServiceImpl implements InventoryService {
         Sale newSale = saleMapper.toEntity(saleDTO);
         newSale.setStore(TenantContext.getCurrentStore());
         newSale.setSaleTimestamp(LocalDateTime.now());
-        newSale.setPaymentMethod(Sale.PaymentMethod.valueOf(String.valueOf(saleDTO.getPaymentMethod())));
+        newSale.setPaymentMethod(PaymentMethod.valueOf(String.valueOf(saleDTO.getPaymentMethod())));
         newSale.setUser(user);
 
         Set<SaleItem> saleItems = saleDTO.getItems().stream().map(itemDTO -> {
@@ -465,7 +466,7 @@ public class InventoryServiceImpl implements InventoryService {
         log.info("Processing receipt for Purchase Order ID: {} for organization ID: {}", purchaseOrderId, TenantContext.getCurrentOrganizationId());
         PurchaseOrder purchaseOrder = findPurchaseOrderOrThrow(purchaseOrderId);
 
-        if (purchaseOrder.getStatus() == PurchaseOrder.PurchaseOrderStatus.CANCELLED || purchaseOrder.getStatus() == PurchaseOrder.PurchaseOrderStatus.RECEIVED_COMPLETE) {
+        if (purchaseOrder.getStatus() ==PurchaseOrderStatus.CANCELLED || purchaseOrder.getStatus() == PurchaseOrderStatus.RECEIVED_COMPLETE) {
             throw new InvalidOperationException("Cannot receive items for a cancelled or already completed purchase order.");
         }
 
@@ -532,11 +533,11 @@ public class InventoryServiceImpl implements InventoryService {
         }
 
         if (allItemsReceived) {
-            purchaseOrder.setStatus(PurchaseOrder.PurchaseOrderStatus.RECEIVED_COMPLETE);
+            purchaseOrder.setStatus(PurchaseOrderStatus.RECEIVED_COMPLETE);
             purchaseOrder.setActualDeliveryDate(LocalDate.now());
             log.info("Purchase Order ID {} marked as RECEIVED_COMPLETE.", purchaseOrderId);
         } else {
-            purchaseOrder.setStatus(PurchaseOrder.PurchaseOrderStatus.RECEIVED_PARTIAL);
+            purchaseOrder.setStatus(PurchaseOrderStatus.RECEIVED_PARTIAL);
             log.info("Purchase Order ID {} marked as RECEIVED_PARTIAL.", purchaseOrderId);
         }
         purchaseOrderRepository.save(purchaseOrder);
@@ -577,7 +578,7 @@ public class InventoryServiceImpl implements InventoryService {
         damageLoss.setStore(TenantContext.getCurrentStore());
         damageLoss.setLocation(location);
         damageLoss.setUser(user);
-        damageLoss.setReason(DamageLoss.DamageLossReason.valueOf(String.valueOf(createDTO.getReason())));
+        damageLoss.setReason(DamageLossReason.valueOf(String.valueOf(createDTO.getReason())));
 
         DamageLoss savedDamageLoss = damageLossRepository.save(damageLoss);
         auditLogService.log("RECORD_DAMAGE_LOSS", savedDamageLoss.getId(), "Recorded damage/loss for product: " + product.getName());
@@ -779,7 +780,7 @@ public class InventoryServiceImpl implements InventoryService {
         }
         Location newLocation = locationMapper.toEntity(createDTO);
         newLocation.setStore(TenantContext.getCurrentStore());
-        newLocation.setType(Location.LocationType.valueOf(String.valueOf(createDTO.getType())));
+        newLocation.setType(LocationType.valueOf(String.valueOf(createDTO.getType())));
         Location savedLocation = locationRepository.save(newLocation);
         auditLogService.log("CREATE_LOCATION", savedLocation.getId(), "Created location: " + savedLocation.getName());
         log.info("Location created with ID: {}", savedLocation.getId());
@@ -815,7 +816,7 @@ public class InventoryServiceImpl implements InventoryService {
         }
 
         locationMapper.updateLocationFromDto(updateDTO, existingLocation);
-        if (updateDTO.getType() != null) existingLocation.setType(Location.LocationType.valueOf(String.valueOf(updateDTO.getType())));
+        if (updateDTO.getType() != null) existingLocation.setType(LocationType.valueOf(String.valueOf(updateDTO.getType())));
 
         Location updatedLocation = locationRepository.save(existingLocation);
         auditLogService.log("UPDATE_LOCATION", updatedLocation.getId(), "Updated location: " + updatedLocation.getName());
@@ -854,7 +855,7 @@ public class InventoryServiceImpl implements InventoryService {
         newPO.setOrganization(TenantContext.getCurrentOrganization());
         newPO.setSupplier(supplier);
         newPO.setOrderDate(LocalDateTime.now());
-        newPO.setStatus(PurchaseOrder.PurchaseOrderStatus.PENDING);
+        newPO.setStatus(PurchaseOrderStatus.PENDING);
         newPO.setUser(user);
 
         Set<PurchaseOrderItem> poItems = createDTO.getItems().stream().map(itemDTO -> {
@@ -880,7 +881,7 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PurchaseOrderDTO> getAllPurchaseOrders(PurchaseOrder.PurchaseOrderStatus statusFilter) {
+    public List<PurchaseOrderDTO> getAllPurchaseOrders(PurchaseOrderStatus statusFilter) {
         log.debug("Fetching all purchase orders for organization ID: {} with status filter: {}", TenantContext.getCurrentOrganizationId(), statusFilter);
         List<PurchaseOrder> purchaseOrders;
         if (statusFilter != null) {
@@ -905,7 +906,7 @@ public class InventoryServiceImpl implements InventoryService {
         log.info("Updating purchase order with ID: {} for organization ID: {}", purchaseOrderId, TenantContext.getCurrentOrganizationId());
         PurchaseOrder existingPO = findPurchaseOrderOrThrow(purchaseOrderId);
 
-        if (existingPO.getStatus() == PurchaseOrder.PurchaseOrderStatus.RECEIVED_COMPLETE || existingPO.getStatus() == PurchaseOrder.PurchaseOrderStatus.CANCELLED) {
+        if (existingPO.getStatus() ==PurchaseOrderStatus.RECEIVED_COMPLETE || existingPO.getStatus() == PurchaseOrderStatus.CANCELLED) {
             throw new InvalidOperationException("Cannot update a completed or cancelled purchase order.");
         }
 
@@ -913,7 +914,7 @@ public class InventoryServiceImpl implements InventoryService {
 
         if (updateDTO.getSupplierId() != null) existingPO.setSupplier(findSupplierOrThrow(updateDTO.getSupplierId()));
         if (updateDTO.getUserId() != null) existingPO.setUser(findUserOrThrow(updateDTO.getUserId()));
-        if (updateDTO.getStatus() != null) existingPO.setStatus(PurchaseOrder.PurchaseOrderStatus.valueOf(updateDTO.getStatus().toUpperCase()));
+        if (updateDTO.getStatus() != null) existingPO.setStatus(PurchaseOrderStatus.valueOf(updateDTO.getStatus().toUpperCase()));
 
         PurchaseOrder updatedPO = purchaseOrderRepository.save(existingPO);
         auditLogService.log("UPDATE_PURCHASE_ORDER", updatedPO.getId(), "Updated purchase order");
@@ -927,14 +928,14 @@ public class InventoryServiceImpl implements InventoryService {
         log.warn("Attempting to cancel purchase order with ID: {} for organization ID: {}", purchaseOrderId, TenantContext.getCurrentOrganizationId());
         PurchaseOrder purchaseOrder = findPurchaseOrderOrThrow(purchaseOrderId);
 
-        if (purchaseOrder.getStatus() == PurchaseOrder.PurchaseOrderStatus.RECEIVED_COMPLETE) {
+        if (purchaseOrder.getStatus() == PurchaseOrderStatus.RECEIVED_COMPLETE) {
             throw new InvalidOperationException("Cannot cancel a completed purchase order.");
         }
-        if (purchaseOrder.getStatus() == PurchaseOrder.PurchaseOrderStatus.CANCELLED) {
+        if (purchaseOrder.getStatus() == PurchaseOrderStatus.CANCELLED) {
             throw new InvalidOperationException("Purchase order is already cancelled.");
         }
 
-        purchaseOrder.setStatus(PurchaseOrder.PurchaseOrderStatus.CANCELLED);
+        purchaseOrder.setStatus(PurchaseOrderStatus.CANCELLED);
         purchaseOrderRepository.save(purchaseOrder);
         auditLogService.log("CANCEL_PURCHASE_ORDER", purchaseOrderId, "Cancelled purchase order");
         log.info("Purchase Order with ID {} cancelled successfully.", purchaseOrderId);
@@ -952,9 +953,9 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<SaleDTO> getSalesByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
-        log.debug("Fetching sales between {} and {} for store ID: {}", startDate, endDate, TenantContext.getCurrentStoreId());
-        List<Sale> sales = saleRepository.findBySaleTimestampBetweenAndStoreId(startDate, endDate.withHour(23).withMinute(59).withSecond(59).withNano(999999999), TenantContext.getCurrentStoreId());
+    public List<SaleDTO> getSalesByDateRange(SalesDateRangeDTO dateRange) {
+        log.debug("Fetching sales between {} and {} for store ID: {}", dateRange.getStartDate(), dateRange.getEndDate(), TenantContext.getCurrentStoreId());
+        List<Sale> sales = saleRepository.findBySaleTimestampBetweenAndStoreId(dateRange.getStartDate(), dateRange.getEndDate().withHour(23).withMinute(59).withSecond(59).withNano(999999999), TenantContext.getCurrentStoreId());
         return saleMapper.toDtoList(sales);
     }
 
@@ -993,7 +994,7 @@ public class InventoryServiceImpl implements InventoryService {
         newDiscount.setOrganization(TenantContext.getCurrentOrganization());
         newDiscount.setProductTemplate(product);
         newDiscount.setCategory(category);
-        newDiscount.setType(Discount.DiscountType.valueOf(String.valueOf(createDTO.getType())));
+        newDiscount.setType(DiscountType.valueOf(String.valueOf(createDTO.getType())));
 
         Discount savedDiscount = discountRepository.save(newDiscount);
         auditLogService.log("CREATE_DISCOUNT", savedDiscount.getId(), "Created discount: " + savedDiscount.getName());
@@ -1035,7 +1036,7 @@ public class InventoryServiceImpl implements InventoryService {
         discountMapper.updateDiscountFromDto(updateDTO, existingDiscount);
         if (updateDTO.getProductTemplateId() != null) existingDiscount.setProductTemplate(findProductTemplateOrThrow(updateDTO.getProductTemplateId()));
         if (updateDTO.getCategoryId() != null) existingDiscount.setCategory(findCategoryOrThrow(updateDTO.getCategoryId()));
-        if (updateDTO.getType() != null) existingDiscount.setType(Discount.DiscountType.valueOf(String.valueOf(updateDTO.getType())));
+        if (updateDTO.getType() != null) existingDiscount.setType(DiscountType.valueOf(String.valueOf(updateDTO.getType())));
 
         Discount updatedDiscount = discountRepository.save(existingDiscount);
         auditLogService.log("UPDATE_DISCOUNT", updatedDiscount.getId(), "Updated discount: " + updatedDiscount.getName());

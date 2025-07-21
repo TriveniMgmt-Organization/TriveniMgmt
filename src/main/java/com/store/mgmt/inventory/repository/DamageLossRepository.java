@@ -1,5 +1,6 @@
 package com.store.mgmt.inventory.repository;
 import com.store.mgmt.inventory.model.entity.DamageLoss;
+import com.store.mgmt.inventory.model.enums.DamageLossReason;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,7 +15,7 @@ public interface DamageLossRepository extends JpaRepository<DamageLoss, UUID> {
     List<DamageLoss> findByDateRecordedBetween(LocalDateTime startDate, LocalDateTime endDate);
     List<DamageLoss> findByProductTemplateId(UUID productTemplateId);
     List<DamageLoss> findByLocationId(UUID locationId);
-    List<DamageLoss> findByReason(DamageLoss.DamageLossReason reason);
+    List<DamageLoss> findByReason(DamageLossReason reason);
 
     Optional<DamageLoss> findByIdAndOrganizationId(UUID id, UUID organizationId);
     List<DamageLoss> findByLocationIdAndStoreId(UUID locationId, UUID storeId);

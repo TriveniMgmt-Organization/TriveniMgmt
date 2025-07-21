@@ -2,6 +2,7 @@ package com.store.mgmt.inventory.controller;
 
 import com.store.mgmt.inventory.model.dto.*;
 import com.store.mgmt.inventory.model.entity.PurchaseOrder;
+import com.store.mgmt.inventory.model.enums.PurchaseOrderStatus;
 import com.store.mgmt.inventory.service.InventoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -24,7 +25,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 @RestController
 @RequestMapping("/api/v1/inventory") // Base path for all inventory related operations
-@Tag(name = "Inventory", description = "Comprehensive API for managing product inventory, sales, purchases, and related master data.")
+@Tag(name = "InventoryController", description = "Comprehensive API for managing product inventory, sales, purchases, and related master data.")
 public class InventoryController {
     private final InventoryService inventoryService;
 
@@ -687,7 +688,7 @@ public class InventoryController {
     )
     public ResponseEntity<List<PurchaseOrderDTO>> getAllPurchaseOrders(
             @Parameter(description = "Filter purchase orders by their status (e.g., PENDING, RECEIVED_PARTIAL, RECEIVED_COMPLETE, CANCELLED).")
-            @RequestParam(required = false) PurchaseOrder.PurchaseOrderStatus statusFilter) {
+            @RequestParam(required = false) PurchaseOrderStatus statusFilter) {
         List<PurchaseOrderDTO> purchaseOrders = inventoryService.getAllPurchaseOrders(statusFilter);
         return ResponseEntity.ok(purchaseOrders);
     }
@@ -810,12 +811,8 @@ public class InventoryController {
                     @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'SALE_READ' authority", content = @Content)
             }
     )
-    public ResponseEntity<List<SaleDTO>> getSalesByDateRange(
-            @Parameter(description = "Start date (yyyy-MM-dd)", required = true)
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime startDate,
-            @Parameter(description = "End date (yyyy-MM-dd)", required = true)
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime endDate) {
-        List<SaleDTO> sales = inventoryService.getSalesByDateRange(startDate, endDate);
+    public ResponseEntity<List<SaleDTO>> getSalesByDateRange( @Valid @RequestBody SalesDateRangeDTO dateRange) {
+        List<SaleDTO> sales = inventoryService.getSalesByDateRange(dateRange);
         return ResponseEntity.ok(sales);
     }
 

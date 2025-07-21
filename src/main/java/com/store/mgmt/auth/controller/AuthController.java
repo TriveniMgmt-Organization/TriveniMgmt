@@ -31,7 +31,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-@Tag(name = "Authentication", description = "Endpoints for user authentication")
+@Tag(name = "AuthController", description = "Endpoints for user authentication")
 public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 

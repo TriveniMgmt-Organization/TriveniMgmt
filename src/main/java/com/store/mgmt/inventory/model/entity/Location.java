@@ -2,6 +2,7 @@ package com.store.mgmt.inventory.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.store.mgmt.common.model.BaseEntity;
+import com.store.mgmt.inventory.model.enums.LocationType;
 import com.store.mgmt.organization.model.entity.Store;
 import jakarta.persistence.*;
 import lombok.*;
@@ -42,20 +43,4 @@ public class Location extends BaseEntity {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<DamageLoss> damageLosses;
-
-    public enum LocationType {
-        STORE("store"),
-        WAREHOUSE("warehouse"),
-        SHELF_AREA("shelf_area"),
-        COLD_STORAGE("cold_storage"),
-        OTHER("other");
-        private final String value;
-        LocationType(String value) {
-            this.value = value;
-        }
-        @JsonValue
-        public String getValue() {
-            return value;
-        }
-    }
 }

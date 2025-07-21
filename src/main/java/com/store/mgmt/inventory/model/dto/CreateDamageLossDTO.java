@@ -2,6 +2,7 @@
 package com.store.mgmt.inventory.model.dto;
 
 import com.store.mgmt.inventory.model.entity.DamageLoss;
+import com.store.mgmt.inventory.model.enums.DamageLossReason;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -32,7 +33,7 @@ public class CreateDamageLossDTO {
             required = true,
             example = "DAMAGE" // Example value, can be adjusted based on actual reasons
     )
-    private DamageLoss.DamageLossReason reason;
+    private DamageLossReason reason;
 
     @Schema(
             name="user_id",

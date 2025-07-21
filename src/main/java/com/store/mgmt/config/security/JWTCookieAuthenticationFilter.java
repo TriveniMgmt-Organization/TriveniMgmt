@@ -2,38 +2,24 @@ package com.store.mgmt.config.security;
 
 
 import com.store.mgmt.auth.service.JWTService;
-import com.store.mgmt.config.TenantContext;
-import com.store.mgmt.organization.model.entity.Organization;
-import com.store.mgmt.organization.model.entity.Store;
-import com.store.mgmt.organization.repository.OrganizationRepository;
-import com.store.mgmt.organization.repository.StoreRepository;
 import com.store.mgmt.users.model.entity.User;
 import com.store.mgmt.users.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.web.util.WebUtils;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -43,20 +29,10 @@ public class JWTCookieAuthenticationFilter  extends OncePerRequestFilter{
     private static final Logger logger = LoggerFactory.getLogger(JWTCookieAuthenticationFilter.class);
     private final JWTService jwtService;
     private final UserRepository userRepository;
-    private final OrganizationRepository organizationRepository;
-    private final StoreRepository storeRepository;
-    private final JwtDecoder jwtDecoder;
-    private final JwtAuthenticationConverter jwtAuthenticationConverter;
 
-    public JWTCookieAuthenticationFilter(JWTService jwtService, UserRepository userRepository,
-                                         OrganizationRepository organizationRepository, StoreRepository storeRepository,
-            JwtDecoder jwtDecoder, JwtAuthenticationConverter jwtAuthenticationConverter) {
-        this.jwtDecoder = jwtDecoder;
-        this.jwtAuthenticationConverter = jwtAuthenticationConverter;
+    public JWTCookieAuthenticationFilter(JWTService jwtService, UserRepository userRepository ) {
         this.jwtService = jwtService;
         this.userRepository = userRepository;
-        this.organizationRepository = organizationRepository;
-        this.storeRepository = storeRepository;
     }
 
     @Override

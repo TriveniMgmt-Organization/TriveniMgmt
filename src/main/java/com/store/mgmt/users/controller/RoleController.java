@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/roles")
-@Tag(name = "Role", description = "Operations related to roles")
+@Tag(name = "RoleController", description = "Operations related to roles")
 public class RoleController {
     private final RoleService roleService;
 

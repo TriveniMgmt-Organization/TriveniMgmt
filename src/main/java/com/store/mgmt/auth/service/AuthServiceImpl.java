@@ -434,9 +434,22 @@ private final UserOrganizationRoleRepository userOrganizationRoleRepository;
         log.info("Retrieving organizations for user : {}", username);
         User currentUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalStateException("Current user not found."));
-        return currentUser.getOrganizationRoles().stream()
-                .map(UserOrganizationRole::getOrganization)
-                .map(organizationMapper::toDto)
+        Map<Organization, List<Store>> orgStoresMap = currentUser.getOrganizationRoles().stream()
+                .collect(Collectors.groupingBy(
+                        UserOrganizationRole::getOrganization,
+                        Collectors.mapping(UserOrganizationRole::getStore, Collectors.toList())
+                ));
+
+        return orgStoresMap.entrySet().stream()
+                .map(entry -> {
+                    OrganizationDTO orgDto = organizationMapper.toDto(entry.getKey());
+                    List<StoreDTO> storeDtos = entry.getValue().stream()
+                            .filter(Objects::nonNull)
+                            .map(storeMapper::toDto)
+                            .collect(Collectors.toList());
+                    orgDto.setStores(storeDtos);
+                    return orgDto;
+                })
                 .collect(Collectors.toList());
     }
 

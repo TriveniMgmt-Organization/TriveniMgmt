@@ -9,6 +9,7 @@ import com.store.mgmt.organization.repository.StoreRepository;
 import com.store.mgmt.users.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.catalina.util.RateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,6 +47,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -115,9 +117,7 @@ public class SecurityConfig {
 //                        .requestMatchers("/api/v1/inventory/**").permitAll()
                                 .anyRequest().authenticated()
                 )
-                .addFilterBefore(new JWTCookieAuthenticationFilter(jwtService, userRepository,
-                        organizationRepository, storeRepository,
-                        jwtDecoder(), jwtAuthenticationConverter()), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JWTCookieAuthenticationFilter(jwtService, userRepository ), UsernamePasswordAuthenticationFilter.class)
                 .userDetailsService(userService)
                 .headers(headers -> headers
                         .xssProtection(xss -> xss.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))
@@ -262,4 +262,12 @@ public class SecurityConfig {
 
         return mailSender;
     }
+
+//    @Bean
+//    public RateLimiter rateLimiter() {
+//        return RateLimiter.of("auth", RateLimiterConfig.custom()
+//                .limitForPeriod(10)
+//                .timeoutDuration(Duration.ofSeconds(1))
+//                .build());
+//    }
 }

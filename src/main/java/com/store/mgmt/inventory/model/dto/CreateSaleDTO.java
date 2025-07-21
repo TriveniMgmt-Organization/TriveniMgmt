@@ -2,6 +2,7 @@
 package com.store.mgmt.inventory.model.dto;
 
 import com.store.mgmt.inventory.model.entity.Sale;
+import com.store.mgmt.inventory.model.enums.PaymentMethod;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -43,7 +44,7 @@ public class CreateSaleDTO {
     private UUID userId;
 
     @Schema(name="payment_method", description = "Date and time of the sale", required = true)
-    private  Sale.PaymentMethod paymentMethod;
+    private PaymentMethod paymentMethod;
 
     @Schema(description = "List of sale items associated with this sale", required = true)
     private List<CreateSaleItemDTO> items;

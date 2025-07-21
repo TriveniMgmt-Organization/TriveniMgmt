@@ -1,6 +1,7 @@
 package com.store.mgmt.inventory.model.dto;
 
 import com.store.mgmt.inventory.model.entity.Discount;
+import com.store.mgmt.inventory.model.enums.DiscountType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -19,7 +20,7 @@ public class CreateDiscountDTO {
     private double discountAmount;
 
     @Schema(description = "Type of the discount", required = true)
-    private Discount.DiscountType type;
+    private DiscountType type;
 
     @Schema(name="product_template_id", description = "Unique identifier of the product to which the discount applies", required = true)
     private UUID productTemplateId;

@@ -10,11 +10,17 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/organizations")
@@ -57,7 +63,11 @@ public class OrganizationController {
             @Parameter(description = "Unique ID of the organization to update", required = true)
             @PathVariable UUID id,
             @Parameter(description = "Organization details to be updated", required = true)
-            @RequestBody UpdateOrganizationDTO request) {
+            @RequestBody UpdateOrganizationDTO request, HttpServletRequest httpRequest) throws IOException {
+        String rawRequestBody = new BufferedReader(new InputStreamReader(httpRequest.getInputStream()))
+                .lines().collect(Collectors.joining("\n"));
+        System.out.println("Raw Request Body: " + rawRequestBody); // Check this output
+
         OrganizationDTO updatedOrganization = organizationService.updateOrganization(id, request);
         return ResponseEntity.ok(updatedOrganization);
     }

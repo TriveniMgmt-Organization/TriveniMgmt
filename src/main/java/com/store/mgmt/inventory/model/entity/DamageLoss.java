@@ -2,6 +2,7 @@ package com.store.mgmt.inventory.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.store.mgmt.common.model.BaseEntity;
+import com.store.mgmt.inventory.model.enums.DamageLossReason;
 import com.store.mgmt.organization.model.entity.Organization;
 import com.store.mgmt.organization.model.entity.Store;
 import com.store.mgmt.users.model.entity.User;
@@ -53,25 +54,5 @@ public class DamageLoss extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id") // Who recorded the loss
     private User user;
-
-    public enum DamageLossReason {
-        EXPIRED("expired"),
-        DAMAGED_IN_TRANSIT("damaged_in_transit"),
-        SPOILAGE("spoilage"),
-        THEFT("theft"),
-        RETURNED_DAMAGED("returned_damaged"),
-        OTHER("other");
-
-        private final String value;
-
-        DamageLossReason(String value) {
-            this.value = value;
-        }
-
-        @JsonValue
-        public String getValue() {
-            return value;
-        }
-    }
 
 }

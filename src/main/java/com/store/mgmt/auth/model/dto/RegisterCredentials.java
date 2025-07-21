@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(name = "RegisterCredentials", description = "Request object for user registration")
+@Schema(name = "register_credentials", description = "Request object for user registration")
 public class RegisterCredentials {
 
     @NotBlank(message = "First Name cannot be empty")

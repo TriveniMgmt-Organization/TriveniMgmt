@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Data
-@Schema(name = "Role", description = "Data Transfer Object for a user role")
+@Schema(name = "AssignRole", description = "Data Transfer Object for a user role")
 public class AssignRoleDTO {
 
     @Schema(

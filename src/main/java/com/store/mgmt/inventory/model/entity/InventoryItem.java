@@ -62,12 +62,4 @@ public class InventoryItem extends BaseEntity {
     @Column(name = "max_stock_level")
     private Integer maxStockLevel;
 
-    public enum InventoryStatus {
-        IN_STOCK,
-        LOW_STOCK,
-        OUT_OF_STOCK,
-        ON_ORDER,
-        DAMAGED,
-        EXPIRED
-    }
 }
