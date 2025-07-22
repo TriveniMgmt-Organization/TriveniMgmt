@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
-@Schema(name = "organization", description = "Data Transfer Object for a organization account")
+@Schema(name = "Organization", description = "Data Transfer Object for a organization account")
 public class OrganizationDTO {
 
     @Schema(

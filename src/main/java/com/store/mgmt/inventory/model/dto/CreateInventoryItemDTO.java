@@ -10,12 +10,11 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
-@Schema(name = "create_inventory_item", description = "Data Transfer Object for a product category")
+@Schema(name = "CreateInventoryItem", description = "Data Transfer Object for a product category")
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateInventoryItemDTO {
     @Schema(
-            name="product_template_id",
             description = "Unique identifier of the Product of id this product belongs to",
             example = "fedcba98-7654-3210-fedc-ba9876543210",
             required = true // Assuming a product must always belong to a category
@@ -23,7 +22,6 @@ public class CreateInventoryItemDTO {
     private UUID productTemplateId;
 
     @Schema(
-            name="location_id",
             description = "Unique identifier of the Product of id this product belongs to",
             example = "fedcba98-7654-3210-fedc-ba9876543210",
             required = true // Assuming a product must always belong to a category
@@ -33,19 +31,19 @@ public class CreateInventoryItemDTO {
     @Schema(description = "Quantity of the inventory item", required = true, minimum = "0", maximum = "1000000")
     private int quantity;
 
-    @Schema(name="cost_price", description = "Cost price of the inventory item", required = true, minimum = "0.01", maximum = "1000000.00")
+    @Schema( description = "Cost price of the inventory item", required = true, minimum = "0.01", maximum = "1000000.00")
     private BigDecimal costPrice;
 
-    @Schema(name="retail_price", description = "Retail price of the inventory item", required = true, minimum = "0.01", maximum = "1000000.00")
+    @Schema( description = "Retail price of the inventory item", required = true, minimum = "0.01", maximum = "1000000.00")
     private BigDecimal retailPrice;
 
-    @Schema(name="expiration_date", description = "Quantity of the inventory item", required = true)
+    @Schema( description = "Quantity of the inventory item", required = true)
     private LocalDateTime expirationDate;
 
-    @Schema(name="batch_number", description = "Quantity of the inventory item", required = true)
+    @Schema( description = "Quantity of the inventory item", required = true)
     private String batchNumber;
 
-@Schema(name="lot_number", description = "Lot number of the inventory item, used for tracking specific lots")
+@Schema( description = "Lot number of the inventory item, used for tracking specific lots")
     private String lotNumber; // Nullable, for tracking specific lots
 
 //    @Schema(description = "Unit of measure for the inventory item")

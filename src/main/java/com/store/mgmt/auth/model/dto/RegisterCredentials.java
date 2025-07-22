@@ -11,13 +11,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(name = "register_credentials", description = "Request object for user registration")
+@Schema(name = "RegisterCredentials", description = "Request object for user registration")
 public class RegisterCredentials {
 
     @NotBlank(message = "First Name cannot be empty")
     @Size(min = 3, max = 50, message = "Full Name must be between 3 and 50 characters")
     @Schema(
-            name= "full_name",
             example = "John Doe",
             required = true,
             minLength = 3,
@@ -28,7 +27,6 @@ public class RegisterCredentials {
     @NotBlank(message = "Last Name cannot be empty")
     @Size(min = 3, max = 50, message = "Last Name must be between 3 and 50 characters")
     @Schema(
-            name= "last_name",
             example = "Smith",
             required = true,
             minLength = 3,
@@ -61,8 +59,21 @@ public class RegisterCredentials {
     )
     private String password;
 
+
+    @NotBlank(message = "Password cannot be empty")
+    @Size(min = 8, max = 100, message = "Password must be at least 8 characters long") // Define strong password requirements
     @Schema(
-            name="invitation_token",
+            description = "User's chosen password",
+            example = "MySuperSecretPassword!123",
+            format = "password",
+            required = true,
+            minLength = 8,
+            maxLength = 100,
+            accessMode = Schema.AccessMode.WRITE_ONLY
+    )
+    private String confirmPassword;
+
+    @Schema(
             description = "Optional invitation token for registration",
             example = "abc123xyz456"
     )

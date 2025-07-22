@@ -7,7 +7,7 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
-@Schema(name = "create-store", description = "Data Transfer Object for a organization account")
+@Schema(name = "CreateStore", description = "Data Transfer Object for a organization account")
 public class CreateStoreDTO {
 
     @Schema(

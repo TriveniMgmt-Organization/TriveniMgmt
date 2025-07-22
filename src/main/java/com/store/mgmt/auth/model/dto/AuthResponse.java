@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(name = "auth_response", description = "Response object containing authentication token and user details after successful login or registration")
+@Schema(name = "AuthResponse", description = "Response object containing authentication token and user details after successful login or registration")
 public class AuthResponse {
 
     @Schema(

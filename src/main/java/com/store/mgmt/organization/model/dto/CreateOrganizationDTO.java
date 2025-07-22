@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 @Data
-@Schema(name = "create-organization", description = "Data Transfer Object for a organization account")
+@Schema(name = "CreateOrganization", description = "Data Transfer Object for a organization account")
 @NoArgsConstructor
 public class CreateOrganizationDTO {
 

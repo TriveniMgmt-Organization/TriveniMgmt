@@ -17,7 +17,6 @@ public class TransactionDTO {
     private UUID id;
 
     @Schema(
-            name="product_template_id",
             description = "Unique identifier of the product involved in the transaction",
             example = "09876543-21ab-cdef-1234-567890fedcba"
     )
@@ -47,8 +46,7 @@ public class TransactionDTO {
 
     @Schema(
             description = "Method of payment used for the transaction (e.g., 'Credit Card', 'Cash', 'UPI')",
-            example = "Credit Card",
-            name="payment_method"
+            example = "Credit Card"
     )
     private String paymentMethod;
 
@@ -59,7 +57,6 @@ public class TransactionDTO {
     private LocalDateTime timestamp;
 
     @Schema(
-            name="user_id",
             description = "Unique identifier of the user who performed the transaction",
             example = "fedcba98-7654-3210-fedc-ba9876543210"
     )

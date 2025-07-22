@@ -6,15 +6,15 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
-@Schema(name = "sale_item", description = "Data Transfer Object for a product category")
+@Schema(name = "SaleItem", description = "Data Transfer Object for a product category")
 public class SaleItemDTO {
     @Schema(description = "Unique identifier for the sale item")
     private UUID id;
 
-    @Schema(name="sale_id", description = "Unique identifier for the sale")
+    @Schema( description = "Unique identifier for the sale")
     private String saleId;
 
-    @Schema(name="inventory_item_id", description = "Unique identifier for the inventory item")
+    @Schema( description = "Unique identifier for the inventory item")
     private String inventoryItemId;
 
     @Schema(description = "Quantity of the inventory item sold", minimum = "0", maximum = "1000000" )
@@ -24,7 +24,6 @@ public class SaleItemDTO {
     private Double price;
 
     @Schema(
-            name="product_template_id",
             description = "Unique identifier of the Product of id this product belongs to",
             example = "fedcba98-7654-3210-fedc-ba9876543210",
             required = true // Assuming a product must always belong to a category

@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
-@Schema(name = "update-store", description = "Data Transfer Object for a organization account")
+@Schema(name = "UpdateStore", description = "Data Transfer Object for a organization account")
 public class UpdateStoreDTO extends CreateStoreDTO {
     @Schema(
             description = "Unique identifier of the user",

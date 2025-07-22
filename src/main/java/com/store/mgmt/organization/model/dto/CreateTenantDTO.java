@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
-@Schema(name = "create-tenant", description = "Data Transfer Object for a organization account")
+@Schema(name = "CreateTenant", description = "Data Transfer Object for a organization account")
 public class CreateTenantDTO {
     @Schema(
             description = "Unique identifier of the tenant",

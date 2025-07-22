@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
-@Schema(name = "supplier", description = "Data Transfer Object for a product category")
+@Schema(name = "Supplier", description = "Data Transfer Object for a product category")
 public class SupplierDTO {
     @Schema(description = "Unique identifier for the supplier")
     private UUID id;
@@ -14,7 +14,7 @@ public class SupplierDTO {
     @Schema(description = "Name of the supplier")
     private String name;
 
-    @Schema(name="contant_info", description = "Contact information for the supplier")
+    @Schema( description = "Contact information for the supplier")
     private String contactInfo;
 
     @Schema(description = "Address of the supplier")
@@ -23,6 +23,6 @@ public class SupplierDTO {
     @Schema(description = "Email of the supplier")
     private String email;
 
-    @Schema(name="phone_number", description = "Phone number of the supplier")
+    @Schema( description = "Phone number of the supplier")
     private String phoneNumber;
 }

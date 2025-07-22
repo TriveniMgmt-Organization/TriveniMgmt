@@ -7,7 +7,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Schema(description = "Date range filter for sales")
+@Schema(name = "SalesDateRange", description = "Date range filter for sales")
 @Data
 public class SalesDateRangeDTO {
 

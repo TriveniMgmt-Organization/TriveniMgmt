@@ -8,7 +8,7 @@ import java.util.UUID;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Data
-@Schema(name = "auth_credentials", description = "Data Transfer Object for a Auth Credential")
+@Schema(name = "AuthCredentials", description = "Data Transfer Object for a Auth Credential")
 public class AuthCredentials {
 
     @Schema(
@@ -33,10 +33,10 @@ public class AuthCredentials {
     @NotBlank(message = "Password cannot be empty")
     private String password;
 
-    @Schema(name = "remember_me",description = "Remember me option for the user",
+    @Schema(description = "Remember me option for the user",
             example = "true",
             defaultValue = "false",
-            requiredMode = Schema.RequiredMode.NOT_REQUIRED
+            requiredMode = Schema.RequiredMode.REQUIRED
             )
     private boolean rememberMe;
 }

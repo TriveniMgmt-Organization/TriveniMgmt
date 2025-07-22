@@ -9,11 +9,10 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
-@Schema(name = "Create_damage_loss", description = "Data Transfer Object for a product category")
+@Schema(name = "CreateDamageLoss", description = "Data Transfer Object for a product category")
 public class CreateDamageLossDTO {
 
     @Schema(
-            name="product_template_id",
             description = "Unique identifier of the Product of id this product belongs to",
             example = "fedcba98-7654-3210-fedc-ba9876543210",
             required = true // Assuming a product must always belong to a category
@@ -21,7 +20,6 @@ public class CreateDamageLossDTO {
     private UUID productTemplateId;
 
     @Schema(
-            name="location_id",
             description = "Unique identifier of the Product of id this product belongs to",
             example = "fedcba98-7654-3210-fedc-ba9876543210",
             required = true // Assuming a product must always belong to a category
@@ -36,7 +34,6 @@ public class CreateDamageLossDTO {
     private DamageLossReason reason;
 
     @Schema(
-            name="user_id",
             description = "Unique identifier of the Product of id this product belongs to",
             example = "fedcba98-7654-3210-fedc-ba9876543210",
             required = true // Assuming a product must always belong to a category
@@ -46,9 +43,9 @@ public class CreateDamageLossDTO {
     @Schema(description = "Quantity of the product sold", required = true, minimum = "0", maximum = "1000000")
     private int quantity;
 
-    @Schema(name = "loss_percentage",description = "Percentage of loss incurred", required = true)
+    @Schema(description = "Percentage of loss incurred", required = true)
     private double lossPercentage;
 
-    @Schema(name="date_of_loss", description = "Date when the damage/loss occurred", required = true)
+    @Schema( description = "Date when the damage/loss occurred", required = true)
     private String dateOfLoss;
 }

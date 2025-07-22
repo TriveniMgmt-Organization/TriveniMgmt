@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
-@Schema(name = "inventory_item", description = "Data Transfer Object for a product category")
+@Schema(name = "InventoryItem", description = "Data Transfer Object for a product category")
 public class InventoryItemDTO {
     @Schema(description = "Unique identifier for the inventory item")
     private String id;
@@ -18,7 +18,7 @@ public class InventoryItemDTO {
     @Schema(description = "Quantity of the inventory item", minimum = "0", maximum = "1000000",  example = "100")
     private Integer quantity;
 
-    @Schema(name="unit_of_measure", description = "Unit of measure for the inventory item")
+    @Schema( description = "Unit of measure for the inventory item")
     private String unitOfMeasure;
 
     @Schema(description = "Location where the inventory item is stored")

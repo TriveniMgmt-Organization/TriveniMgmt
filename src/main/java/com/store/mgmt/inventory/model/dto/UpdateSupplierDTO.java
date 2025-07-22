@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
-@Schema(name = "update_supplier", description = "Data Transfer Object for a product category")
+@Schema(name = "UpdateSupplier", description = "Data Transfer Object for a product category")
 public class UpdateSupplierDTO extends CreateSupplierDTO{
 
     @Schema(description = "Unique identifier for the location", required = true)

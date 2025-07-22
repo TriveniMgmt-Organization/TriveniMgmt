@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 @Data
-@Schema(name = "create_category", description = "Data Transfer Object for a category item available for sale")
+@Schema(name = "CreateCategory", description = "Data Transfer Object for a category item available for sale")
 public class CreateCategoryDTO {
     @Schema(
             description = "Code of the category",

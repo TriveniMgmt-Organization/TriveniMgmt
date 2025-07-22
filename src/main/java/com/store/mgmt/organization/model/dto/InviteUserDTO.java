@@ -8,17 +8,17 @@ import lombok.Setter;
 import java.util.UUID;
 
 @Data
-@Schema(name = "invite_user", description = "Data Transfer Object for a organization account")
+@Schema(name = "InviteUser", description = "Data Transfer Object for a organization account")
 public class InviteUserDTO {
     @Schema(description = "Email of User")
     private String email;
 
-    @Schema(description = "Organization ID", name="organization_id", example = "123e4567-e89b-12d3-a456-426614174000", requiredMode = Schema.RequiredMode.REQUIRED, format = "uuid")
+    @Schema(description = "Organization ID",  example = "123e4567-e89b-12d3-a456-426614174000", requiredMode = Schema.RequiredMode.REQUIRED, format = "uuid")
     private UUID organizationId;
 
-    @Schema(name = "role_name")
+    @Schema(name = "roleName")
     private String roleName;
 
-    @Schema(name = "store_id", description = "Store ID if the invitation is for a specific store", example = "123e4567-e89b-12d3-a456-426614174000", format = "uuid")
+    @Schema(description = "Store ID if the invitation is for a specific store", example = "123e4567-e89b-12d3-a456-426614174000", format = "uuid")
     private UUID storeId;
 }
