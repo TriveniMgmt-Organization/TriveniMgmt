@@ -1,5 +1,6 @@
 package com.store.mgmt.organization.model.dto;
 
+import com.store.mgmt.organization.enums.StoreStatus;
 import com.store.mgmt.organization.model.entity.Store;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -44,5 +45,5 @@ public class StoreDTO {
             description = "First name of the user",
             example = "john"
     )
-    private Store.StoreStatus status;
+    private StoreStatus status;
 }

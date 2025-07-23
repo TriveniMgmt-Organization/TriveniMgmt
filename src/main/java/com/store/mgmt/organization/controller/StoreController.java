@@ -3,22 +3,21 @@ package com.store.mgmt.organization.controller;
 import com.store.mgmt.organization.model.dto.CreateStoreDTO;
 import com.store.mgmt.organization.model.dto.StoreDTO;
 import com.store.mgmt.organization.model.dto.UpdateStoreDTO;
-import com.store.mgmt.organization.model.entity.Store;
 import com.store.mgmt.organization.service.StoreService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.hibernate.sql.Update;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/stores")
@@ -58,8 +57,13 @@ public class StoreController {
     )
     public ResponseEntity<StoreDTO> createStore(
             @Parameter(description = "User details to be created", required = true)
-            @RequestBody CreateStoreDTO dto) {
+            @Valid @RequestBody CreateStoreDTO dto, HttpServletRequest httpRequest) throws Exception {
+
+        String rawRequestBody = new BufferedReader(new InputStreamReader(httpRequest.getInputStream()))
+                .lines().collect(Collectors.joining("\n"));
+        System.out.println("Raw Request Body: " + rawRequestBody); // Check this output
         StoreDTO store = storeService.createStore(dto);
+        System.out.println("Store created: " + store); // Log the created store details
         return ResponseEntity.ok(store);
     }
 

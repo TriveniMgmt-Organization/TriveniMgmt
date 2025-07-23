@@ -11,12 +11,14 @@ import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring") // Tells MapStruct to make this a Spring component
 public interface OrganizationMapper {
-        OrganizationMapper INSTANCE = Mappers.getMapper(OrganizationMapper.class);
-        OrganizationDTO toDto(Organization organization);
+    OrganizationMapper INSTANCE = Mappers.getMapper(OrganizationMapper.class);
+
+    @Mapping(target = "stores", ignore = true)
+    OrganizationDTO toDto(Organization organization);
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-        Organization toEntity(CreateOrganizationDTO dto);
+    Organization toEntity(CreateOrganizationDTO dto);
     @Mapping(target = "id", ignore = true) // Don't update the ID
     @Mapping(target = "createdAt", ignore = true) // Don't update creation timestamp
     @Mapping(target = "updatedAt", ignore = true) // Let @UpdateTimestamp handle this

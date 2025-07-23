@@ -302,7 +302,7 @@ private final UserOrganizationRoleRepository userOrganizationRoleRepository;
                 .map(uor -> new SimpleGrantedAuthority(uor.getRole().getName()))
                 .collect(Collectors.toList());
         AuthToken aT = generateAndStoreAuthToken(savedUser, activeOrganizationId, activeStoreId, authoritiesForToken);
-        auditLogService.log("REGISTER_USER", savedUser.getId(), "User registered: " + savedUser.getEmail());
+        logAuditEntry("REGISTER_USER", savedUser.getId(), "User registered: " + savedUser.getEmail());
         return new AuthResponse(aT.getAccessToken(), aT.getRefreshToken(), userMapper.toDto(user));
     }
 
@@ -369,8 +369,10 @@ private final UserOrganizationRoleRepository userOrganizationRoleRepository;
         UserDTO userDTO = userMapper.toDto(user);
         Organization organization = organizationRepository.findById(orgId)
                 .orElseThrow(() -> new EntityNotFoundException("Organization not found: " + orgId));
-        userDTO.setActiveOrganization(organizationMapper.toDto(organization));
-
+        OrganizationDTO organizationDTO = organizationMapper.toDto(organization);
+        System.out.println("Organization found: " + organizationDTO.getName() + " for user: " + user.getUsername());
+        userDTO.setActiveOrganization(organizationDTO);
+        System.out.println("Organization found: " + organization.getName() + " for user: " + user.getUsername());
         if (storeUuid != null) {
             boolean hasStoreAccess = userOrganizationRoleRepository.existsByUserIdAndStoreId(user.getId(), storeUuid);
             if (!hasStoreAccess) {
@@ -432,8 +434,13 @@ private final UserOrganizationRoleRepository userOrganizationRoleRepository;
     public List<OrganizationDTO> getOrganizations() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         log.info("Retrieving organizations for user : {}", username);
-        User currentUser = userRepository.findByUsername(username)
+
+        // Use the optimized query
+        User currentUser = userRepository.findByUsernameWithAllRelatedData(username)
                 .orElseThrow(() -> new IllegalStateException("Current user not found."));
+
+        // Now, all UserOrganizationRoles, their associated Organizations, and Stores
+        // should be fully initialized within the transaction.
         Map<Organization, List<Store>> orgStoresMap = currentUser.getOrganizationRoles().stream()
                 .collect(Collectors.groupingBy(
                         UserOrganizationRole::getOrganization,
@@ -444,7 +451,7 @@ private final UserOrganizationRoleRepository userOrganizationRoleRepository;
                 .map(entry -> {
                     OrganizationDTO orgDto = organizationMapper.toDto(entry.getKey());
                     List<StoreDTO> storeDtos = entry.getValue().stream()
-                            .filter(Objects::nonNull)
+                            .filter(Objects::nonNull) // Ensure null stores (for org-level roles) are handled
                             .map(storeMapper::toDto)
                             .collect(Collectors.toList());
                     orgDto.setStores(storeDtos);
@@ -486,8 +493,7 @@ private final UserOrganizationRoleRepository userOrganizationRoleRepository;
                 .filter(uor -> uor.getOrganization().getId().equals(organization.getId()))
                 .map(uor -> new SimpleGrantedAuthority(uor.getRole().getName()))
                 .collect(Collectors.toList());
-        auditLogService.log("SELECT_TENANT", currentUser.getId(),
-                "Selected organization ID: " + selectDTO.getOrganizationId() +
+        logAuditEntry("SELECT_TENANT", currentUser.getId(), "Selected organization ID: " + selectDTO.getOrganizationId() +
                         (selectDTO.getStoreId() != null ? ", store ID: " + selectDTO.getStoreId() : ""));
 
         AuthToken aT = generateAndStoreAuthToken(currentUser,
@@ -533,4 +539,17 @@ private final UserOrganizationRoleRepository userOrganizationRoleRepository;
         return new AuthToken(accessToken, refreshToken);
     }
 
+    private void logAuditEntry(String action, UUID entityId, String message) {
+        try {
+            System.out.println("Audit entry logged successfully: " + log);
+            auditLogService.builder()
+                    .action(action)
+//                    .entityType("Store")
+                    .entityId(entityId)
+                    .message(message)
+                    .log();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to log audit entry", e);
+        }
+    }
 }

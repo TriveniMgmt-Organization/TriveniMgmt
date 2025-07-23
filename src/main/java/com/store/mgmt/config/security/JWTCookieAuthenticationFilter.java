@@ -2,6 +2,7 @@ package com.store.mgmt.config.security;
 
 
 import com.store.mgmt.auth.service.JWTService;
+import com.store.mgmt.config.TenantContext;
 import com.store.mgmt.users.model.entity.User;
 import com.store.mgmt.users.repository.UserRepository;
 import org.slf4j.Logger;
@@ -79,7 +80,7 @@ public class JWTCookieAuthenticationFilter  extends OncePerRequestFilter{
 //                                .orElseThrow(() -> new IllegalStateException("Store not found for id: " + storeId));
 //                        TenantContext.setCurrentStore(store);
 //                    }
-//                    TenantContext.setCurrentUser(user);
+                    TenantContext.setCurrentUser(user);
 
                     logger.debug("Authenticated user: {} with organization_id: {} and store_id: {}",
                             email, orgId, storeId);

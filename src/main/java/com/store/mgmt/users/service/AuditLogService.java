@@ -5,6 +5,7 @@ import com.store.mgmt.users.model.dto.UpdateUserDTO;
 import com.store.mgmt.users.model.dto.UserDTO;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -21,5 +22,13 @@ public interface AuditLogService {
      * @param entityId  The unique identifier of the user entity.
      * @param details   Additional details about the action.
      */
-    void log(String action, UUID entityId, String details);
+    void _persistAuditLog(String action, UUID entityId, Map<String, Object> details);
+
+    /**
+     * Creates a new AuditLogBuilder instance for building audit log entries.
+     *
+     * @return A new AuditLogBuilder instance.
+     */
+    AuditLogServiceImpl.AuditLogBuilder builder();
+
 }

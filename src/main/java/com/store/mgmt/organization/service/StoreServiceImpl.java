@@ -61,16 +61,17 @@ public class StoreServiceImpl implements StoreService {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalStateException("Current user not found."));
-        if (!hasRoleInOrganization(currentUser, RoleType.ORG_ADMIN.toString(), createDTO.getOrganizationId()) ||
-                !hasRole(currentUser, RoleType.SUPER_ADMIN.toString())) {
+        if (noRoleInOrganization(currentUser, RoleType.SUPER_ADMIN.toString(), createDTO.getOrganizationId())) {
             throw new SecurityException("User not authorized to create stores in this organization.");
         }
 
         Store store = storeMapper.toEntity(createDTO);
         store.setOrganization(organization);
+        System.out.println(store);
         Store savedStore = storeRepository.save(store);
 
-        auditLogService.log("CREATE_STORE", savedStore.getId(), "Created store: " + savedStore.getName() + " in organization ID: " + organization.getId());
+        System.out.println("Store saved: " + savedStore);
+        logAuditEntry("CREATE_STORE", savedStore.getId(), "Created store: " + savedStore.getName() + " in organization ID: " + organization.getId());
         return storeMapper.toDto(savedStore);
     }
 
@@ -84,8 +85,7 @@ public class StoreServiceImpl implements StoreService {
                 .orElseThrow(() -> new IllegalArgumentException("Store not found."));
 
         User currentUser = TenantContext.getCurrentUser();
-        if (!hasRoleInOrganization(currentUser, RoleType.ORG_ADMIN.toString(), store.getOrganization().getId()) &&
-                !hasRole(currentUser, RoleType.SUPER_ADMIN.toString())) {
+        if (noRoleInOrganization(currentUser, RoleType.SUPER_ADMIN.toString(), store.getOrganization().getId())) {
             throw new SecurityException("User not authorized to update stores in this organization.");
         }
 
@@ -93,7 +93,7 @@ public class StoreServiceImpl implements StoreService {
         storeMapper.updateEntityFromDto(dto, store);
         Store updatedStore = storeRepository.save(store);
 
-        auditLogService.log("UPDATE_STORE", updatedStore.getId(), "Updated store: " + updatedStore.getName() + " in organization ID: " + updatedStore.getOrganization().getId());
+        logAuditEntry("UPDATE_STORE", updatedStore.getId(), "Updated store: " + updatedStore.getName() + " in organization ID: " + updatedStore.getOrganization().getId());
         return storeMapper.toDto(updatedStore);
     }
 
@@ -106,8 +106,7 @@ public class StoreServiceImpl implements StoreService {
                 .orElseThrow(() -> new IllegalArgumentException("Store not found."));
 
         User currentUser = TenantContext.getCurrentUser();
-        if (!hasRoleInOrganization(currentUser, RoleType.ORG_ADMIN.toString(), store.getOrganization().getId()) &&
-                !hasRole(currentUser, RoleType.SUPER_ADMIN.toString())) {
+        if (noRoleInOrganization(currentUser, RoleType.SUPER_ADMIN.toString(), store.getOrganization().getId()) ) {
             throw new SecurityException("User not authorized to view stores in this organization.");
         }
 
@@ -123,23 +122,37 @@ public class StoreServiceImpl implements StoreService {
                 .orElseThrow(() -> new IllegalArgumentException("Store not found."));
 
         User currentUser = TenantContext.getCurrentUser();
-        if (!hasRoleInOrganization(currentUser, RoleType.ORG_ADMIN.toString(), store.getOrganization().getId()) &&
-                !hasRole(currentUser, RoleType.SUPER_ADMIN.toString())) {
+        if (noRoleInOrganization(currentUser, RoleType.SUPER_ADMIN.toString(), store.getOrganization().getId())) {
             throw new SecurityException("User not authorized to delete stores in this organization.");
         }
 
         storeRepository.delete(store);
-        auditLogService.log("DELETE_STORE", id, "Deleted store: " + store.getName() + " in organization ID: " + store.getOrganization().getId());
+        logAuditEntry("DELETE_STORE", id, "Deleted store: " + store.getName() + " in organization ID: " + store.getOrganization().getId());
     }
 
-    private boolean hasRoleInOrganization(User user, String roleName, UUID organizationId) {
+    private boolean noRoleInOrganization(User user, String roleName, UUID organizationId) {
         return userOrganizationRoleRepository.findByUserIdAndOrganizationId(user.getId(), organizationId)
                 .stream()
-                .anyMatch(ua -> ua.getRole().getName().equals(roleName));
+                .noneMatch(ua -> ua.getRole().getName().equals(roleName));
     }
 
     private boolean hasRole(User user, String roleName) {
         return user.getOrganizationRoles().stream()
-                .anyMatch(ua -> ua.getRole().getName().equals(roleName));
+                .noneMatch(ua -> ua.getRole().getName().equals(roleName));
+    }
+
+
+    private void logAuditEntry(String action, UUID entityId, String message) {
+        try {
+            System.out.println("Audit entry logged successfully: " + log);
+            auditLogService.builder()
+                    .action(action)
+//                    .entityType("Store")
+                    .entityId(entityId)
+                    .message(message)
+                    .log();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to log audit entry", e);
+        }
     }
 }

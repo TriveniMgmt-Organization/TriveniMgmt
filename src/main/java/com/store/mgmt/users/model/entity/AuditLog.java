@@ -7,6 +7,7 @@ import com.vladmihalcea.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.hibernate.annotations.Type;
 
 import java.util.Set;
@@ -19,16 +20,19 @@ import java.util.UUID;
 public class AuditLog extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "organization_id", nullable = false)
+    @ToString.Exclude
     private Organization organization;
 
     @ManyToOne
     @JoinColumn(name = "store_id")
+    @ToString.Exclude
     private Store store; // Nullable for organization-level actions
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-
+    @ToString.Exclude
     private User user;
+
     @Column(name="action", nullable = false )
     private String action; //-- e.g., 'ASSIGNED_ROLE', 'UPDATED_PERMISSION'
 

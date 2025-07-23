@@ -1,9 +1,10 @@
 package com.store.mgmt.organization.model.entity;
 
 import com.store.mgmt.common.model.BaseEntity;
-import com.store.mgmt.organization.model.entity.Organization;
+import com.store.mgmt.organization.enums.StoreStatus;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 @Entity
 @Table(name = "stores")
@@ -11,6 +12,7 @@ import lombok.Data;
 public class Store extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "organization_id", nullable = false)
+    @ToString.Exclude
     private Organization organization;
 
     @Column(nullable = false)
@@ -26,7 +28,4 @@ public class Store extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private StoreStatus status = StoreStatus.ACTIVE;
 
-    public enum StoreStatus {
-        ACTIVE, INACTIVE, CLOSED
-    }
 }

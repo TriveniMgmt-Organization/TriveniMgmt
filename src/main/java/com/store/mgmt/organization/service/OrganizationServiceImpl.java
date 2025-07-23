@@ -72,7 +72,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         userOrgRole.setRole(adminRole);
         userOrganizationRoleRepository.save(userOrgRole); // Save the role assignment
 
-        auditLogService.log("CREATE_ORGANIZATION", savedOrganization.getId(),
+        logAuditEntry("CREATE_ORGANIZATION", savedOrganization.getId(),
                 "Organization '" + savedOrganization.getName() + "' created by user: " + currentUserName);
 
         return organizationMapper.toDto(savedOrganization);
@@ -95,7 +95,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         System.out.println("Updated Organization: " + updatedOrganization.getName() + " with id: " + updatedOrganization.getId());
 
-        auditLogService.log("UPDATE_ORGANIZATION", updatedOrganization.getId(), "Updated organization: " + updatedOrganization.getName());
+        logAuditEntry("UPDATE_ORGANIZATION", updatedOrganization.getId(), "Updated organization: " + updatedOrganization.getName());
         return organizationMapper.toDto(updatedOrganization);
     }
 
@@ -110,6 +110,19 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         organizationRepository.delete(organization);
-        auditLogService.log("DELETE_ORGANIZATION", id, "Deleted organization: " + organization.getName());
+        logAuditEntry("DELETE_ORGANIZATION", id, "Deleted organization: " + organization.getName());
+    }
+
+    private void logAuditEntry(String action, UUID entityId, String message) {
+        try {
+            auditLogService.builder()
+                    .action(action)
+//                    .entityType("Store")
+                    .entityId(entityId)
+                    .message(message)
+                    .log();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to log audit entry", e);
+        }
     }
 }

@@ -205,7 +205,8 @@ public class UserServiceImpl implements UserService {
             userOrgRole.setRole(role);
             userOrgRole.setStore(store);
             userOrganizationRoleRepository.save(userOrgRole);
-            auditLogService.log("ADD_USER_TO_ORG", user.getId(), "Added user to organization ID: " + organization.getId() + " with role: " + role.getName());
+
+            logAuditEntry("ADD_USER_TO_ORG", user.getId(), "Added user to organization ID: " + organization.getId() + " with role: " + role.getName());
         } else {
             String token = UUID.randomUUID().toString();
             Invitation invitation = new Invitation();
@@ -220,7 +221,7 @@ public class UserServiceImpl implements UserService {
             invitationRepository.save(invitation);
 
             emailService.sendInvitationEmail(inviteDTO.getEmail(), token, organization.getName(), role.getName());
-            auditLogService.log("INVITE_USER", invitation.getId(), "Invited user: " + inviteDTO.getEmail() + " to organization ID: " + organization.getId());
+            logAuditEntry("INVITE_USER", invitation.getId(), "Invited user: " + inviteDTO.getEmail() + " to organization ID: " + organization.getId());
         }
     }
 
@@ -292,7 +293,22 @@ public class UserServiceImpl implements UserService {
         assignment.setRole(role);
         UserOrganizationRole savedAssignment = userOrganizationRoleRepository.save(assignment);
 
-        auditLogService.log("ASSIGN_USER_TO_STORE", assignee.getId(),
+        logAuditEntry("ASSIGN_USER_TO_STORE", assignee.getId(),
                 "Assigned user to store ID: " + store.getName() + " with role: " + role.getName());
+    }
+
+
+    private void logAuditEntry(String action, UUID entityId, String message) {
+        try {
+            System.out.println("Audit entry logged successfully: " + log);
+            auditLogService.builder()
+                    .action(action)
+//                    .entityType("Store")
+                    .entityId(entityId)
+                    .message(message)
+                    .log();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to log audit entry", e);
+        }
     }
 }

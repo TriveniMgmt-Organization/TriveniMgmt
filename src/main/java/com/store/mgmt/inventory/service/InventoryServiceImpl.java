@@ -207,7 +207,7 @@ public class InventoryServiceImpl implements InventoryService {
         newProduct.setUnitOfMeasure(uom);
 
         ProductTemplate savedProduct = productTemplateRepository.save(newProduct);
-        auditLogService.log("CREATE_PRODUCT", savedProduct.getId(), "Created product: " + savedProduct.getName());
+        logAuditEntry("CREATE_PRODUCT", savedProduct.getId(), "Created product: " + savedProduct.getName());
         log.info("Product created with ID: {}", savedProduct.getId());
         return productTemplateMapper.toDto(savedProduct);
     }
@@ -254,7 +254,7 @@ public class InventoryServiceImpl implements InventoryService {
         if (updateDTO.getUnitOfMeasureId() != null) existingProduct.setUnitOfMeasure(findUnitOfMeasureOrThrow(updateDTO.getUnitOfMeasureId()));
 
         ProductTemplate updatedProduct = productTemplateRepository.save(existingProduct);
-        auditLogService.log("UPDATE_PRODUCT", updatedProduct.getId(), "Updated product: " + updatedProduct.getName());
+        logAuditEntry("UPDATE_PRODUCT", updatedProduct.getId(), "Updated product: " + updatedProduct.getName());
         log.info("Product updated with ID: {}", updatedProduct.getId());
         return productTemplateMapper.toDto(updatedProduct);
     }
@@ -266,7 +266,7 @@ public class InventoryServiceImpl implements InventoryService {
         ProductTemplate product = findProductTemplateOrThrow(productId);
         product.setActive(false);
         productTemplateRepository.save(product);
-        auditLogService.log("DELETE_PRODUCT", productId, "Logically deleted product: " + product.getName());
+        logAuditEntry("DELETE_PRODUCT", productId, "Logically deleted product: " + product.getName());
         log.info("Product with ID {} logically deleted (set to inactive).", productId);
     }
 
@@ -293,7 +293,7 @@ public class InventoryServiceImpl implements InventoryService {
             itemToUpdate.setCostPrice(createDTO.getCostPrice());
             itemToUpdate.setLastStockUpdate(LocalDateTime.now());
             inventoryItemRepository.save(itemToUpdate);
-            auditLogService.log("UPDATE_INVENTORY_ITEM", itemToUpdate.getId(), "Updated inventory item quantity: " + itemToUpdate.getQuantity());
+            logAuditEntry("UPDATE_INVENTORY_ITEM", itemToUpdate.getId(), "Updated inventory item quantity: " + itemToUpdate.getQuantity());
             log.info("Updated existing inventory item ID {} with new quantity {}", itemToUpdate.getId(), itemToUpdate.getQuantity());
             return inventoryItemMapper.toDto(itemToUpdate);
         } else {
@@ -304,7 +304,7 @@ public class InventoryServiceImpl implements InventoryService {
             newInventoryItem.setLastStockUpdate(LocalDateTime.now());
 
             InventoryItem savedItem = inventoryItemRepository.save(newInventoryItem);
-            auditLogService.log("CREATE_INVENTORY_ITEM", savedItem.getId(), "Created inventory item for product: " + product.getName());
+            logAuditEntry("CREATE_INVENTORY_ITEM", savedItem.getId(), "Created inventory item for product: " + product.getName());
             log.info("New inventory item created with ID: {}", savedItem.getId());
             return inventoryItemMapper.toDto(savedItem);
         }
@@ -350,7 +350,7 @@ public class InventoryServiceImpl implements InventoryService {
         item.setQuantity(newQuantity);
         item.setLastStockUpdate(LocalDateTime.now());
         InventoryItem updatedItem = inventoryItemRepository.save(item);
-        auditLogService.log("UPDATE_INVENTORY_QUANTITY", updatedItem.getId(), "Updated inventory item quantity to: " + newQuantity);
+        logAuditEntry("UPDATE_INVENTORY_QUANTITY", updatedItem.getId(), "Updated inventory item quantity to: " + newQuantity);
         log.info("Inventory item ID {} quantity updated to {}", updatedItem.getId(), updatedItem.getQuantity());
         return inventoryItemMapper.toDto(updatedItem);
     }
@@ -361,7 +361,7 @@ public class InventoryServiceImpl implements InventoryService {
         log.warn("Deleting inventory item with ID: {} for store ID: {}", inventoryItemId, TenantContext.getCurrentStoreId());
         InventoryItem item = findInventoryItemOrThrow(inventoryItemId);
         inventoryItemRepository.delete(item);
-        auditLogService.log("DELETE_INVENTORY_ITEM", inventoryItemId, "Deleted inventory item");
+        logAuditEntry("DELETE_INVENTORY_ITEM", inventoryItemId, "Deleted inventory item");
         log.info("Inventory item with ID {} deleted.", inventoryItemId);
     }
 
@@ -415,7 +415,7 @@ public class InventoryServiceImpl implements InventoryService {
 
         Sale savedSale = saleRepository.save(newSale);
         saleItemRepository.saveAll(saleItems);
-        auditLogService.log("CREATE_SALE", savedSale.getId(), "Processed sale with total: " + savedSale.getTotalAmount());
+        logAuditEntry("CREATE_SALE", savedSale.getId(), "Processed sale with total: " + savedSale.getTotalAmount());
         log.info("Sale with ID {} processed successfully.", savedSale.getId());
     }
 
@@ -503,7 +503,7 @@ public class InventoryServiceImpl implements InventoryService {
                 item.setCostPrice(receivedItemDTO.getCostPrice());
                 item.setLastStockUpdate(LocalDateTime.now());
                 inventoryItemRepository.save(item);
-                auditLogService.log("UPDATE_INVENTORY_ITEM", item.getId(), "Updated inventory item with received quantity: " + receivedItemDTO.getQuantity());
+                logAuditEntry("UPDATE_INVENTORY_ITEM", item.getId(), "Updated inventory item with received quantity: " + receivedItemDTO.getQuantity());
                 log.debug("Updated existing inventory item ID {} with new received quantity {}. New total: {}", item.getId(), receivedItemDTO.getQuantity(), item.getQuantity());
             } else {
                 InventoryItem newInventoryItem = inventoryItemMapper.toEntity(new CreateInventoryItemDTO(
@@ -523,7 +523,7 @@ public class InventoryServiceImpl implements InventoryService {
                 newInventoryItem.setCostPrice(receivedItemDTO.getCostPrice());
                 newInventoryItem.setLastStockUpdate(LocalDateTime.now());
                 inventoryItemRepository.save(newInventoryItem);
-                auditLogService.log("CREATE_INVENTORY_ITEM", newInventoryItem.getId(), "Created inventory item for received product: " + orderItem.getProductTemplate().getName());
+                logAuditEntry("CREATE_INVENTORY_ITEM", newInventoryItem.getId(), "Created inventory item for received product: " + orderItem.getProductTemplate().getName());
                 log.debug("Created new inventory item ID {} for received product {}.", newInventoryItem.getId(), orderItem.getProductTemplate().getName());
             }
 
@@ -541,7 +541,7 @@ public class InventoryServiceImpl implements InventoryService {
             log.info("Purchase Order ID {} marked as RECEIVED_PARTIAL.", purchaseOrderId);
         }
         purchaseOrderRepository.save(purchaseOrder);
-        auditLogService.log("PROCESS_PURCHASE_ORDER_RECEIPT", purchaseOrderId, "Processed receipt for purchase order");
+        logAuditEntry("PROCESS_PURCHASE_ORDER_RECEIPT", purchaseOrderId, "Processed receipt for purchase order");
     }
 
     @Override
@@ -581,7 +581,7 @@ public class InventoryServiceImpl implements InventoryService {
         damageLoss.setReason(DamageLossReason.valueOf(String.valueOf(createDTO.getReason())));
 
         DamageLoss savedDamageLoss = damageLossRepository.save(damageLoss);
-        auditLogService.log("RECORD_DAMAGE_LOSS", savedDamageLoss.getId(), "Recorded damage/loss for product: " + product.getName());
+        logAuditEntry("RECORD_DAMAGE_LOSS", savedDamageLoss.getId(), "Recorded damage/loss for product: " + product.getName());
         log.info("Recorded damage/loss ID {} for product ID {}", savedDamageLoss.getId(), product.getId());
         return damageLossMapper.toDto(savedDamageLoss);
     }
@@ -647,7 +647,7 @@ public class InventoryServiceImpl implements InventoryService {
         Category newCategory = categoryMapper.toEntity(createDTO);
         newCategory.setOrganization(TenantContext.getCurrentOrganization());
         Category savedCategory = categoryRepository.save(newCategory);
-        auditLogService.log("CREATE_CATEGORY", savedCategory.getId(), "Created category: " + savedCategory.getName());
+        logAuditEntry("CREATE_CATEGORY", savedCategory.getId(), "Created category: " + savedCategory.getName());
         log.info("Category created with ID: {}", savedCategory.getId());
         return categoryMapper.toDto(savedCategory);
     }
@@ -682,7 +682,7 @@ public class InventoryServiceImpl implements InventoryService {
 
         categoryMapper.updateCategoryFromDto(updateDTO, existingCategory);
         Category updatedCategory = categoryRepository.save(existingCategory);
-        auditLogService.log("UPDATE_CATEGORY", updatedCategory.getId(), "Updated category: " + updatedCategory.getName());
+        logAuditEntry("UPDATE_CATEGORY", updatedCategory.getId(), "Updated category: " + updatedCategory.getName());
         log.info("Category updated with ID: {}", updatedCategory.getId());
         return categoryMapper.toDto(updatedCategory);
     }
@@ -698,7 +698,7 @@ public class InventoryServiceImpl implements InventoryService {
         }
 
         categoryRepository.delete(category);
-        auditLogService.log("DELETE_CATEGORY", categoryId, "Deleted category: " + category.getName());
+        logAuditEntry("DELETE_CATEGORY", categoryId, "Deleted category: " + category.getName());
         log.info("Category with ID {} deleted successfully.", categoryId);
     }
 
@@ -714,7 +714,7 @@ public class InventoryServiceImpl implements InventoryService {
         Supplier newSupplier = supplierMapper.toEntity(createDTO);
         newSupplier.setOrganization(TenantContext.getCurrentOrganization());
         Supplier savedSupplier = supplierRepository.save(newSupplier);
-        auditLogService.log("CREATE_SUPPLIER", savedSupplier.getId(), "Created supplier: " + savedSupplier.getName());
+        logAuditEntry("CREATE_SUPPLIER", savedSupplier.getId(), "Created supplier: " + savedSupplier.getName());
         log.info("Supplier created with ID: {}", savedSupplier.getId());
         return supplierMapper.toDto(savedSupplier);
     }
@@ -749,7 +749,7 @@ public class InventoryServiceImpl implements InventoryService {
 
         supplierMapper.updateSupplierFromDto(updateDTO, existingSupplier);
         Supplier updatedSupplier = supplierRepository.save(existingSupplier);
-        auditLogService.log("UPDATE_SUPPLIER", updatedSupplier.getId(), "Updated supplier: " + updatedSupplier.getName());
+        logAuditEntry("UPDATE_SUPPLIER", updatedSupplier.getId(), "Updated supplier: " + updatedSupplier.getName());
         log.info("Supplier updated with ID: {}", updatedSupplier.getId());
         return supplierMapper.toDto(updatedSupplier);
     }
@@ -765,7 +765,7 @@ public class InventoryServiceImpl implements InventoryService {
         }
 
         supplierRepository.delete(supplier);
-        auditLogService.log("DELETE_SUPPLIER", supplierId, "Deleted supplier: " + supplier.getName());
+        logAuditEntry("DELETE_SUPPLIER", supplierId, "Deleted supplier: " + supplier.getName());
         log.info("Supplier with ID {} deleted successfully.", supplierId);
     }
 
@@ -782,7 +782,7 @@ public class InventoryServiceImpl implements InventoryService {
         newLocation.setStore(TenantContext.getCurrentStore());
         newLocation.setType(LocationType.valueOf(String.valueOf(createDTO.getType())));
         Location savedLocation = locationRepository.save(newLocation);
-        auditLogService.log("CREATE_LOCATION", savedLocation.getId(), "Created location: " + savedLocation.getName());
+        logAuditEntry("CREATE_LOCATION", savedLocation.getId(), "Created location: " + savedLocation.getName());
         log.info("Location created with ID: {}", savedLocation.getId());
         return locationMapper.toDto(savedLocation);
     }
@@ -819,7 +819,7 @@ public class InventoryServiceImpl implements InventoryService {
         if (updateDTO.getType() != null) existingLocation.setType(LocationType.valueOf(String.valueOf(updateDTO.getType())));
 
         Location updatedLocation = locationRepository.save(existingLocation);
-        auditLogService.log("UPDATE_LOCATION", updatedLocation.getId(), "Updated location: " + updatedLocation.getName());
+        logAuditEntry("UPDATE_LOCATION", updatedLocation.getId(), "Updated location: " + updatedLocation.getName());
         log.info("Location updated with ID: {}", updatedLocation.getId());
         return locationMapper.toDto(updatedLocation);
     }
@@ -838,7 +838,7 @@ public class InventoryServiceImpl implements InventoryService {
         }
 
         locationRepository.delete(location);
-        auditLogService.log("DELETE_LOCATION", locationId, "Deleted location: " + location.getName());
+        logAuditEntry("DELETE_LOCATION", locationId, "Deleted location: " + location.getName());
         log.info("Location with ID {} deleted successfully.", locationId);
     }
 
@@ -874,7 +874,7 @@ public class InventoryServiceImpl implements InventoryService {
         PurchaseOrder savedPO = purchaseOrderRepository.save(newPO);
         poItems.forEach(item -> item.setPurchaseOrder(savedPO));
         purchaseOrderItemRepository.saveAll(poItems);
-        auditLogService.log("CREATE_PURCHASE_ORDER", savedPO.getId(), "Created purchase order for supplier: " + supplier.getName());
+        logAuditEntry("CREATE_PURCHASE_ORDER", savedPO.getId(), "Created purchase order for supplier: " + supplier.getName());
         log.info("Purchase Order created with ID: {}", savedPO.getId());
         return purchaseOrderMapper.toDto(savedPO);
     }
@@ -917,7 +917,7 @@ public class InventoryServiceImpl implements InventoryService {
         if (updateDTO.getStatus() != null) existingPO.setStatus(PurchaseOrderStatus.valueOf(updateDTO.getStatus().toUpperCase()));
 
         PurchaseOrder updatedPO = purchaseOrderRepository.save(existingPO);
-        auditLogService.log("UPDATE_PURCHASE_ORDER", updatedPO.getId(), "Updated purchase order");
+        logAuditEntry("UPDATE_PURCHASE_ORDER", updatedPO.getId(), "Updated purchase order");
         log.info("Purchase order updated with ID: {}", updatedPO.getId());
         return purchaseOrderMapper.toDto(updatedPO);
     }
@@ -937,7 +937,7 @@ public class InventoryServiceImpl implements InventoryService {
 
         purchaseOrder.setStatus(PurchaseOrderStatus.CANCELLED);
         purchaseOrderRepository.save(purchaseOrder);
-        auditLogService.log("CANCEL_PURCHASE_ORDER", purchaseOrderId, "Cancelled purchase order");
+        logAuditEntry("CANCEL_PURCHASE_ORDER", purchaseOrderId, "Cancelled purchase order");
         log.info("Purchase Order with ID {} cancelled successfully.", purchaseOrderId);
     }
 
@@ -997,7 +997,7 @@ public class InventoryServiceImpl implements InventoryService {
         newDiscount.setType(DiscountType.valueOf(String.valueOf(createDTO.getType())));
 
         Discount savedDiscount = discountRepository.save(newDiscount);
-        auditLogService.log("CREATE_DISCOUNT", savedDiscount.getId(), "Created discount: " + savedDiscount.getName());
+        logAuditEntry("CREATE_DISCOUNT", savedDiscount.getId(), "Created discount: " + savedDiscount.getName());
         log.info("Discount created with ID: {}", savedDiscount.getId());
         return discountMapper.toDto(savedDiscount);
     }
@@ -1039,7 +1039,7 @@ public class InventoryServiceImpl implements InventoryService {
         if (updateDTO.getType() != null) existingDiscount.setType(DiscountType.valueOf(String.valueOf(updateDTO.getType())));
 
         Discount updatedDiscount = discountRepository.save(existingDiscount);
-        auditLogService.log("UPDATE_DISCOUNT", updatedDiscount.getId(), "Updated discount: " + updatedDiscount.getName());
+        logAuditEntry("UPDATE_DISCOUNT", updatedDiscount.getId(), "Updated discount: " + updatedDiscount.getName());
         log.info("Discount updated with ID: {}", updatedDiscount.getId());
         return discountMapper.toDto(updatedDiscount);
     }
@@ -1055,7 +1055,7 @@ public class InventoryServiceImpl implements InventoryService {
         }
         discount.setActive(false);
         discountRepository.save(discount);
-        auditLogService.log("DEACTIVATE_DISCOUNT", discountId, "Deactivated discount: " + discount.getName());
+        logAuditEntry("DEACTIVATE_DISCOUNT", discountId, "Deactivated discount: " + discount.getName());
         log.info("Discount ID {} deactivated.", discountId);
     }
 
@@ -1112,7 +1112,7 @@ public class InventoryServiceImpl implements InventoryService {
         UnitOfMeasure newUoM = unitOfMeasureMapper.toEntity(createDTO);
         newUoM.setOrganization(TenantContext.getCurrentOrganization());
         UnitOfMeasure savedUoM = unitOfMeasureRepository.save(newUoM);
-        auditLogService.log("CREATE_UNIT_OF_MEASURE", savedUoM.getId(), "Created unit of measure: " + savedUoM.getName());
+        logAuditEntry("CREATE_UNIT_OF_MEASURE", savedUoM.getId(), "Created unit of measure: " + savedUoM.getName());
         log.info("Unit of Measure created with ID: {}", savedUoM.getId());
         return unitOfMeasureMapper.toDto(savedUoM);
     }
@@ -1152,7 +1152,7 @@ public class InventoryServiceImpl implements InventoryService {
 
         unitOfMeasureMapper.updateUnitOfMeasureFromDto(updateDTO, existingUoM);
         UnitOfMeasure updatedUoM = unitOfMeasureRepository.save(existingUoM);
-        auditLogService.log("UPDATE_UNIT_OF_MEASURE", updatedUoM.getId(), "Updated unit of measure: " + updatedUoM.getName());
+        logAuditEntry("UPDATE_UNIT_OF_MEASURE", updatedUoM.getId(), "Updated unit of measure: " + updatedUoM.getName());
         log.info("Unit of Measure updated with ID: {}", updatedUoM.getId());
         return unitOfMeasureMapper.toDto(updatedUoM);
     }
@@ -1168,7 +1168,22 @@ public class InventoryServiceImpl implements InventoryService {
         }
 
         unitOfMeasureRepository.delete(uom);
-        auditLogService.log("DELETE_UNIT_OF_MEASURE", uomId, "Deleted unit of measure: " + uom.getName());
+        logAuditEntry("DELETE_UNIT_OF_MEASURE", uomId, "Deleted unit of measure: " + uom.getName());
         log.info("Unit of Measure with ID {} deleted successfully.", uomId);
+    }
+
+
+    private void logAuditEntry(String action, UUID entityId, String message) {
+        try {
+            System.out.println("Audit entry logged successfully: " + log);
+            auditLogService.builder()
+                    .action(action)
+//                    .entityType("Store")
+                    .entityId(entityId)
+                    .message(message)
+                    .log();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to log audit entry", e);
+        }
     }
 }
