@@ -252,18 +252,6 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @PostMapping("/organization")
-    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN')")
-    public OrganizationDTO createOrganization(@RequestBody CreateOrganizationDTO createDTO) {
-        return userService.createOrganization(createDTO);
-    }
-
-    @PostMapping("/store")
-    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN')")
-    public StoreDTO createStore(@RequestBody CreateStoreDTO createDTO) {
-        return userService.createStore(createDTO);
-    }
-
     @PostMapping("/invite")
     @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN')")
    @Operation(

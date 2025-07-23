@@ -18,14 +18,14 @@ public class CreateStoreDTO {
     private UUID organizationId;
 
     @Schema(
-            description = "First name of the user",
+            description = "Name of the store",
             example = "john",
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     private String name;
 
     @Schema(
-            description = "Unique email address of the user",
+            description = "Location of the store",
             example = "john.doe@example.com",
             format = "location",
             requiredMode = Schema.RequiredMode.REQUIRED
@@ -33,7 +33,7 @@ public class CreateStoreDTO {
     private String location;
 
     @Schema(
-            description = "Unique email address of the user",
+            description = "Contact information for the store",
             example = "john.doe@example.com",
             format = "contactInfo"
     )

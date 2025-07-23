@@ -11,9 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.BufferedReader;
@@ -41,7 +39,6 @@ public class OrganizationController {
                             @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content)
     }
     )
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<OrganizationDTO> createOrganization(
             @Parameter(description = "User details to be created", required = true)
             @RequestBody CreateOrganizationDTO request) {
@@ -63,12 +60,12 @@ public class OrganizationController {
             @Parameter(description = "Unique ID of the organization to update", required = true)
             @PathVariable UUID id,
             @Parameter(description = "Organization details to be updated", required = true)
-            @RequestBody UpdateOrganizationDTO request, HttpServletRequest httpRequest) throws IOException {
+            @RequestBody UpdateOrganizationDTO dto, HttpServletRequest httpRequest) throws IOException {
         String rawRequestBody = new BufferedReader(new InputStreamReader(httpRequest.getInputStream()))
                 .lines().collect(Collectors.joining("\n"));
         System.out.println("Raw Request Body: " + rawRequestBody); // Check this output
 
-        OrganizationDTO updatedOrganization = organizationService.updateOrganization(id, request);
+        OrganizationDTO updatedOrganization = organizationService.updateOrganization(id, dto);
         return ResponseEntity.ok(updatedOrganization);
     }
 }

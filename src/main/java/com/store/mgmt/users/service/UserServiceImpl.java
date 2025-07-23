@@ -1,7 +1,5 @@
 package com.store.mgmt.users.service;
 
-import com.store.mgmt.auth.model.dto.AuthResponse;
-import com.store.mgmt.config.TenantContext;
 import com.store.mgmt.organization.mapper.OrganizationMapper;
 import com.store.mgmt.organization.mapper.StoreMapper;
 import com.store.mgmt.organization.model.dto.*;
@@ -21,11 +19,8 @@ import com.store.mgmt.users.model.entity.User;
 import com.store.mgmt.users.repository.UserRepository;
 import com.store.mgmt.users.repository.RoleRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -229,63 +224,6 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    //# Organization  Management
-    @Transactional
-//    @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public OrganizationDTO createOrganization(CreateOrganizationDTO createDTO) {
-        log.info("Creating organization: {}", createDTO.getName());
-
-        if (organizationRepository.findByName(createDTO.getName()).isPresent()) {
-            throw new IllegalArgumentException("Organization name '" + createDTO.getName() + "' already exists.");
-        }
-
-        Organization organization = organizationMapper.toEntity(createDTO);
-        Organization savedOrganization = organizationRepository.save(organization);
-
-        // Assign ORG_ADMIN role to the creator
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalStateException("Current user not found."));
-        Role orgAdminRole = roleRepository.findByName(RoleType.ADMIN.toString())
-                .orElseThrow(() -> new IllegalStateException("ORG_ADMIN role not found."));
-        UserOrganizationRole userOrgRole = new UserOrganizationRole();
-        userOrgRole.setUser(user);
-        userOrgRole.setOrganization(savedOrganization);
-        userOrgRole.setRole(orgAdminRole);
-        userOrganizationRoleRepository.save(userOrgRole);
-
-        auditLogService.log("CREATE_ORGANIZATION", savedOrganization.getId(), "Created organization: " + savedOrganization.getName());
-        return organizationMapper.toDto(savedOrganization);
-    }
-
-    @Transactional
-//    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ORG_ADMIN')")
-    public StoreDTO createStore(CreateStoreDTO createDTO) {
-        log.info("Creating store: {} for organization ID: {}", createDTO.getName(), createDTO.getOrganizationId());
-
-        Organization organization = organizationRepository.findById(createDTO.getOrganizationId())
-                .orElseThrow(() -> new IllegalArgumentException("Organization not found."));
-        if (storeRepository.findByNameAndOrganizationId(createDTO.getName(), createDTO.getOrganizationId()).isPresent()) {
-            throw new IllegalArgumentException("Store name '" + createDTO.getName() + "' already exists in organization.");
-        }
-
-        // Check if user has ORG_ADMIN role for the organization
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalStateException("Current user not found."));
-        if (!hasRoleInOrganization(currentUser, RoleType.ADMIN.toString(), createDTO.getOrganizationId()) &&
-                !hasRole(currentUser, RoleType.SUPER_ADMIN.toString())) {
-            throw new SecurityException("User not authorized to create stores in this organization.");
-        }
-
-        Store store = storeMapper.toEntity(createDTO);
-        store.setOrganization(organization);
-        Store savedStore = storeRepository.save(store);
-
-        auditLogService.log("CREATE_STORE", savedStore.getId(), "Created store: " + savedStore.getName() + " in organization ID: " + organization.getId());
-        return storeMapper.toDto(savedStore);
-    }
-
     @Override
     @Transactional
     public void assignUserToOrganization(CreateUserAssignmentDTO dto) {
@@ -295,7 +233,6 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new IllegalStateException("Current user not found."));
         Organization organization = organizationRepository.findById(dto.getOrganizationId())
                 .orElseThrow(() -> new IllegalArgumentException("Organization not found"));
-        // Check if user is already assign to organization
         if (userOrganizationRoleRepository.findByUserIdAndOrganizationId(dto.getUserId(), dto.getOrganizationId()).isPresent()) {
             throw new IllegalArgumentException("User already assigned to this organization.");
         }
@@ -328,7 +265,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new IllegalArgumentException("Store not found"));
 
         // Check if current user is authorized for the organization
-        if (!hasRoleInOrganization(currentUser, RoleType.ADMIN.toString(), store.getOrganization().getId()) &&
+        if (!hasRoleInOrganization(currentUser, RoleType.ORG_ADMIN.toString(), store.getOrganization().getId()) &&
                 !hasRole(currentUser, RoleType.SUPER_ADMIN.toString())) {
             throw new SecurityException("User not authorized to assign users in this organization.");
         }

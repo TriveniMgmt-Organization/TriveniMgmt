@@ -2,6 +2,7 @@ package com.store.mgmt.organization.controller;
 
 import com.store.mgmt.organization.model.dto.CreateStoreDTO;
 import com.store.mgmt.organization.model.dto.StoreDTO;
+import com.store.mgmt.organization.model.dto.UpdateStoreDTO;
 import com.store.mgmt.organization.model.entity.Store;
 import com.store.mgmt.organization.service.StoreService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,22 +11,25 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.hibernate.sql.Update;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
-@RequestMapping("/apiv1//stores")
+@RequestMapping("/api/v1/stores")
 public class StoreController {
-    @Autowired
-    private StoreService storeService;
+    private final StoreService storeService;
+
+    public  StoreController(StoreService storeService) {
+        this.storeService = storeService;
+    }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('USER_WRITE')")
     @Operation(
             summary = "Create a new user",
             description = "Creates a new user account with the provided details.",
@@ -57,5 +61,88 @@ public class StoreController {
             @RequestBody CreateStoreDTO dto) {
         StoreDTO store = storeService.createStore(dto);
         return ResponseEntity.ok(store);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(
+            summary = "Get store by ID",
+            description = "Retrieves the details of a store by its unique ID.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Store retrieved successfully",
+                            content = @Content(schema = @Schema(implementation = StoreDTO.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Not Found: Store with provided ID does not exist",
+                            content = @Content
+                    )
+            }
+    )
+    public ResponseEntity<StoreDTO> getStoreById(
+            @Parameter(description = "Unique ID of the store to retrieve", required = true)
+            @PathVariable UUID id) {
+        StoreDTO store = storeService.getStoreById(id);
+        return ResponseEntity.ok(store);
+    }
+
+    @PutMapping("/{id}")
+    @Operation(
+            summary = "Update an existing store",
+            description = "Updates the details of an existing store.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Store updated successfully",
+                            content = @Content(schema = @Schema(implementation = StoreDTO.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Invalid input or missing required fields",
+                            content = @Content
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "Forbidden: User does not have 'UPDATE_STORE' authority",
+                            content = @Content
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Not Found: Store with provided ID does not exist",
+                            content = @Content
+                    )
+            }
+    )
+    public ResponseEntity<StoreDTO> updateStore(
+            @Parameter(description = "Unique ID of the store to update", required = true)
+            @PathVariable UUID id,
+            @Parameter(description = "User details to be updated", required = true)
+            @RequestBody UpdateStoreDTO dto) {
+        StoreDTO store = storeService.updateStore(id, dto);
+        return ResponseEntity.ok(store);
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(
+            summary = "Delete a store",
+            description = "Deletes a store by its unique ID.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "204",
+                            description = "Store deleted successfully"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Not Found: Store with provided ID does not exist",
+                            content = @Content
+                    )
+            }
+    )
+    public ResponseEntity<Void> deleteStore(
+            @Parameter(description = "Unique ID of the store to delete", required = true)
+            @PathVariable UUID id) {
+        storeService.deleteStore(id);
+        return ResponseEntity.noContent().build();
     }
 }

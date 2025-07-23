@@ -15,13 +15,11 @@ import com.store.mgmt.users.repository.RoleRepository;
 import com.store.mgmt.users.repository.UserRepository;
 import com.store.mgmt.users.service.AuditLogService;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -58,67 +56,51 @@ public class OrganizationServiceImpl implements OrganizationService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Organization with name '" + dto.getName() + "' already exists"); // Use CONFLICT for existing resource
         }
 
-        // Get current authenticated user's username (email)
         String currentUserName = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userRepository.findByUsername(currentUserName) // Assuming username is email
                 .orElseThrow(() -> new IllegalStateException("Authenticated user not found in database: " + currentUserName));
 
-        // 1. Create and Save Organization
         Organization organization = organizationMapper.toEntity(dto);
-        organization.setCreatedBy(currentUserName); // Set creator
-        organization.setCreatedAt(LocalDateTime.now()); // Set creation timestamp (if not handled by JPA Auditing)
-        // Set any other default values for Organization if needed, e.g., status
-
         Organization savedOrganization = organizationRepository.save(organization); // Save the organization to get its ID
 
-        // 2. Assign SUPER_ADMIN role to the creator in this new organization
-        UserOrganizationRole userOrgRoleAssignment = new UserOrganizationRole();
-        userOrgRoleAssignment.setUser(currentUser);
-        userOrgRoleAssignment.setOrganization(savedOrganization); // Link to the newly saved organization
+        UserOrganizationRole userOrgRole = new UserOrganizationRole();
+        userOrgRole.setUser(currentUser);
+        userOrgRole.setOrganization(savedOrganization); // Link to the newly saved organization
 
-        // Fetch the SUPER_ADMIN role from the database
-        Role superAdminRole = roleRepository.findByName(RoleType.SUPER_ADMIN.name())
-                .orElseThrow(() -> new IllegalStateException("SUPER_ADMIN role not found in database. Please ensure roles are seeded."));
-        userOrgRoleAssignment.setRole(superAdminRole);
+        Role adminRole = roleRepository.findByName(RoleType.ORG_ADMIN.name())
+                .orElseThrow(() -> new IllegalStateException("ORG_ADMIN role not found in database. Please ensure roles are seeded."));
+        userOrgRole.setRole(adminRole);
+        userOrganizationRoleRepository.save(userOrgRole); // Save the role assignment
 
-        userOrgRoleAssignment.setCreatedAt(LocalDateTime.now()); // Set creation timestamp for the assignment
-        userOrgRoleAssignment.setCreatedBy(currentUserName); // Creator of the assignment
-
-        userOrganizationRoleRepository.save(userOrgRoleAssignment); // Save the role assignment
-
-        // 3. Log in AuditLog
         auditLogService.log("CREATE_ORGANIZATION", savedOrganization.getId(),
                 "Organization '" + savedOrganization.getName() + "' created by user: " + currentUserName);
 
-        // 4. Return DTO of the fully persisted organization
         return organizationMapper.toDto(savedOrganization);
     }
 
     @Override
     @Transactional
-    public OrganizationDTO updateOrganization(UUID id, UpdateOrganizationDTO request) {
+    public OrganizationDTO updateOrganization(UUID id, UpdateOrganizationDTO dto) {
         System.out.println("Updateing Organization for id: " + id  );
-        System.out.println("Request to update Organization: " + request.getName() + "///"+ request.getDescription());
+        System.out.println("Request to update Organization: " + dto.getName() + "///"+ dto.getDescription());
         Organization organization = organizationRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Organization not found"));
 
         System.out.println("Found Organization: " + organization.getName() + " for id: " + id);
-         organizationMapper.updateEntityFromDto(request, organization);
+         organizationMapper.updateEntityFromDto(dto, organization);
 
-        System.out.println("Updating Organization: " + organization.getName() + " with new details: " + request);
+        System.out.println("Updating Organization: " + organization.getName() + " with new details: " + dto);
 
         Organization updatedOrganization = organizationRepository.save(organization);
 
         System.out.println("Updated Organization: " + updatedOrganization.getName() + " with id: " + updatedOrganization.getId());
-        // Log in AuditLog
-        auditLogService.log("UPDATE_ORGANIZATION", updatedOrganization.getId(), "Updated organization: " + updatedOrganization.getName());
 
+        auditLogService.log("UPDATE_ORGANIZATION", updatedOrganization.getId(), "Updated organization: " + updatedOrganization.getName());
         return organizationMapper.toDto(updatedOrganization);
     }
 
     @Override
     public void deleteOrganization(UUID id) {
-
         Organization organization = organizationRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Organization not found"));
 
@@ -128,8 +110,6 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
         organizationRepository.delete(organization);
-
-        // Log in AuditLog
         auditLogService.log("DELETE_ORGANIZATION", id, "Deleted organization: " + organization.getName());
     }
 }

@@ -24,8 +24,6 @@ public interface UserService  {
     UserDTO removeRole(UUID userId, UUID roleId);
 
     void inviteUser(InviteUserDTO inviteDTO);
-    OrganizationDTO createOrganization(CreateOrganizationDTO createDTO);
-    StoreDTO createStore(CreateStoreDTO createDTO);
     void assignUserToOrganization(CreateUserAssignmentDTO dto);
     void assignUserToStore(CreateUserAssignmentDTO dto);
 }

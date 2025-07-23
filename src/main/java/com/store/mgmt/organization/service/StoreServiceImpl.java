@@ -7,21 +7,16 @@ import com.store.mgmt.organization.model.dto.StoreDTO;
 import com.store.mgmt.organization.model.dto.UpdateStoreDTO;
 import com.store.mgmt.organization.model.entity.Organization;
 import com.store.mgmt.organization.model.entity.Store;
-import com.store.mgmt.organization.model.entity.UserOrganizationRole;
 import com.store.mgmt.organization.repository.OrganizationRepository;
 import com.store.mgmt.organization.repository.StoreRepository;
 import com.store.mgmt.organization.repository.UserOrganizationRoleRepository;
 import com.store.mgmt.users.model.RoleType;
-import com.store.mgmt.users.model.entity.Role;
 import com.store.mgmt.users.model.entity.User;
-import com.store.mgmt.organization.model.entity.UserAssignment;
 import com.store.mgmt.users.repository.RoleRepository;
 import com.store.mgmt.users.repository.UserRepository;
 import com.store.mgmt.users.service.AuditLogService;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.mapping.UserDefinedObjectType;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,42 +24,44 @@ import java.util.UUID;
 
 @Service
 @Slf4j
-    public class StoreServiceImpl implements StoreService {
-        private final StoreRepository storeRepository;
+public class StoreServiceImpl implements StoreService {
+    private final StoreRepository storeRepository;
 
-        private final UserOrganizationRoleRepository userOrganizationRoleRepository;
+    private final UserOrganizationRoleRepository userOrganizationRoleRepository;
 
-        private final UserRepository userRepository;
+    private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-        private final AuditLogService auditLogService;
-        private final OrganizationRepository organizationRepository;
-        private final StoreMapper storeMapper;
-        public StoreServiceImpl(StoreRepository storeRepository, OrganizationRepository organizationRepository, UserOrganizationRoleRepository userOrganizationRoleRepository, UserRepository userRepository,
-                                RoleRepository roleRepository,
-                                AuditLogService auditLogService, StoreMapper storeMapper  ) {
-            this.organizationRepository = organizationRepository;
-            this.storeRepository = storeRepository;
-            this.userOrganizationRoleRepository = userOrganizationRoleRepository;
-            this.userRepository = userRepository;
-            this.roleRepository = roleRepository;
-            this.auditLogService = auditLogService;
-            this.storeMapper = storeMapper;
-        }
+    private final AuditLogService auditLogService;
+    private final OrganizationRepository organizationRepository;
+    private final StoreMapper storeMapper;
+    public StoreServiceImpl(StoreRepository storeRepository, OrganizationRepository organizationRepository, UserOrganizationRoleRepository userOrganizationRoleRepository, UserRepository userRepository,
+                            RoleRepository roleRepository,
+                            AuditLogService auditLogService, StoreMapper storeMapper  ) {
+        this.organizationRepository = organizationRepository;
+        this.storeRepository = storeRepository;
+        this.userOrganizationRoleRepository = userOrganizationRoleRepository;
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.auditLogService = auditLogService;
+        this.storeMapper = storeMapper;
+    }
 
     @Override
     @Transactional
     public StoreDTO createStore(CreateStoreDTO createDTO) {
         log.info("Creating store: {} for organization ID: {}", createDTO.getName(), createDTO.getOrganizationId());
 
-        // Fetch the organization from the provided organizationId
         Organization organization = organizationRepository.findById(createDTO.getOrganizationId())
                 .orElseThrow(() -> new IllegalArgumentException("Organization not found."));
         if (storeRepository.findByNameAndOrganizationId(createDTO.getName(), createDTO.getOrganizationId()).isPresent()) {
             throw new IllegalArgumentException("Store name '" + createDTO.getName() + "' already exists in organization.");
         }
 
-        User currentUser = TenantContext.getCurrentUser();
-        if (!hasRoleInOrganization(currentUser, RoleType.ADMIN.toString(), createDTO.getOrganizationId()) &&
+        // Check if user has ORG_ADMIN role for the organization
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalStateException("Current user not found."));
+        if (!hasRoleInOrganization(currentUser, RoleType.ORG_ADMIN.toString(), createDTO.getOrganizationId()) ||
                 !hasRole(currentUser, RoleType.SUPER_ADMIN.toString())) {
             throw new SecurityException("User not authorized to create stores in this organization.");
         }
@@ -77,6 +74,7 @@ import java.util.UUID;
         return storeMapper.toDto(savedStore);
     }
 
+
     @Override
     @Transactional
     public StoreDTO updateStore(UUID id, UpdateStoreDTO dto) {
@@ -86,7 +84,7 @@ import java.util.UUID;
                 .orElseThrow(() -> new IllegalArgumentException("Store not found."));
 
         User currentUser = TenantContext.getCurrentUser();
-        if (!hasRoleInOrganization(currentUser, RoleType.ADMIN.toString(), store.getOrganization().getId()) &&
+        if (!hasRoleInOrganization(currentUser, RoleType.ORG_ADMIN.toString(), store.getOrganization().getId()) &&
                 !hasRole(currentUser, RoleType.SUPER_ADMIN.toString())) {
             throw new SecurityException("User not authorized to update stores in this organization.");
         }
@@ -99,6 +97,41 @@ import java.util.UUID;
         return storeMapper.toDto(updatedStore);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public StoreDTO getStoreById(UUID id) {
+        log.info("Fetching store with ID: {}", id);
+
+        Store store = storeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Store not found."));
+
+        User currentUser = TenantContext.getCurrentUser();
+        if (!hasRoleInOrganization(currentUser, RoleType.ORG_ADMIN.toString(), store.getOrganization().getId()) &&
+                !hasRole(currentUser, RoleType.SUPER_ADMIN.toString())) {
+            throw new SecurityException("User not authorized to view stores in this organization.");
+        }
+
+        return storeMapper.toDto(store);
+    }
+
+    @Override
+    @Transactional
+    public void deleteStore(UUID id) {
+        log.info("Deleting store with ID: {}", id);
+
+        Store store = storeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Store not found."));
+
+        User currentUser = TenantContext.getCurrentUser();
+        if (!hasRoleInOrganization(currentUser, RoleType.ORG_ADMIN.toString(), store.getOrganization().getId()) &&
+                !hasRole(currentUser, RoleType.SUPER_ADMIN.toString())) {
+            throw new SecurityException("User not authorized to delete stores in this organization.");
+        }
+
+        storeRepository.delete(store);
+        auditLogService.log("DELETE_STORE", id, "Deleted store: " + store.getName() + " in organization ID: " + store.getOrganization().getId());
+    }
+
     private boolean hasRoleInOrganization(User user, String roleName, UUID organizationId) {
         return userOrganizationRoleRepository.findByUserIdAndOrganizationId(user.getId(), organizationId)
                 .stream()
@@ -109,4 +142,4 @@ import java.util.UUID;
         return user.getOrganizationRoles().stream()
                 .anyMatch(ua -> ua.getRole().getName().equals(roleName));
     }
-    }
+}
