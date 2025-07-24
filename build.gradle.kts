@@ -53,6 +53,7 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.security:spring-security-test")
 	testImplementation("com.h2database:h2")
+
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 //	implementation("io.jsonwebtoken:jjwt-api:0.12.5")
 //	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.5")
