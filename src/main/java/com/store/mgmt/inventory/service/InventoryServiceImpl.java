@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 public class InventoryServiceImpl implements InventoryService {
     private final ProductTemplateRepository productTemplateRepository;
     private final CategoryRepository categoryRepository;
+    private final BrandRepository brandRepository;
     private final SupplierRepository supplierRepository;
     private final InventoryItemRepository inventoryItemRepository;
     private final LocationRepository locationRepository;
@@ -47,6 +48,7 @@ public class InventoryServiceImpl implements InventoryService {
 
     // Mappers
     private final ProductTemplateMapper productTemplateMapper;
+    private final BrandMapper brandMapper;
     private final CategoryMapper categoryMapper;
     private final InventoryItemMapper inventoryItemMapper;
     private final SaleMapper saleMapper;
@@ -62,6 +64,7 @@ public class InventoryServiceImpl implements InventoryService {
     public InventoryServiceImpl(
             ProductTemplateRepository productTemplateRepository,
             CategoryRepository categoryRepository,
+            BrandRepository brandRepository,
             SupplierRepository supplierRepository,
             InventoryItemRepository inventoryItemRepository,
             LocationRepository locationRepository,
@@ -76,6 +79,7 @@ public class InventoryServiceImpl implements InventoryService {
             AuditLogService auditLogService,
             ProductTemplateMapper productTemplateMapper,
             CategoryMapper categoryMapper,
+            BrandMapper brandMapper,
             InventoryItemMapper inventoryItemMapper,
             SaleMapper saleMapper,
             SaleItemMapper saleItemMapper,
@@ -89,6 +93,7 @@ public class InventoryServiceImpl implements InventoryService {
     ) {
         this.productTemplateRepository = productTemplateRepository;
         this.categoryRepository = categoryRepository;
+        this.brandRepository = brandRepository;
         this.supplierRepository = supplierRepository;
         this.inventoryItemRepository = inventoryItemRepository;
         this.locationRepository = locationRepository;
@@ -103,6 +108,7 @@ public class InventoryServiceImpl implements InventoryService {
         this.auditLogService = auditLogService;
         this.productTemplateMapper = productTemplateMapper;
         this.categoryMapper = categoryMapper;
+        this.brandMapper = brandMapper;
         this.inventoryItemMapper = inventoryItemMapper;
         this.saleMapper = saleMapper;
         this.saleItemMapper = saleItemMapper;
@@ -120,6 +126,11 @@ public class InventoryServiceImpl implements InventoryService {
     private ProductTemplate findProductTemplateOrThrow(UUID productId) {
         return productTemplateRepository.findByIdAndOrganizationId(productId, TenantContext.getCurrentOrganizationId())
                 .orElseThrow(() -> new ResourceNotFoundException("ProductTemplate not found with ID: " + productId));
+    }
+
+    private Brand findBrandOrThrow(UUID brandId) {
+        return brandRepository.findById(brandId)
+                .orElseThrow(() -> new ResourceNotFoundException("Brand not found with ID: " + brandId));
     }
 
     private Category findCategoryOrThrow(UUID categoryId) {
@@ -171,6 +182,71 @@ public class InventoryServiceImpl implements InventoryService {
     private DamageLoss findDamageLossOrThrow(UUID damageLossId) {
         return damageLossRepository.findByIdAndOrganizationId(damageLossId, TenantContext.getCurrentOrganizationId())
                 .orElseThrow(() -> new ResourceNotFoundException("Damage/Loss record not found with ID: " + damageLossId));
+    }
+
+    // --- Brand Management ---
+    @Override
+    @Transactional
+    public BrandDTO createBrand(CreateBrandDTO createDTO) {
+        log.info("Creating new brand with name: {} for organization ID: {}", createDTO.getName());
+
+        if (brandRepository.findByName(createDTO.getName()).isPresent()) {
+            throw new DuplicateResourceException("Brand with name '" + createDTO.getName() + "' already exists.");
+        }
+
+        Brand newBrand = brandMapper.toEntity(createDTO);
+        Brand savedBrand = brandRepository.save(newBrand);
+        logAuditEntry("CREATE_BRAND", savedBrand.getId(), "Created brand: " + savedBrand.getName());
+        log.info("Brand created with ID: {}", savedBrand.getId());
+        return brandMapper.toDto(savedBrand);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BrandDTO> getAllBrands(boolean includeInactive) {
+        List<Brand> brands = brandRepository.findAll();
+        if (!includeInactive) {
+            brands = brands.stream().filter(Brand::isActive).collect(Collectors.toList());
+        }
+        return brandMapper.toDtoList(brands);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public BrandDTO getBrandById(UUID brandId) {
+        log.debug("Fetching brand with ID: {} for organization ID: {}", brandId, TenantContext.getCurrentOrganizationId());
+        Brand brand = findBrandOrThrow(brandId);
+        return brandMapper.toDto(brand);
+    }
+
+    @Override
+    @Transactional
+    public BrandDTO updateBrand(UUID brandId, UpdateBrandDTO updateDTO) {
+        log.info("Updating brand with ID: {} for organization ID: {}", brandId);
+        Brand existingBrand = findBrandOrThrow(brandId);
+
+        if (updateDTO.getName() != null && !updateDTO.getName().equals(existingBrand.getName())) {
+            if (brandRepository.findByName(updateDTO.getName()).isPresent()) {
+                throw new DuplicateResourceException("Brand with name '" + updateDTO.getName() + "' already exists.");
+            }
+        }
+
+        brandMapper.updateBrandFromDto(updateDTO, existingBrand);
+        Brand updatedBrand = brandRepository.save(existingBrand);
+        logAuditEntry("UPDATE_BRAND", updatedBrand.getId(), "Updated brand: " + updatedBrand.getName());
+        log.info("Brand updated with ID: {}", updatedBrand.getId());
+        return brandMapper.toDto(updatedBrand);
+    }
+
+    @Override
+    @Transactional
+    public void deleteBrand(UUID brandId) {
+        log.warn("Attempting to logically delete brand with ID: {} for organization ID: {}", brandId, TenantContext.getCurrentOrganizationId());
+        Brand brand = findBrandOrThrow(brandId);
+        brand.setActive(false);
+        brandRepository.save(brand);
+        logAuditEntry("DELETE_BRAND", brandId, "Logically deleted brand: " + brand.getName());
+        log.info("Brand with ID {} logically deleted (set to inactive).", brandId);
     }
 
     // --- Product Management ---

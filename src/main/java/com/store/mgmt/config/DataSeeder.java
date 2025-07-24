@@ -66,6 +66,8 @@ public class DataSeeder {
     private void seedPermissions() {
         logger.debug("Seeding permissions...");
         Map<String, String> permissions = new HashMap<>();
+        permissions.put("ORG_READ", "Permission to read org details");
+        permissions.put("ORG_WRITE", "Permission to manage org");
         permissions.put("PRODUCT_READ", "Permission to read product details");
         permissions.put("PRODUCT_WRITE", "Permission to modify product details");
         permissions.put("USER_READ", "Permission to read user details");

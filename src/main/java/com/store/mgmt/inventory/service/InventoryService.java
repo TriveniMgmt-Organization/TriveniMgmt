@@ -38,6 +38,12 @@ public interface InventoryService {
     boolean checkStockAvailability(UUID roductId, int quantityNeeded);
     boolean checkStockAvailabilityAtLocation(UUID productId, UUID locationId, int quantityNeeded);
 
+    // --- Brand Management ---
+    BrandDTO createBrand(CreateBrandDTO createDTO);
+    List<BrandDTO> getAllBrands(boolean includeInactive);
+    BrandDTO getBrandById(UUID brandId);
+    BrandDTO updateBrand(UUID brandId, UpdateBrandDTO updateDTO);
+    void deleteBrand(UUID brandId);
 
     // --- Category Management ---
     CategoryDTO createCategory(CreateCategoryDTO createDTO);

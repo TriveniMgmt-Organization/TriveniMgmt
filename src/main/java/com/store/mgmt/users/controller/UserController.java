@@ -333,4 +333,58 @@ public class UserController {
     public void assignUserToStore(@RequestBody CreateUserAssignmentDTO dto) {
         userService.assignUserToStore(dto);
     }
+
+@PostMapping("/remove/organization")
+@PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN')")
+@Operation(
+        summary = "Remove a user from an organization",
+        description = "Removes a user from a specific organization.",
+        responses = {
+                @ApiResponse(
+                        responseCode = "200",
+                        description = "User removed from organization successfully",
+                        content = @Content
+                ),
+                @ApiResponse(
+                        responseCode = "400",
+                        description = "Invalid input or missing required fields",
+                        content = @Content
+                ),
+                @ApiResponse(
+                        responseCode = "403",
+                        description = "Forbidden: User does not have 'REMOVE_USER_FROM_ORGANIZATION' authority",
+                        content = @Content
+                )
+        }
+)
+    public void removeUserFromOrganization(@RequestBody RemoveUserAssignmentDTO dto) {
+        userService.removeUserFromOrganization(dto);
+    }
+
+    @PostMapping("/remove/store")
+    @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN')")
+    @Operation(
+            summary = "Remove a user from a store",
+            description = "Removes a user from a specific store.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "User removed from store successfully",
+                            content = @Content
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Invalid input or missing required fields",
+                            content = @Content
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "Forbidden: User does not have 'REMOVE_USER_FROM_STORE' authority",
+                            content = @Content
+                    )
+            }
+    )
+    public void removeUserFromStore(@RequestBody RemoveUserAssignmentDTO dto) {
+        userService.removeUserFromStore(dto);
+    }
 }

@@ -26,4 +26,6 @@ public interface UserService  {
     void inviteUser(InviteUserDTO inviteDTO);
     void assignUserToOrganization(CreateUserAssignmentDTO dto);
     void assignUserToStore(CreateUserAssignmentDTO dto);
+    void removeUserFromOrganization(RemoveUserAssignmentDTO dto);
+    void removeUserFromStore(RemoveUserAssignmentDTO dto);
 }

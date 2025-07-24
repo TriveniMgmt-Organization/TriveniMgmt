@@ -16,6 +16,7 @@ import java.util.UUID;
 public interface UserOrganizationRoleRepository extends JpaRepository<UserOrganizationRole, UUID> {
     Optional<UserOrganizationRole> findByOrganizationId(UUID organizationId);
     Optional<UserOrganizationRole> findByUserIdAndOrganizationId(UUID userId, UUID organizationId);
+    Optional<UserOrganizationRole> findByUserIdAndOrganizationIdAndStoreId(UUID userId, UUID organizationId, UUID storeId);
 
     boolean existsByUserIdAndOrganizationId(UUID userId, UUID organizationId);
     boolean existsByUserIdAndStoreId(UUID userId, UUID storeId);

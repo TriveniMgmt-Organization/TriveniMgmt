@@ -2,6 +2,8 @@ package com.store.mgmt.users.model.dto;
 
 import com.store.mgmt.organization.model.dto.OrganizationDTO;
 import com.store.mgmt.organization.model.dto.StoreDTO;
+import com.store.mgmt.users.model.PermissionType;
+import com.store.mgmt.users.model.RoleType;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -74,14 +76,14 @@ public class UserDTO {
     private StoreDTO activeStore;
 
     @ArraySchema(
-            schema = @Schema(required = true, implementation = String.class),
+            schema = @Schema(required = true, implementation = RoleType.class),
             arraySchema = @Schema(description = "Set of roles assigned to the user")
     )
-    private Set<String> roles;
+    private Set<RoleType> roles;
 
     @ArraySchema(
-            schema = @Schema(required = true,implementation = String.class),
+            schema = @Schema(required = true,implementation = PermissionType.class),
             arraySchema = @Schema(description = "Set of permissions assigned to the user")
     )
-    private Set<String> permissions;
+    private Set<PermissionType> permissions;
 }

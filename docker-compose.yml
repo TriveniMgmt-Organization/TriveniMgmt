@@ -16,7 +16,7 @@ services:
       - JWT_EXPIRATION_MS=${JWT_EXPIRATION_MS}
       - JWT_REFRESH_EXPIRATION_MS=${JWT_REFRESH_EXPIRATION_MS}
       - JWT_ISSUER=${JWT_ISSUER}
-      - SPRING_LIQUIBASE_ENABLED=true
+      - SPRING_LIQUIBASE_ENABLED=false
       - SPRING_LIQUIBASE_CHANGE_LOG=classpath:db/changelog/db.changelog-master.yaml
     depends_on:
       db:

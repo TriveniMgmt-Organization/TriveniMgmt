@@ -297,6 +297,37 @@ public class UserServiceImpl implements UserService {
                 "Assigned user to store ID: " + store.getName() + " with role: " + role.getName());
     }
 
+    @Override
+    @Transactional
+    public void removeUserFromOrganization(RemoveUserAssignmentDTO dto) {
+        log.info("Removing user ID: {} from organization ID: {}", dto.getUserId(), dto.getOrganizationId());
+
+        User user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        Organization organization = organizationRepository.findById(dto.getOrganizationId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Organization not found"));
+        UserOrganizationRole userRole = userOrganizationRoleRepository.findByUserIdAndOrganizationId(user.getId(), organization.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User is not assigned to this organization"));
+        userOrganizationRoleRepository.delete(userRole);
+        logAuditEntry("REMOVE_USER_FROM_ORG", user.getId(), "Removed user from organization ID: " + organization.getId());
+    }
+
+    @Override
+    @Transactional
+    public void removeUserFromStore(RemoveUserAssignmentDTO dto) {
+        log.info("Removing user ID: {} from store ID: {}", dto.getUserId(), dto.getStoreId());
+
+        User user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        Organization organization = organizationRepository.findById(dto.getOrganizationId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Organization not found"));
+        Store store = storeRepository.findById(dto.getStoreId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Store not found"));
+        UserOrganizationRole userRole = userOrganizationRoleRepository.findByUserIdAndOrganizationIdAndStoreId(user.getId(), organization.getId(), store.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User is not assigned to this store"));
+        userOrganizationRoleRepository.delete(userRole);
+        logAuditEntry("REMOVE_USER_FROM_STORE", user.getId(), "Removed user from store ID: " + store.getName());
+    }
 
     private void logAuditEntry(String action, UUID entityId, String message) {
         try {

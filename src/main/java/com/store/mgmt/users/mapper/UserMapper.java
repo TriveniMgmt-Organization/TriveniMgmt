@@ -1,5 +1,7 @@
 package com.store.mgmt.users.mapper;
 
+import com.store.mgmt.users.model.PermissionType;
+import com.store.mgmt.users.model.RoleType;
 import com.store.mgmt.users.model.dto.PermissionDTO;
 import com.store.mgmt.users.model.dto.UpdateUserDTO;
 import com.store.mgmt.users.model.dto.UserDTO;
@@ -32,16 +34,16 @@ public interface UserMapper {
         // @Mapping(target = "username", source = "dto.username")
     void updateEntityFromDto(UpdateUserDTO dto, @MappingTarget User user);
     // Custom method to extract permissions from roles
-    default Set<String> mapRoles(User user) {
+    default Set<RoleType> mapRoles(User user) {
         return user.getOrganizationRoles().stream()
-                .map(role -> role.getRole().getName())
+                  .map(role -> RoleType.valueOf(role.getRole().getName()))
                 .collect(Collectors.toSet());
     }
 
-    default Set<String> mapPermissions(User user) {
+    default Set<PermissionType> mapPermissions(User user) {
         return user.getOrganizationRoles().stream()
                 .flatMap(role -> role.getRole().getPermissions().stream())
-                .map(per -> permissionToPermissionDTO(per).getName())
+                .map(per -> PermissionType.valueOf(permissionToPermissionDTO(per).getName()))
                 .collect(Collectors.toSet());
     }
 

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import jakarta.validation.Valid; // Import for @Valid
+import jakarta.validation.Valid;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -403,6 +403,92 @@ public class InventoryController {
     )
     public ResponseEntity<Void> deleteCategory(@PathVariable UUID id) {
         inventoryService.deleteCategory(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // --- Brand Management ---
+    @PostMapping("/brands")
+//    @PreAuthorize("hasAuthority('BRAND_WRITE')")
+    @Operation(
+            summary = "Create a new product brand",
+            description = "Adds a new brand definition to the system.",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Brand created successfully", content = @Content(schema = @Schema(implementation = BrandDTO.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
+                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_CREATE_BRAND' authority", content = @Content),
+                    @ApiResponse(responseCode = "409", description = "Conflict: Brand with this name already exists", content = @Content)
+            }
+    )
+    public ResponseEntity<BrandDTO> createBrand(@Valid @RequestBody CreateBrandDTO createDTO) {
+        BrandDTO newBrand = inventoryService.createBrand(createDTO);
+        return new ResponseEntity<>(newBrand, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/brands")
+//    @PreAuthorize("hasAuthority('BRAND_READ')")
+    @Operation(
+            summary = "Get all product brands",
+            description = "Retrieves a list of all defined product brands.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Brands retrieved successfully", content = @Content(array = @ArraySchema(schema = @Schema(implementation = BrandDTO.class)))),
+                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_VIEW_BRAND' authority", content = @Content)
+            }
+    )
+    public ResponseEntity<List<BrandDTO>> getAllBrands(
+            @Parameter(description = "Set to true to include inactive brands. Defaults to false.")
+            @RequestParam(defaultValue = "false") boolean includeInactive) {
+        List<BrandDTO> brands = inventoryService.getAllBrands(includeInactive);
+        return ResponseEntity.ok(brands);
+    }
+
+    @GetMapping("/brands/{id}")
+//    @PreAuthorize("hasAuthority('BRAND_READ')")
+    @Operation(
+            summary = "Get brand by ID",
+            description = "Retrieves a brand by its unique ID.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Brand retrieved successfully", content = @Content(schema = @Schema(implementation = BrandDTO.class))),
+                    @ApiResponse(responseCode = "404", description = "Brand not found", content = @Content),
+                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_VIEW_BRAND' authority", content = @Content)
+            }
+    )
+    public ResponseEntity<BrandDTO> getBrandById(@PathVariable UUID id) {
+        BrandDTO brand = inventoryService.getBrandById(id);
+        return ResponseEntity.ok(brand);
+    }
+
+    @PutMapping("/brands/{id}")
+//    @PreAuthorize("hasAuthority('BRAND_WRITE')")
+    @Operation(
+            summary = "Update an existing brand",
+            description = "Updates the details of an existing brand.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Brand updated successfully", content = @Content(schema = @Schema(implementation = BrandDTO.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
+                    @ApiResponse(responseCode = "404", description = "Brand not found", content = @Content),
+                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_UPDATE_BRAND' authority", content = @Content),
+                    @ApiResponse(responseCode = "409", description = "Conflict: Brand name already in use", content = @Content)
+            }
+    )
+    public ResponseEntity<BrandDTO> updateBrand(@PathVariable UUID id, @Valid @RequestBody UpdateBrandDTO updateDTO) {
+        BrandDTO updatedBrand = inventoryService.updateBrand(id, updateDTO);
+        return ResponseEntity.ok(updatedBrand);
+    }
+
+    @DeleteMapping("/brands/{id}")
+//    @PreAuthorize("hasAuthority('BRAND_WRITE')")
+    @Operation(
+            summary = "Delete a brand",
+            description = "Deletes a brand by its unique ID. Fails if products are associated.",
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "Brand deleted successfully", content = @Content),
+                    @ApiResponse(responseCode = "404", description = "Brand not found", content = @Content),
+                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_DELETE_BRAND' authority", content = @Content),
+                    @ApiResponse(responseCode = "409", description = "Conflict: Brand has associated products", content = @Content)
+            }
+    )
+    public ResponseEntity<Void> deleteBrand(@PathVariable UUID id) {
+        inventoryService.deleteBrand(id);
         return ResponseEntity.noContent().build();
     }
 
