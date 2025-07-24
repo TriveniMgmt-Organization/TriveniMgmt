@@ -13,16 +13,14 @@ import org.mapstruct.factory.Mappers;
 public interface OrganizationMapper {
     OrganizationMapper INSTANCE = Mappers.getMapper(OrganizationMapper.class);
 
-    @Mapping(target = "stores", ignore = true)
+//    @Mapping(target = "stores", ignore = true)
     OrganizationDTO toDto(Organization organization);
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Organization toEntity(CreateOrganizationDTO dto);
-    @Mapping(target = "id", ignore = true) // Don't update the ID
-    @Mapping(target = "createdAt", ignore = true) // Don't update creation timestamp
-    @Mapping(target = "updatedAt", ignore = true) // Let @UpdateTimestamp handle this
-        // Or if your DTO has a 'username' field and you want to use its value directly:
-        // @Mapping(target = "username", source = "dto.username")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     void updateEntityFromDto(UpdateOrganizationDTO dto, @MappingTarget Organization entity);
 }

@@ -470,9 +470,9 @@ private final UserOrganizationRoleRepository userOrganizationRoleRepository;
         User currentUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalStateException("Current user not found."));
         boolean hasAccess = currentUser.getOrganizationRoles().stream()
-                .anyMatch(uor -> uor.getOrganization().getId().equals(selectDTO.getOrganizationId()) &&
-                        (selectDTO.getStoreId() == null ||
-                                (uor.getStore() != null && uor.getStore().getId().equals(selectDTO.getStoreId()))));
+                .anyMatch(uor -> uor.getOrganization().getId().equals(selectDTO.getOrganizationId()));
+//                        && (selectDTO.getStoreId() == null ||
+//                                (uor.getStore() != null && uor.getStore().getId().equals(selectDTO.getStoreId()))));
 
         if (!hasAccess) {
             throw new SecurityException("User not authorized for this organization or store.");
