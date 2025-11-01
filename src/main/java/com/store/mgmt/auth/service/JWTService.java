@@ -28,6 +28,7 @@ import org.springframework.web.util.WebUtils;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -206,6 +207,7 @@ public class JWTService {
         data.username = claims.getSubject();
         data.organizationId = (String) claims.getClaim("organization_id") != null ? UUID.fromString((String) claims.getClaim("organization_id")) : null;
         data.storeId = (String) claims.getClaim("store_id") != null ? UUID.fromString((String) claims.getClaim("store_id")) : null;
+        
         if (data.username == null) {
             log.warn("JWT does not contain a username");
             throw new JwtException("JWT does not contain a username");
@@ -266,12 +268,22 @@ public class JWTService {
         }
     }
 
-
     @Transactional
     public UserDetails createUserDetails(User user) {
-        List<GrantedAuthority> authorities = user.getOrganizationRoles().stream()
+        // Include both roles (with ROLE_ prefix) and permissions (without prefix)
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        
+        // Add roles
+        authorities.addAll(user.getOrganizationRoles().stream()
                 .map(uor -> new SimpleGrantedAuthority("ROLE_" + uor.getRole().getName()))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
+        
+        // Add permissions from roles
+        authorities.addAll(user.getOrganizationRoles().stream()
+                .flatMap(uor -> uor.getRole().getPermissions().stream())
+                .map(permission -> new SimpleGrantedAuthority(permission.getName()))
+                .collect(Collectors.toList()));
+        log.debug("Authorities for user {}: {}", user.getEmail(), authorities);
 
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),

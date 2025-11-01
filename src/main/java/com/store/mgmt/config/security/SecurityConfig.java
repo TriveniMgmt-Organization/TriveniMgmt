@@ -115,8 +115,8 @@ public class SecurityConfig {
                                 // Permission-based restrictions (optional, for finer control)
                                 .requestMatchers("/api/v1/users/**").hasAnyAuthority("USER_READ", "USER_WRITE")
                                 .requestMatchers("/api/v1/roles/**").hasAnyAuthority("ROLE_READ", "ROLE_WRITE")
-                                // Product endpoints (templates) require PRODUCT_READ/PRODUCT_WRITE
-                                .requestMatchers("/api/v1/inventory/products/**").hasAnyAuthority("PRODUCT_READ", "PRODUCT_WRITE", "INVENTORY_ITEM_READ", "INVENTORY_ITEM_WRITE")
+                                // Product endpoints (templates) require PRODUCT_READ/PRODUCT_WRITE or ROLE_SUPER_ADMIN
+                                .requestMatchers("/api/v1/inventory/products/**").hasAnyAuthority("ROLE_SUPER_ADMIN", "PRODUCT_READ", "PRODUCT_WRITE", "INVENTORY_ITEM_READ", "INVENTORY_ITEM_WRITE")
                                 // Other inventory endpoints require INVENTORY_ITEM_READ/INVENTORY_ITEM_WRITE
                                 .requestMatchers("/api/v1/inventory/**").hasAnyAuthority("INVENTORY_ITEM_READ", "INVENTORY_ITEM_WRITE")
 //                        .requestMatchers("/api/v1/inventory/**").permitAll()

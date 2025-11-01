@@ -990,7 +990,7 @@ public class InventoryServiceImpl implements InventoryService {
 
         if (updateDTO.getSupplierId() != null) existingPO.setSupplier(findSupplierOrThrow(updateDTO.getSupplierId()));
         if (updateDTO.getUserId() != null) existingPO.setUser(findUserOrThrow(updateDTO.getUserId()));
-        if (updateDTO.getStatus() != null) existingPO.setStatus(PurchaseOrderStatus.valueOf(updateDTO.getStatus().toUpperCase()));
+        if (updateDTO.getStatus() != null) existingPO.setStatus(PurchaseOrderStatus.valueOf(updateDTO.getStatus() != null ? updateDTO.getStatus().toUpperCase() : null));
 
         PurchaseOrder updatedPO = purchaseOrderRepository.save(existingPO);
         logAuditEntry("UPDATE_PURCHASE_ORDER", updatedPO.getId(), "Updated purchase order");

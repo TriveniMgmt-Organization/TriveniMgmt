@@ -47,22 +47,30 @@ public class JWTCookieAuthenticationFilter  extends OncePerRequestFilter{
                  String email = jwtData.username;
                  UUID orgId = jwtData.organizationId;
                  UUID storeId = jwtData.storeId;
-                User user = userRepository.findByEmail(email)
+                // Fetch user with roles and permissions eagerly to avoid LazyInitializationException
+                User user = userRepository.findByEmailWithRolesAndPermissions(email)
                         .orElseThrow(() -> new IllegalStateException("User not found for email: " + email));
                 if (jwtService.validateToken(token, user)) {
 
                     logger.info("Extracted JWT data: username={}, organizationId={}, storeId={}",
                             jwtData.username, jwtData.organizationId, jwtData.storeId);
+                    
+                    // Load user details with authorities (roles + permissions) from database
+                    // Spring Security will handle authorization checks based on these authorities
                     UserDetails userDetails = jwtService.createUserDetails(user);
-                    System.out.println("User Details: " + userDetails.getUsername() + ", Authorities: " +
+                    
+                    logger.debug("User Details: {}, Authorities: {}", 
+                            userDetails.getUsername(), 
                             userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(", ")));
+                    
                     Map<String, Object> claims = new HashMap<>();
                     claims.put("org_id", orgId != null ? orgId.toString() : null);
                     claims.put("store_id", storeId != null ? storeId.toString() : null);
 
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    System.out.println("Authentication: " + authentication.getName() + ", Authorities: " +
+                    logger.debug("Authentication: {}, Authorities: {}", 
+                            authentication.getName(),
                             authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(", ")));
                     authentication.setDetails(claims);
                     SecurityContextHolder.getContext().setAuthentication(authentication);

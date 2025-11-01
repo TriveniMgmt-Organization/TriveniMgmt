@@ -31,4 +31,13 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             "LEFT JOIN FETCH ur.store s " +                // Eagerly fetch Store for each role (if role has one)
             "WHERE u.username = :username")
     Optional<User> findByUsernameWithAllRelatedData(@Param("username") String username);
+
+    @Query("SELECT DISTINCT u FROM User u " +
+            "LEFT JOIN FETCH u.organizationRoles ur " +     // Eagerly fetch User's roles
+            "LEFT JOIN FETCH ur.role r " +                  // Eagerly fetch Role
+            "LEFT JOIN FETCH r.permissions p " +            // Eagerly fetch Permissions
+            "LEFT JOIN FETCH ur.organization o " +         // Eagerly fetch Organization
+            "LEFT JOIN FETCH ur.store s " +                // Eagerly fetch Store
+            "WHERE u.email = :email AND u.deletedAt IS NULL")
+    Optional<User> findByEmailWithRolesAndPermissions(@Param("email") String email);
 }
