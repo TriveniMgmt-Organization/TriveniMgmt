@@ -101,6 +101,8 @@ public class SecurityConfig {
                                 // Public endpoints
                                 .requestMatchers("/api/v1/auth/**").permitAll()
                                 .requestMatchers(SWAGGER_WHITELIST).permitAll()
+                                .requestMatchers("/error").permitAll()
+                                .requestMatchers("/actuator/health").permitAll()
                                 .requestMatchers("/api/v1/organizations/**").hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ORG_ADMIN")
                                 .requestMatchers("/api/v1/stores/**").hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ORG_ADMIN", "ROLE_STORE_MANAGER")
                                 .requestMatchers("/api/v1/user-organizations/**").hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ORG_ADMIN")
@@ -113,6 +115,9 @@ public class SecurityConfig {
                                 // Permission-based restrictions (optional, for finer control)
                                 .requestMatchers("/api/v1/users/**").hasAnyAuthority("USER_READ", "USER_WRITE")
                                 .requestMatchers("/api/v1/roles/**").hasAnyAuthority("ROLE_READ", "ROLE_WRITE")
+                                // Product endpoints (templates) require PRODUCT_READ/PRODUCT_WRITE
+                                .requestMatchers("/api/v1/inventory/products/**").hasAnyAuthority("PRODUCT_READ", "PRODUCT_WRITE", "INVENTORY_ITEM_READ", "INVENTORY_ITEM_WRITE")
+                                // Other inventory endpoints require INVENTORY_ITEM_READ/INVENTORY_ITEM_WRITE
                                 .requestMatchers("/api/v1/inventory/**").hasAnyAuthority("INVENTORY_ITEM_READ", "INVENTORY_ITEM_WRITE")
 //                        .requestMatchers("/api/v1/inventory/**").permitAll()
                                 .anyRequest().authenticated()

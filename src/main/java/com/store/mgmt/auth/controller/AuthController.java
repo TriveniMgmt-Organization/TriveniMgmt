@@ -279,6 +279,7 @@ public class AuthController {
         response.addHeader("Set-Cookie", accessTokenCookie.toString());
         response.addHeader("Set-Cookie", refreshTokenCookie.toString());
     }
+
     private String getAccessTokenFromCookies(HttpServletRequest request) {
         Cookie cookie = WebUtils.getCookie(request, ACCESS_TOKEN_COOKIE_NAME);
         if (cookie != null) {

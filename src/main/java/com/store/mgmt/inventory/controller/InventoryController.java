@@ -239,7 +239,7 @@ public class InventoryController {
 
     // --- Product Management ---
     @PostMapping("/products")
-//    @PreAuthorize("hasAuthority('PRODUCT_WRITE')")
+   @PreAuthorize("hasAuthority('PRODUCT_WRITE')")
     @Operation(
             summary = "Create a new product",
             description = "Adds a new product definition to the system. This is master data, not an inventory record.",
@@ -256,7 +256,7 @@ public class InventoryController {
     }
 
     @GetMapping("/products")
-//    @PreAuthorize("hasAuthority('PRODUCT_READ')")
+   @PreAuthorize("hasAuthority('PRODUCT_READ')")
     @Operation(
             summary = "Get all products",
             description = "Retrieves a list of all products, optionally including inactive ones.",
@@ -273,7 +273,7 @@ public class InventoryController {
     }
 
     @GetMapping("/products/{id}")
-//    @PreAuthorize("hasAuthority('PRODUCT_READ')")
+   @PreAuthorize("hasAuthority('PRODUCT_READ')")
     @Operation(
             summary = "Get product by ID",
             description = "Retrieves a product definition by its unique ID.",
@@ -289,7 +289,7 @@ public class InventoryController {
     }
 
     @PutMapping("/products/{id}")
-//    @PreAuthorize("hasAuthority('PRODUCT_WRITE')")
+   @PreAuthorize("hasAuthority('PRODUCT_WRITE')")
     @Operation(
             summary = "Update an existing product",
             description = "Updates the details of an existing product definition.",
@@ -307,7 +307,7 @@ public class InventoryController {
     }
 
     @DeleteMapping("/products/{id}")
-//    @PreAuthorize("hasAuthority('PRODUCT_WRITE')")
+   @PreAuthorize("hasAuthority('PRODUCT_WRITE')")
     @Operation(
             summary = "Logically delete a product",
             description = "Marks a product as inactive. It does not physically remove it from the database.",
@@ -324,7 +324,7 @@ public class InventoryController {
 
     // --- Category Management ---
     @PostMapping("/categories")
-//    @PreAuthorize("hasAuthority('CATEGORY_WRITE')")
+   @PreAuthorize("hasAuthority('CATEGORY_WRITE')")
     @Operation(
             summary = "Create a new product category",
             description = "Adds a new category definition.",
@@ -341,7 +341,7 @@ public class InventoryController {
     }
 
     @GetMapping("/categories")
-//    @PreAuthorize("hasAuthority('CATEGORY_READ')")
+   @PreAuthorize("hasAuthority('CATEGORY_READ')")
     @Operation(
             summary = "Get all product categories",
             description = "Retrieves a list of all defined product categories.",
@@ -356,7 +356,7 @@ public class InventoryController {
     }
 
     @GetMapping("/categories/{id}")
-//    @PreAuthorize("hasAuthority('CATEGORY_READ')")
+   @PreAuthorize("hasAuthority('CATEGORY_READ')")
     @Operation(
             summary = "Get category by ID",
             description = "Retrieves a category by its unique ID.",
@@ -372,7 +372,7 @@ public class InventoryController {
     }
 
     @PutMapping("/categories/{id}")
-//    @PreAuthorize("hasAuthority('CATEGORY_WRITE')")
+   @PreAuthorize("hasAuthority('CATEGORY_WRITE')")
     @Operation(
             summary = "Update an existing category",
             description = "Updates the details of an existing category.",
@@ -390,7 +390,7 @@ public class InventoryController {
     }
 
     @DeleteMapping("/categories/{id}")
-//    @PreAuthorize("hasAuthority('CATEGORY_WRITE')")
+   @PreAuthorize("hasAuthority('CATEGORY_WRITE')")
     @Operation(
             summary = "Delete a category",
             description = "Deletes a category by its unique ID. Fails if products are associated.",
@@ -408,7 +408,7 @@ public class InventoryController {
 
     // --- Brand Management ---
     @PostMapping("/brands")
-//    @PreAuthorize("hasAuthority('BRAND_WRITE')")
+   @PreAuthorize("hasAuthority('BRAND_WRITE')")
     @Operation(
             summary = "Create a new product brand",
             description = "Adds a new brand definition to the system.",
@@ -425,7 +425,7 @@ public class InventoryController {
     }
 
     @GetMapping("/brands")
-//    @PreAuthorize("hasAuthority('BRAND_READ')")
+   @PreAuthorize("hasAuthority('BRAND_READ')")
     @Operation(
             summary = "Get all product brands",
             description = "Retrieves a list of all defined product brands.",
@@ -442,7 +442,7 @@ public class InventoryController {
     }
 
     @GetMapping("/brands/{id}")
-//    @PreAuthorize("hasAuthority('BRAND_READ')")
+   @PreAuthorize("hasAuthority('BRAND_READ')")
     @Operation(
             summary = "Get brand by ID",
             description = "Retrieves a brand by its unique ID.",
@@ -458,7 +458,7 @@ public class InventoryController {
     }
 
     @PutMapping("/brands/{id}")
-//    @PreAuthorize("hasAuthority('BRAND_WRITE')")
+   @PreAuthorize("hasAuthority('BRAND_WRITE')")
     @Operation(
             summary = "Update an existing brand",
             description = "Updates the details of an existing brand.",
@@ -476,7 +476,7 @@ public class InventoryController {
     }
 
     @DeleteMapping("/brands/{id}")
-//    @PreAuthorize("hasAuthority('BRAND_WRITE')")
+   @PreAuthorize("hasAuthority('BRAND_WRITE')")
     @Operation(
             summary = "Delete a brand",
             description = "Deletes a brand by its unique ID. Fails if products are associated.",
@@ -494,7 +494,7 @@ public class InventoryController {
 
     // --- Supplier Management ---
     @PostMapping("/suppliers")
-//    @PreAuthorize("hasAuthority('SUPPLIER_WRITE')")
+   @PreAuthorize("hasAuthority('SUPPLIER_WRITE')")
     @Operation(
             summary = "Create a new supplier",
             description = "Adds a new supplier to the system.",
@@ -511,7 +511,7 @@ public class InventoryController {
     }
 
     @GetMapping("/suppliers")
-//    @PreAuthorize("hasAuthority('SUPPLIER_READ')")
+   @PreAuthorize("hasAuthority('SUPPLIER_READ')")
     @Operation(
             summary = "Get all suppliers",
             description = "Retrieves a list of all registered suppliers.",
@@ -526,7 +526,7 @@ public class InventoryController {
     }
 
     @GetMapping("/suppliers/{id}")
-//    @PreAuthorize("hasAuthority('SUPPLIER_READ')")
+   @PreAuthorize("hasAuthority('SUPPLIER_READ')")
     @Operation(
             summary = "Get supplier by ID",
             description = "Retrieves a supplier by its unique ID.",
@@ -542,7 +542,7 @@ public class InventoryController {
     }
 
     @PutMapping("/suppliers/{id}")
-//    @PreAuthorize("hasAuthority('SUPPLIER_WRITE')")
+   @PreAuthorize("hasAuthority('SUPPLIER_WRITE')")
     @Operation(
             summary = "Update an existing supplier",
             description = "Updates the details of an existing supplier.",
@@ -560,7 +560,7 @@ public class InventoryController {
     }
 
     @DeleteMapping("/suppliers/{id}")
-//    @PreAuthorize("hasAuthority('SUPPLIER_WRITE')")
+   @PreAuthorize("hasAuthority('SUPPLIER_WRITE')")
     @Operation(
             summary = "Delete a supplier",
             description = "Deletes a supplier by its unique ID. Fails if purchase orders are associated.",
@@ -578,7 +578,7 @@ public class InventoryController {
 
     // --- Location Management ---
     @PostMapping("/locations")
-//    @PreAuthorize("hasAuthority('LOCATION_WRITE')")
+   @PreAuthorize("hasAuthority('LOCATION_WRITE')")
     @Operation(
             summary = "Create a new inventory location",
             description = "Adds a new physical or logical location for inventory.",
@@ -595,7 +595,7 @@ public class InventoryController {
     }
 
     @GetMapping("/locations")
-//    @PreAuthorize("hasAuthority('LOCATION_READ')")
+   @PreAuthorize("hasAuthority('LOCATION_READ')")
     @Operation(
             summary = "Get all inventory locations",
             description = "Retrieves a list of all defined inventory locations.",
@@ -610,7 +610,7 @@ public class InventoryController {
     }
 
     @GetMapping("/locations/{id}")
-//    @PreAuthorize("hasAuthority('LOCATION_READ')")
+   @PreAuthorize("hasAuthority('LOCATION_READ')")
     @Operation(
             summary = "Get location by ID",
             description = "Retrieves a location by its unique ID.",

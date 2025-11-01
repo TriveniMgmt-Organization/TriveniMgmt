@@ -35,3 +35,35 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# Environment variables - NEVER commit these!
+.env
+.env.*
+env.*
+!.env.sample
+!.env.example
+*.env
+!*.env.sample
+!*.env.example
+
+# Application properties (local overrides)
+application-local.properties
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+kls_database.db
+
+# Logs
+*.log
+logs/
+
+# Docker
+docker-compose.override.yml
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/

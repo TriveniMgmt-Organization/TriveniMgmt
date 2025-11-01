@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.simple
     ports:
       - "8080:8080"
     environment:
@@ -16,7 +16,7 @@ services:
       - JWT_EXPIRATION_MS=${JWT_EXPIRATION_MS}
       - JWT_REFRESH_EXPIRATION_MS=${JWT_REFRESH_EXPIRATION_MS}
       - JWT_ISSUER=${JWT_ISSUER}
-      - SPRING_LIQUIBASE_ENABLED=false
+      - SPRING_LIQUIBASE_ENABLED=${SPRING_LIQUIBASE_ENABLED}
       - SPRING_LIQUIBASE_CHANGE_LOG=classpath:db/changelog/db.changelog-master.yaml
     depends_on:
       db:
@@ -42,7 +42,7 @@ services:
     networks:
       - store-network
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "${DB_USER}"]
+      test: ["CMD", "pg_isready", "-U", "${DB_USER}", "-d", "${DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -53,5 +53,3 @@ volumes:
 networks:
   store-network:
     driver: bridge
-
-version: '3.9'
