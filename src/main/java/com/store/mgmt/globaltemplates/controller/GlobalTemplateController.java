@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,7 +39,6 @@ public class GlobalTemplateController {
     }
     
     @PostMapping
-    @PreAuthorize("hasAuthority('TEMPLATE_WRITE')")
     @Operation(
             summary = "Create a new global template",
             description = "Creates a new global template that can be applied to organizations.",
@@ -53,6 +51,38 @@ public class GlobalTemplateController {
     public ResponseEntity<GlobalTemplateDTO> createTemplate(@Valid @RequestBody CreateGlobalTemplateDTO createDTO) {
         GlobalTemplateDTO template = templateService.createTemplate(createDTO);
         return new ResponseEntity<>(template, HttpStatus.CREATED);
+    }
+    
+    @PostMapping("/from-json")
+    @Operation(
+            summary = "Create a global template from JSON",
+            description = "Creates a global template and its items from a JSON string (similar to seed files).",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Template created successfully", content = @Content(schema = @Schema(implementation = GlobalTemplateDTO.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid JSON format"),
+                    @ApiResponse(responseCode = "409", description = "Template with code already exists")
+            }
+    )
+    public ResponseEntity<GlobalTemplateDTO> createTemplateFromJson(@Valid @RequestBody CreateTemplateFromJsonDTO jsonDTO) {
+        GlobalTemplateDTO template = templateService.createTemplateFromJson(jsonDTO.getJsonData());
+        return new ResponseEntity<>(template, HttpStatus.CREATED);
+    }
+    
+    @PutMapping("/{id}/from-json")
+    @Operation(
+            summary = "Update a global template from JSON",
+            description = "Updates an existing global template and its items from a JSON string. The template code in JSON must match the existing template code.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Template updated successfully", content = @Content(schema = @Schema(implementation = GlobalTemplateDTO.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid JSON format or template code mismatch"),
+                    @ApiResponse(responseCode = "404", description = "Template not found")
+            }
+    )
+    public ResponseEntity<GlobalTemplateDTO> updateTemplateFromJson(
+            @PathVariable UUID id,
+            @Valid @RequestBody CreateTemplateFromJsonDTO jsonDTO) {
+        GlobalTemplateDTO template = templateService.updateTemplateFromJson(id, jsonDTO.getJsonData());
+        return ResponseEntity.ok(template);
     }
     
     @GetMapping
@@ -124,7 +154,6 @@ public class GlobalTemplateController {
     }
     
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('TEMPLATE_WRITE')")
     @Operation(
             summary = "Update a global template",
             description = "Updates an existing global template.",
@@ -141,7 +170,6 @@ public class GlobalTemplateController {
     }
     
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('TEMPLATE_WRITE')")
     @Operation(
             summary = "Delete a global template",
             description = "Deletes a global template (logical delete).",
@@ -156,7 +184,6 @@ public class GlobalTemplateController {
     }
     
     @PostMapping("/apply")
-    @PreAuthorize("hasAuthority('TEMPLATE_WRITE')")
     @Operation(
             summary = "Apply a template to an organization",
             description = "Applies a global template to an organization, creating all entities defined in the template.",
@@ -174,7 +201,6 @@ public class GlobalTemplateController {
     }
     
     @PostMapping("/{id}/items")
-    @PreAuthorize("hasAuthority('TEMPLATE_WRITE')")
     @Operation(
             summary = "Add an item to a template",
             description = "Adds a new item (brand, category, UOM, etc.) to a global template.",
@@ -193,7 +219,6 @@ public class GlobalTemplateController {
     }
     
     @DeleteMapping("/items/{itemId}")
-    @PreAuthorize("hasAuthority('TEMPLATE_WRITE')")
     @Operation(
             summary = "Remove an item from a template",
             description = "Removes an item from a global template.",

@@ -59,10 +59,6 @@ public class JWTCookieAuthenticationFilter  extends OncePerRequestFilter{
                     // Spring Security will handle authorization checks based on these authorities
                     UserDetails userDetails = jwtService.createUserDetails(user);
                     
-                    logger.debug("User Details: {}, Authorities: {}", 
-                            userDetails.getUsername(), 
-                            userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(", ")));
-                    
                     Map<String, Object> claims = new HashMap<>();
                     claims.put("org_id", orgId != null ? orgId.toString() : null);
                     claims.put("store_id", storeId != null ? storeId.toString() : null);

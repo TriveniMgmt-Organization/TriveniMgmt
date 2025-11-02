@@ -103,6 +103,7 @@ public class SecurityConfig {
                                 .requestMatchers(SWAGGER_WHITELIST).permitAll()
                                 .requestMatchers("/error").permitAll()
                                 .requestMatchers("/actuator/health").permitAll()
+                                .requestMatchers("/api/v1/global-templates/**").hasAnyAuthority("ROLE_SUPER_ADMIN")
                                 .requestMatchers("/api/v1/organizations/**").hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ORG_ADMIN")
                                 .requestMatchers("/api/v1/stores/**").hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ORG_ADMIN", "ROLE_STORE_MANAGER")
                                 .requestMatchers("/api/v1/user-organizations/**").hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ORG_ADMIN")

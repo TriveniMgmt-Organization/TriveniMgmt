@@ -15,7 +15,8 @@ import java.util.List;
 
 @Mapper(componentModel = "spring",
         config = BaseMapperConfig.class,
-        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+        uses = {ProductVariantMapper.class})
 public interface ProductTemplateMapper {
 
     @Mapping(target = "unitOfMeasure.description", ignore = true)

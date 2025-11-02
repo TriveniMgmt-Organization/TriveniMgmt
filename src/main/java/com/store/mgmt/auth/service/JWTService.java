@@ -284,7 +284,7 @@ public class JWTService {
                 .flatMap(uor -> uor.getRole().getPermissions().stream())
                 .map(permission -> new SimpleGrantedAuthority(permission.getName()))
                 .collect(Collectors.toList()));
-        log.debug("Authorities for user {}: {}", user.getEmail(), authorities);
+        // log.debug("Authorities for user {}: {}", user.getEmail(), authorities);
 
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),

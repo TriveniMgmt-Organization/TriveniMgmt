@@ -5,6 +5,7 @@ import com.store.mgmt.organization.model.entity.Organization;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -17,7 +18,8 @@ import java.util.Set;
     @UniqueConstraint(columnNames = {"organization_id", "barcode"})
 })
 @Data
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = false, exclude = {"template", "organization", "inventoryItems"})
+@ToString(exclude = {"template", "organization", "inventoryItems"})
 public class ProductVariant extends BaseEntity {
 
     @ManyToOne

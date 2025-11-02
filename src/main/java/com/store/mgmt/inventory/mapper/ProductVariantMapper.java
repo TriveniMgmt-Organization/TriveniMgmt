@@ -19,6 +19,7 @@ import java.util.List;
 public interface ProductVariantMapper {
 
     @Mapping(source = "template.id", target = "templateId")
+    @Mapping(target = "template", ignore = true) // Ignore to prevent circular reference
     ProductVariantDTO toDto(ProductVariant variant);
     List<ProductVariantDTO> toDtoList(List<ProductVariant> variants);
 

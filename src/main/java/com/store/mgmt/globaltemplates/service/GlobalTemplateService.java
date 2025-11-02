@@ -26,5 +26,9 @@ public interface GlobalTemplateService {
     GlobalTemplateDTO addItemToTemplate(UUID templateId, String entityType, String jsonData, Integer sortOrder);
     
     void removeItemFromTemplate(UUID itemId);
+    
+    GlobalTemplateDTO createTemplateFromJson(String jsonData);
+    
+    GlobalTemplateDTO updateTemplateFromJson(UUID templateId, String jsonData);
 }
 

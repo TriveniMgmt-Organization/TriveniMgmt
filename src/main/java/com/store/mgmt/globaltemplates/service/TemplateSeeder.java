@@ -221,12 +221,12 @@ public class TemplateSeeder {
                     if (dataNode != null) {
                         // Normalize field names from snake_case to camelCase before storing
                         JsonNode normalizedDataNode = normalizeFieldNames(dataNode);
-                        item.setData(normalizedDataNode.toString());
+                        item.setData(normalizedDataNode);
                     } else {
                         // If no "data" field, store the entire node except entityType/entity_type
                         // Normalize field names in the entire node
                         JsonNode normalizedItemNode = normalizeFieldNames(itemNode);
-                        item.setData(normalizedItemNode.toString());
+                        item.setData(normalizedItemNode);
                     }
                     
                     // Handle both "sortOrder" (camelCase) and "sort_order" (snake_case)

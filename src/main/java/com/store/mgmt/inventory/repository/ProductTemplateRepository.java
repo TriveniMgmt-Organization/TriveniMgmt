@@ -25,7 +25,10 @@ public interface ProductTemplateRepository extends JpaRepository<ProductTemplate
     List<ProductTemplate> findAll();
 
     Optional<ProductTemplate> findByIdAndOrganizationId(UUID id, UUID organizationId);
+    
+    @Query("SELECT DISTINCT pt FROM ProductTemplate pt LEFT JOIN FETCH pt.variants v WHERE pt.organization.id = :organizationId AND pt.deletedAt IS NULL AND (v.deletedAt IS NULL OR v IS NULL) ORDER BY pt.createdAt DESC")
     List<ProductTemplate> findByOrganizationId(UUID organizationId);
+    
     List<ProductTemplate> findByCategoryIdAndOrganizationId(UUID categoryId, UUID organizationId);
     List<ProductTemplate> findByUnitOfMeasureIdAndOrganizationId(UUID unitOfMeasureId, UUID organizationId);
 }

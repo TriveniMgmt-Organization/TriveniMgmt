@@ -20,20 +20,9 @@ public interface GlobalTemplateItemMapper {
     ObjectMapper objectMapper = new ObjectMapper();
 
     @Mapping(target = "templateId", source = "template.id")
-    @Mapping(target = "data", expression = "java(parseJson(entity.getData()))")
+    @Mapping(target = "data", source = "data")
     GlobalTemplateItemDTO toDto(GlobalTemplateItem entity);
 
     List<GlobalTemplateItemDTO> toDtoList(List<GlobalTemplateItem> entities);
-
-    default JsonNode parseJson(String json) {
-        if (json == null || json.isEmpty()) {
-            return null;
-        }
-        try {
-            return objectMapper.readTree(json);
-        } catch (JsonProcessingException e) {
-            return null;
-        }
-    }
 }
 

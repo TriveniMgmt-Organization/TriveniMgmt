@@ -184,11 +184,6 @@ private final UserOrganizationRoleRepository userOrganizationRoleRepository;
 //        String accessToken = jwtService.generateAccessToken(user, activeOrganizationId, activeStoreId, authoritiesForActiveOrg);
 //        String refreshToken = jwtService.generateRefreshToken(user);
 
-        System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^Generated tokens for user: " + user.getUsername() +
-                "\nAccess Token: " + aT.getAccessToken() +
-                "\nRefresh Token: " + aT.getRefreshToken());
-
-
 //        storeRefreshToken(user, refreshToken);
         return new AuthResponse(aT.getAccessToken(), aT.getRefreshToken(), userMapper.toDto(user));
     }
@@ -211,7 +206,6 @@ private final UserOrganizationRoleRepository userOrganizationRoleRepository;
                 throw new DisabledException("User account is inactive");
             }
 
-            System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^Authentication success creating tokens for user: " + user.getUsername());
             return handleJWTGeneration(user);
 //            UserDetails userDetails = createUserDetails(user);
 //            String accessToken = jwtService.generateAccessToken(userDetails, user);
@@ -390,9 +384,7 @@ private final UserOrganizationRoleRepository userOrganizationRoleRepository;
         Organization organization = organizationRepository.findById(orgId)
                 .orElseThrow(() -> new EntityNotFoundException("Organization not found: " + orgId));
         OrganizationDTO organizationDTO = organizationMapper.toDto(organization);
-        System.out.println("Organization found: " + organizationDTO.getName() + " for user: " + user.getUsername());
         userDTO.setActiveOrganization(organizationDTO);
-        System.out.println("Organization found: " + organization.getName() + " for user: " + user.getUsername());
         if (storeUuid != null) {
             boolean hasStoreAccess = userOrganizationRoleRepository.existsByUserIdAndStoreId(user.getId(), storeUuid);
             if (!hasStoreAccess) {
@@ -561,7 +553,7 @@ private final UserOrganizationRoleRepository userOrganizationRoleRepository;
 
     private void logAuditEntry(String action, UUID entityId, String message) {
         try {
-            System.out.println("Audit entry logged successfully: " + log);
+            log.info("Logging audit entry: action={}, entityId={}, message={}", action, entityId, message);
             auditLogService.builder()
                     .action(action)
 //                    .entityType("Store")

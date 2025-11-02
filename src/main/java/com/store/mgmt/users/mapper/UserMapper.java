@@ -52,15 +52,46 @@ public interface UserMapper {
     void updateEntityFromDto(UpdateUserDTO dto, @MappingTarget User user);
     // Custom method to extract permissions from roles
     default Set<RoleType> mapRoles(User user) {
+        if (user == null || user.getOrganizationRoles() == null) {
+            return java.util.Collections.emptySet();
+        }
         return user.getOrganizationRoles().stream()
-                  .map(role -> RoleType.valueOf(role.getRole().getName()))
-                .collect(Collectors.toSet());
+                  .filter(role -> role != null && role.getRole() != null && role.getRole().getName() != null)
+                  .map(role -> {
+                      String roleName = role.getRole().getName();
+                      if (roleName == null || roleName.trim().isEmpty()) {
+                          return null;
+                      }
+                      try {
+                          return RoleType.valueOf(roleName.toUpperCase().trim());
+                      } catch (IllegalArgumentException e) {
+                          return null;
+                      }
+                  })
+                  .filter(java.util.Objects::nonNull)
+                  .collect(Collectors.toSet());
     }
 
     default Set<PermissionType> mapPermissions(User user) {
+        if (user == null || user.getOrganizationRoles() == null) {
+            return java.util.Collections.emptySet();
+        }
         return user.getOrganizationRoles().stream()
+                .filter(role -> role != null && role.getRole() != null && role.getRole().getPermissions() != null)
                 .flatMap(role -> role.getRole().getPermissions().stream())
-                .map(per -> PermissionType.valueOf(permissionToPermissionDTO(per).getName()))
+                .filter(per -> per != null)
+                .map(per -> {
+                    PermissionDTO permDTO = permissionToPermissionDTO(per);
+                    if (permDTO == null || permDTO.getName() == null || permDTO.getName().trim().isEmpty()) {
+                        return null;
+                    }
+                    try {
+                        return PermissionType.valueOf(permDTO.getName().toUpperCase().trim());
+                    } catch (IllegalArgumentException e) {
+                        return null;
+                    }
+                })
+                .filter(java.util.Objects::nonNull)
                 .collect(Collectors.toSet());
     }
 

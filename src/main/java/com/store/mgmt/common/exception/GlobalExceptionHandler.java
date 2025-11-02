@@ -12,6 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -224,6 +225,48 @@ public class GlobalExceptionHandler {
                 .build();
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handle ResponseStatusException (Spring's status exception)
+     */
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ErrorResponse> handleResponseStatusException(
+            ResponseStatusException ex,
+            HttpServletRequest request) {
+        HttpStatus status = HttpStatus.resolve(ex.getStatusCode().value());
+        if (status == null) {
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+        
+        String errorTitle = status.getReasonPhrase();
+        String errorMessage = ex.getReason();
+        
+        // If no reason provided, use default based on status
+        if (errorMessage == null || errorMessage.isEmpty()) {
+            if (status == HttpStatus.CONFLICT) {
+                errorMessage = "A resource with this information already exists.";
+            } else if (status == HttpStatus.BAD_REQUEST) {
+                errorMessage = "Invalid request. Please check your input and try again.";
+            } else if (status == HttpStatus.NOT_FOUND) {
+                errorMessage = "The requested resource was not found.";
+            } else {
+                errorMessage = ex.getMessage() != null && !ex.getMessage().isEmpty()
+                        ? ex.getMessage()
+                        : "An error occurred while processing your request.";
+            }
+        }
+
+        logger.warn("ResponseStatusException: {} {} - Path: {}", status.value(), errorMessage, request.getRequestURI());
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .status(status.value())
+                .error(errorTitle)
+                .message(errorMessage)
+                .path(request.getRequestURI())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, status);
     }
 
     /**

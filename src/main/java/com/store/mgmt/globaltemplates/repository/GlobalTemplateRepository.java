@@ -12,19 +12,19 @@ import java.util.UUID;
 @Repository
 public interface GlobalTemplateRepository extends JpaRepository<GlobalTemplate, UUID> {
     
-    @Query("SELECT DISTINCT t FROM GlobalTemplate t LEFT JOIN FETCH t.items WHERE t.code = :code AND t.deletedAt IS NULL")
+    @Query("SELECT DISTINCT t FROM GlobalTemplate t LEFT JOIN FETCH t.items i WHERE t.code = :code AND t.deletedAt IS NULL AND (i.deletedAt IS NULL OR i IS NULL)")
     Optional<GlobalTemplate> findByCode(String code);
     
-    @Query("SELECT DISTINCT t FROM GlobalTemplate t LEFT JOIN FETCH t.items WHERE t.id = :id AND t.deletedAt IS NULL")
+    @Query("SELECT DISTINCT t FROM GlobalTemplate t LEFT JOIN FETCH t.items i WHERE t.id = :id AND t.deletedAt IS NULL AND (i.deletedAt IS NULL OR i IS NULL)")
     Optional<GlobalTemplate> findByIdWithItems(UUID id);
     
-    @Query("SELECT DISTINCT t FROM GlobalTemplate t LEFT JOIN FETCH t.items WHERE t.isActive = true AND t.deletedAt IS NULL ORDER BY t.name ASC")
+    @Query("SELECT DISTINCT t FROM GlobalTemplate t LEFT JOIN FETCH t.items i WHERE t.isActive = true AND t.deletedAt IS NULL AND (i.deletedAt IS NULL OR i IS NULL) ORDER BY t.name ASC")
     List<GlobalTemplate> findAllActive();
     
-    @Query("SELECT DISTINCT t FROM GlobalTemplate t LEFT JOIN FETCH t.items WHERE t.type = :type AND t.isActive = true AND t.deletedAt IS NULL ORDER BY t.name ASC")
+    @Query("SELECT DISTINCT t FROM GlobalTemplate t LEFT JOIN FETCH t.items i WHERE t.type = :type AND t.isActive = true AND t.deletedAt IS NULL AND (i.deletedAt IS NULL OR i IS NULL) ORDER BY t.name ASC")
     List<GlobalTemplate> findByType(String type);
     
-    @Query("SELECT DISTINCT t FROM GlobalTemplate t LEFT JOIN FETCH t.items WHERE t.deletedAt IS NULL ORDER BY t.name ASC")
+    @Query("SELECT DISTINCT t FROM GlobalTemplate t LEFT JOIN FETCH t.items i WHERE t.deletedAt IS NULL AND (i.deletedAt IS NULL OR i IS NULL) ORDER BY t.name ASC")
     List<GlobalTemplate> findAll();
 }
 
