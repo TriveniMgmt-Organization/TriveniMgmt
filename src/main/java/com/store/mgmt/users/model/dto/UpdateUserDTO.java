@@ -2,12 +2,14 @@ package com.store.mgmt.users.model.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Schema(name = "UpdateUser", description = "Data Transfer Object for a user account")
 public class UpdateUserDTO extends CreateUserDTO {
     @Schema(

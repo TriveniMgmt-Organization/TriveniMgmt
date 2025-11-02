@@ -16,7 +16,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "users")
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = "organizationRoles")
 @ToString(exclude = "organizationRoles")
 public class User extends BaseEntity {
     @Column(nullable = false, unique = true)

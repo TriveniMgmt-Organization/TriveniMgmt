@@ -1,52 +1,36 @@
 package com.store.mgmt.inventory.model.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
-@Schema(name = "CreateInventoryItem", description = "Data Transfer Object for a product category")
 @AllArgsConstructor
 @NoArgsConstructor
+@Schema(name = "CreateInventoryItem", description = "Data Transfer Object for creating an inventory item")
 public class CreateInventoryItemDTO {
+    
     @Schema(
-            description = "Unique identifier of the Product of id this product belongs to",
+            description = "Unique identifier of the product variant",
             example = "fedcba98-7654-3210-fedc-ba9876543210",
-            required = true // Assuming a product must always belong to a category
+            requiredMode = Schema.RequiredMode.REQUIRED
     )
-    private UUID productTemplateId;
+    private UUID variantId;
 
     @Schema(
-            description = "Unique identifier of the Product of id this product belongs to",
+            description = "Unique identifier of the location",
             example = "fedcba98-7654-3210-fedc-ba9876543210",
-            required = true // Assuming a product must always belong to a category
+            requiredMode = Schema.RequiredMode.REQUIRED
     )
     private UUID locationId;
 
-    @Schema(description = "Quantity of the inventory item", required = true, minimum = "0", maximum = "1000000")
-    private int quantity;
+    @Schema(description = "Batch/lot identifier (optional, for batch tracking)")
+    private UUID batchLotId;
 
-    @Schema( description = "Cost price of the inventory item", required = true, minimum = "0.01", maximum = "1000000.00")
-    private BigDecimal costPrice;
-
-    @Schema( description = "Retail price of the inventory item", required = true, minimum = "0.01", maximum = "1000000.00")
-    private BigDecimal retailPrice;
-
-    @Schema( description = "Quantity of the inventory item", required = true)
-    private LocalDateTime expirationDate;
-
-    @Schema( description = "Quantity of the inventory item", required = true)
-    private String batchNumber;
-
-@Schema( description = "Lot number of the inventory item, used for tracking specific lots")
-    private String lotNumber; // Nullable, for tracking specific lots
-
-//    @Schema(description = "Unit of measure for the inventory item")
-//    private String unitOfMeasure;
-
+    @Schema(description = "Expiry date for this inventory item (optional)")
+    private LocalDate expiryDate;
 }

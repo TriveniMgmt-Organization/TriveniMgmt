@@ -4,12 +4,14 @@ import com.store.mgmt.common.model.BaseEntity;
 import com.store.mgmt.organization.model.entity.Organization;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "tax_rules")
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class TaxRule extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "organization_id", nullable = false)

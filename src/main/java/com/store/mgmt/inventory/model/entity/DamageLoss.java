@@ -17,9 +17,9 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "damage_losses")
 @Data
-@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public class DamageLoss extends BaseEntity {
 
     @ManyToOne
@@ -55,4 +55,8 @@ public class DamageLoss extends BaseEntity {
     @JoinColumn(name = "user_id") // Who recorded the loss
     private User user;
 
+// Example: SaleItem
+@ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "variant_id", nullable = false)
+private ProductVariant variant;
 }

@@ -7,10 +7,12 @@ import com.store.mgmt.users.model.entity.Role;
 import com.store.mgmt.users.model.entity.User;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Entity
 @Table(name = "user_assignments")
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class UserAssignment extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

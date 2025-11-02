@@ -2,10 +2,12 @@ package com.store.mgmt.inventory.model.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.UUID;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Schema(name = "UpdateInventoryItem", description = "Data Transfer Object for a product category")
 public class UpdateInventoryItemDTO extends CreateInventoryItemDTO {
     @Schema(description = "Unique identifier for the inventory item", required = true)

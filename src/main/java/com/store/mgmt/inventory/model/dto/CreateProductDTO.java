@@ -8,20 +8,11 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 @Data
-@Schema(name = "CreateProduct", description = "Data Transfer Object for a product item available for sale")
+@Schema(name = "CreateProduct", description = "Data Transfer Object for creating a Product Template (master product definition)")
 public class CreateProductDTO {
 
     @Schema(
-            description = "Name of the product",
-            example = "Laptop Pro X",
-            requiredMode = Schema.RequiredMode.REQUIRED,
-            minLength = 2,
-            maxLength = 20
-    )
-    private String sku;
-
-    @Schema(
-            description = "Name of the product",
+            description = "Name of the product template",
             example = "Laptop Pro X",
             requiredMode = Schema.RequiredMode.REQUIRED,
             minLength = 2,
@@ -39,32 +30,6 @@ public class CreateProductDTO {
     private String description;
 
     @Schema(
-            description = "Selling price of the product",
-            example = "1200.50",
-            requiredMode = Schema.RequiredMode.REQUIRED,
-            minimum = "0.01", // Price must be greater than zero
-            maximum = "1000000.00" // Reasonable upper limit for product price
-    )
-    private BigDecimal price;
-
-    @Schema(
-            description = "Current stock quantity of the product",
-            example = "50",
-            requiredMode = Schema.RequiredMode.REQUIRED,
-            minimum = "0" ,// Quantity can be zero if out of stock
-            maximum = "1000000"
-    )
-    private Integer quantity;
-
-    @Schema(
-            description = "Unique barcode identifier for the product",
-            example = "1234567890123",
-            requiredMode = Schema.RequiredMode.REQUIRED,
-            pattern = "^[0-9]{12,13}$" // Example for EAN-13 or UPC-A
-    )
-    private String barcode;
-
-    @Schema(
             description = "Unique identifier of the category this product belongs to",
             example = "fedcba98-7654-3210-fedc-ba9876543210",
             requiredMode = Schema.RequiredMode.REQUIRED
@@ -77,6 +42,13 @@ public class CreateProductDTO {
             requiredMode = Schema.RequiredMode.REQUIRED
     )
     private UUID unitOfMeasureId;
+
+    @Schema(
+            description = "Unique identifier of the brand (optional)",
+            example = "fedcba98-7654-3210-fedc-ba9876543210",
+            requiredMode = Schema.RequiredMode.NOT_REQUIRED
+    )
+    private UUID brandId;
 
     @Schema(
             description = "Image Url of this product"

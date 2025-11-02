@@ -4,12 +4,14 @@ import com.store.mgmt.common.model.BaseEntity;
 import com.store.mgmt.users.model.entity.User;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.Date;
 
 @Entity
 @Table(name = "refresh_tokens")
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class RefreshToken extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

@@ -2,8 +2,10 @@ package com.store.mgmt.common.model;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -13,10 +15,13 @@ import java.util.UUID;
 @MappedSuperclass
 @Getter
 @Setter
+@EqualsAndHashCode(of = "id")
+@ToString(of = {"id"})
 public abstract class BaseEntity {
+
     @Id
     @Column(name = "id", updatable = false, nullable = false)
-    private UUID id;
+    private UUID id = UuidCreator.getTimeOrderedEpoch();
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false, nullable = false)
@@ -43,5 +48,6 @@ public abstract class BaseEntity {
         if (id == null) {
             id = UuidCreator.getTimeOrderedEpoch();
         }
+        if (createdAt == null) createdAt = LocalDateTime.now();
     }
 }

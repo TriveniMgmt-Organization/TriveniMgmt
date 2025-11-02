@@ -15,7 +15,7 @@ import java.util.List;
 @Entity
 @Table(name = "pos_sales")
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 public class PosSale extends BaseEntity {
 
     @Column(nullable = false)

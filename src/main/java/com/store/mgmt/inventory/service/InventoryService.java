@@ -5,6 +5,7 @@ import com.store.mgmt.inventory.model.entity.PurchaseOrder;
 import com.store.mgmt.inventory.model.enums.PurchaseOrderStatus;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -19,24 +20,57 @@ public interface InventoryService {
     ProductDTO updateProduct(UUID productTemplateId, UpdateProductDTO updateDTO);
     void deleteProduct(UUID productTemplateId); // Logical delete (isActive = false)
 
+    // --- Product Variant Management ---
+    ProductVariantDTO createProductVariant(CreateProductVariantDTO createDTO);
+    List<ProductVariantDTO> getVariantsByTemplate(UUID templateId);
+    List<ProductVariantDTO> getAllVariants(boolean includeInactive);
+    ProductVariantDTO getVariantById(UUID variantId);
+    ProductVariantDTO updateVariant(UUID variantId, UpdateProductVariantDTO updateDTO);
+    void deleteVariant(UUID variantId);
+
     // --- Inventory Item Management (Stock specific) ---
-    InventoryItemDTO createInventoryItem(CreateInventoryItemDTO createDTO); // Adding new stock
+    InventoryItemDTO createInventoryItem(CreateInventoryItemDTO createDTO); // Creating inventory item (no direct quantity)
     InventoryItemDTO getInventoryItemById(UUID inventoryItemId);
-    List<InventoryItemDTO> getInventoryItemsForProduct(UUID productTemplateId);
+    List<InventoryItemDTO> getInventoryItemsForVariant(UUID variantId);
+    List<InventoryItemDTO> getInventoryItemsForTemplate(UUID templateId); // Via variants
     List<InventoryItemDTO> getInventoryItemsAtLocation(UUID locationId);
-    InventoryItemDTO updateInventoryItemQuantity(UUID inventoryItemId, Integer quantityChange); // Adjust specific item stock
     void deleteInventoryItem(UUID inventoryItemId); // Remove a specific inventory item record
+
+    // --- Stock Transaction Management (Immutable records) ---
+    StockTransactionDTO createStockTransaction(CreateStockTransactionDTO createDTO);
+    List<StockTransactionDTO> getTransactionsByInventoryItem(UUID inventoryItemId);
+    StockTransactionDTO getTransactionById(UUID transactionId);
+    List<StockTransactionDTO> getTransactionsByDateRange(LocalDateTime startDate, LocalDateTime endDate);
+
+    // --- Stock Level Management (Calculated from transactions) ---
+    StockLevelDTO getStockLevel(UUID inventoryItemId);
+    List<StockLevelDTO> getStockLevelsByVariant(UUID variantId);
+    List<StockLevelDTO> getLowStockItems();
+
+    // --- Batch/Lot Management ---
+    BatchLotDTO createBatchLot(CreateBatchLotDTO createDTO);
+    List<BatchLotDTO> getAllBatchLots();
+    BatchLotDTO getBatchLotById(UUID batchLotId);
+    List<BatchLotDTO> getExpiringBatchLots(LocalDate startDate, LocalDate endDate);
+
+    // --- UoM Conversion Management ---
+    UoMConversionDTO createUoMConversion(CreateUoMConversionDTO createDTO);
+    List<UoMConversionDTO> getAllUoMConversions();
+    UoMConversionDTO getUoMConversionById(UUID conversionId);
+    List<UoMConversionDTO> getConversionsByUom(UUID uomId);
+    UoMConversionDTO getConversion(UUID fromUomId, UUID toUomId);
 
     // --- Stock Operations (Higher-level) ---
     void processSale(CreateSaleDTO saleDTO); // Main method for sales, which reduces stock
     void processPurchaseOrderReceipt(UUID purchaseOrderId, List<PurchaseOrderItemDTO> receivedItems); // For receiving goods
 
     // --- Stock Check & Information ---
-    int getTotalStockQuantity(UUID productId);
-    int getStockQuantityAtLocation(UUID productId, UUID locationId);
-    BigDecimal getInventoryItemRetailPrice(UUID productId);
-    boolean checkStockAvailability(UUID roductId, int quantityNeeded);
-    boolean checkStockAvailabilityAtLocation(UUID productId, UUID locationId, int quantityNeeded);
+    int getTotalStockQuantity(UUID variantId); // For variant
+    int getTotalStockQuantityForTemplate(UUID templateId); // Sum across all variants
+    int getStockQuantityAtLocation(UUID variantId, UUID locationId);
+    BigDecimal getVariantRetailPrice(UUID variantId);
+    boolean checkStockAvailability(UUID variantId, int quantityNeeded);
+    boolean checkStockAvailabilityAtLocation(UUID variantId, UUID locationId, int quantityNeeded);
 
     // --- Brand Management ---
     BrandDTO createBrand(CreateBrandDTO createDTO);

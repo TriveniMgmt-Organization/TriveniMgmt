@@ -1,18 +1,17 @@
 package com.store.mgmt.users.model.entity;
 
 import com.store.mgmt.common.model.BaseEntity;
-import com.store.mgmt.organization.model.entity.Organization;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.EqualsAndHashCode;
 
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 
 @Entity
 @Table(name = "roles")
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString(exclude = "permissions")
@@ -35,16 +34,16 @@ public class Role extends BaseEntity {
     )
     private Set<Permission> permissions;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Role)) return false;
-        Role role = (Role) o;
-        return Objects.equals(getId(), role.getId()) && Objects.equals(name, role.name);
-    }
+    // @Override
+    // public boolean equals(Object o) {
+    //     if (this == o) return true;
+    //     if (!(o instanceof Role)) return false;
+    //     Role role = (Role) o;
+    //     return Objects.equals(getId(), role.getId()) && Objects.equals(name, role.name);
+    // }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId(), name);
-    }
+    // @Override
+    // public int hashCode() {
+    //     return Objects.hash(getId(), name);
+    // }
 }

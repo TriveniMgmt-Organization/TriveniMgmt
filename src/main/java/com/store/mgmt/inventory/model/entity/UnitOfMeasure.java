@@ -4,21 +4,16 @@ import com.store.mgmt.common.model.BaseEntity;
 import com.store.mgmt.organization.model.entity.Organization;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDateTime;
-import java.util.Set; // For OneToMany relationship
+import lombok.EqualsAndHashCode;
 
 @Entity
 @Table(name = "units_of_measure")
 @Data
-@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public class UnitOfMeasure extends BaseEntity {
 
     @ManyToOne

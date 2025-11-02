@@ -109,11 +109,11 @@ public class InventoryController {
         return ResponseEntity.ok(inventoryItem);
     }
 
-    @GetMapping("/items/by-product/{productTemplateId}")
+    @GetMapping("/items/by-template/{templateId}")
     @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
     @Operation(
-            summary = "Get inventory items for a specific product",
-            description = "Retrieves a list of all inventory item records for a given product across all locations.",
+            summary = "Get inventory items for a specific product template",
+            description = "Retrieves a list of all inventory item records for a given product template (across all variants and locations).",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -122,7 +122,7 @@ public class InventoryController {
                     ),
                     @ApiResponse(
                             responseCode = "404",
-                            description = "Product not found",
+                            description = "Product template not found",
                             content = @Content
                     ),
                     @ApiResponse(
@@ -132,10 +132,40 @@ public class InventoryController {
                     )
             }
     )
-    public ResponseEntity<List<InventoryItemDTO>> getInventoryItemsByProduct(
-            @Parameter(description = "ID of the product to retrieve inventory items for", required = true)
-            @PathVariable UUID productTemplateId) {
-        List<InventoryItemDTO> inventoryItems = inventoryService.getInventoryItemsForProduct(productTemplateId);
+    public ResponseEntity<List<InventoryItemDTO>> getInventoryItemsByTemplate(
+            @Parameter(description = "ID of the product template to retrieve inventory items for", required = true)
+            @PathVariable UUID templateId) {
+        List<InventoryItemDTO> inventoryItems = inventoryService.getInventoryItemsForTemplate(templateId);
+        return ResponseEntity.ok(inventoryItems);
+    }
+
+    @GetMapping("/items/by-variant/{variantId}")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
+    @Operation(
+            summary = "Get inventory items for a specific product variant",
+            description = "Retrieves a list of all inventory item records for a given product variant across all locations.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "List of inventory items retrieved successfully",
+                            content = @Content(array = @ArraySchema(schema = @Schema(required = true, implementation = InventoryItemDTO.class)))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Product variant not found",
+                            content = @Content
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "Forbidden: User does not have 'PERM_VIEW_INVENTORY_ITEM' authority",
+                            content = @Content
+                    )
+            }
+    )
+    public ResponseEntity<List<InventoryItemDTO>> getInventoryItemsByVariant(
+            @Parameter(description = "ID of the product variant to retrieve inventory items for", required = true)
+            @PathVariable UUID variantId) {
+        List<InventoryItemDTO> inventoryItems = inventoryService.getInventoryItemsForVariant(variantId);
         return ResponseEntity.ok(inventoryItems);
     }
 
@@ -170,42 +200,8 @@ public class InventoryController {
     }
 
 
-    @PatchMapping("/items/{id}/quantity") // Using PATCH for partial update
-    @PreAuthorize("hasAuthority('INVENTORY_ITEM_WRITE')")
-    @Operation(
-            summary = "Update the quantity of an inventory item",
-            description = "Adjusts the quantity of an existing inventory item identified by its ID. Use positive values to add, negative to subtract.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Inventory item quantity updated successfully",
-                            content = @Content(schema = @Schema(implementation = InventoryItemDTO.class))
-                    ),
-                    @ApiResponse(
-                            responseCode = "400",
-                            description = "Invalid input (e.g., resulting quantity would be negative)",
-                            content = @Content
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Inventory item not found",
-                            content = @Content
-                    ),
-                    @ApiResponse(
-                            responseCode = "403",
-                            description = "Forbidden: User does not have 'PERM_UPDATE_INVENTORY_ITEM_QUANTITY' authority",
-                            content = @Content
-                    )
-            }
-    )
-    public ResponseEntity<InventoryItemDTO> updateInventoryItemQuantity(
-            @Parameter(description = "Unique ID of the inventory item to update", required = true)
-            @PathVariable UUID id, // Changed UUID to UUID
-            @Parameter(description = "Quantity change (positive for add, negative for subtract)", required = true)
-            @Valid @RequestBody UpdateInventoryItemDTO request) { // New DTO for quantity change
-        InventoryItemDTO updatedInventory = inventoryService.updateInventoryItemQuantity(id, request.getQuantityChange());
-        return ResponseEntity.ok(updatedInventory);
-    }
+    // REMOVED: updateInventoryItemQuantity endpoint
+    // Use POST /stock-transactions instead to create immutable stock transaction records
 
     @DeleteMapping("/items/{id}")
     @PreAuthorize("hasAuthority('INVENTORY_ITEM_WRITE')")
@@ -1090,98 +1086,262 @@ public class InventoryController {
         return ResponseEntity.ok(record);
     }
 
-    // --- Stock Information & Checks ---
-    @GetMapping("/stock/total/{productId}")
-//    @PreAuthorize("hasAuthority('STOCK_CHECK_READ')")
+    // --- Product Variant Management ---
+    @PostMapping("/variants")
+    @PreAuthorize("hasAuthority('PRODUCT_WRITE')")
     @Operation(
-//            summary = "Get total stock quantity for a product",
-            description = "Retrieves the aggregated quantity of a specific product across all inventory locations.",
+            summary = "Create a new product variant",
+            description = "Creates a new product variant with unique SKU and barcode for a product template.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Total stock quantity retrieved successfully", content = @Content(schema = @Schema(implementation = Integer.class))),
-                    @ApiResponse(responseCode = "404", description = "Product not found", content = @Content),
-                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_VIEW_STOCK_LEVELS' authority", content = @Content)
+                    @ApiResponse(responseCode = "201", description = "Variant created successfully", content = @Content(schema = @Schema(implementation = ProductVariantDTO.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
+                    @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content),
+                    @ApiResponse(responseCode = "409", description = "Conflict: SKU or barcode already exists", content = @Content)
             }
     )
-    public ResponseEntity<Integer> getTotalStockQuantity(@PathVariable UUID productId) {
-        int totalQuantity = inventoryService.getTotalStockQuantity(productId);
+    public ResponseEntity<ProductVariantDTO> createProductVariant(@Valid @RequestBody CreateProductVariantDTO createDTO) {
+        ProductVariantDTO newVariant = inventoryService.createProductVariant(createDTO);
+        return new ResponseEntity<>(newVariant, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/variants")
+    @PreAuthorize("hasAuthority('PRODUCT_READ')")
+    @Operation(summary = "Get all product variants")
+    public ResponseEntity<List<ProductVariantDTO>> getAllVariants(
+            @RequestParam(defaultValue = "false") boolean includeInactive) {
+        List<ProductVariantDTO> variants = inventoryService.getAllVariants(includeInactive);
+        return ResponseEntity.ok(variants);
+    }
+
+    @GetMapping("/variants/by-template/{templateId}")
+    @PreAuthorize("hasAuthority('PRODUCT_READ')")
+    @Operation(summary = "Get variants for a product template")
+    public ResponseEntity<List<ProductVariantDTO>> getVariantsByTemplate(@PathVariable UUID templateId) {
+        List<ProductVariantDTO> variants = inventoryService.getVariantsByTemplate(templateId);
+        return ResponseEntity.ok(variants);
+    }
+
+    @GetMapping("/variants/{id}")
+    @PreAuthorize("hasAuthority('PRODUCT_READ')")
+    @Operation(summary = "Get variant by ID")
+    public ResponseEntity<ProductVariantDTO> getVariantById(@PathVariable UUID id) {
+        ProductVariantDTO variant = inventoryService.getVariantById(id);
+        return ResponseEntity.ok(variant);
+    }
+
+    @PutMapping("/variants/{id}")
+    @PreAuthorize("hasAuthority('PRODUCT_WRITE')")
+    @Operation(summary = "Update a product variant")
+    public ResponseEntity<ProductVariantDTO> updateVariant(@PathVariable UUID id, @Valid @RequestBody UpdateProductVariantDTO updateDTO) {
+        ProductVariantDTO updated = inventoryService.updateVariant(id, updateDTO);
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/variants/{id}")
+    @PreAuthorize("hasAuthority('PRODUCT_WRITE')")
+    @Operation(summary = "Delete (deactivate) a product variant")
+    public ResponseEntity<Void> deleteVariant(@PathVariable UUID id) {
+        inventoryService.deleteVariant(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // --- Stock Transaction Management ---
+    @PostMapping("/stock-transactions")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_WRITE')")
+    @Operation(
+            summary = "Create a stock transaction",
+            description = "Creates an immutable stock transaction record. All quantity changes must go through transactions.",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Transaction created successfully", content = @Content(schema = @Schema(implementation = StockTransactionDTO.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid input or insufficient stock", content = @Content),
+                    @ApiResponse(responseCode = "404", description = "Inventory item not found", content = @Content)
+            }
+    )
+    public ResponseEntity<StockTransactionDTO> createStockTransaction(@Valid @RequestBody CreateStockTransactionDTO createDTO) {
+        StockTransactionDTO transaction = inventoryService.createStockTransaction(createDTO);
+        return new ResponseEntity<>(transaction, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/stock-transactions/by-item/{inventoryItemId}")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
+    @Operation(summary = "Get transactions for an inventory item")
+    public ResponseEntity<List<StockTransactionDTO>> getTransactionsByInventoryItem(@PathVariable UUID inventoryItemId) {
+        List<StockTransactionDTO> transactions = inventoryService.getTransactionsByInventoryItem(inventoryItemId);
+        return ResponseEntity.ok(transactions);
+    }
+
+    @GetMapping("/stock-transactions/{id}")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
+    @Operation(summary = "Get transaction by ID")
+    public ResponseEntity<StockTransactionDTO> getTransactionById(@PathVariable UUID id) {
+        StockTransactionDTO transaction = inventoryService.getTransactionById(id);
+        return ResponseEntity.ok(transaction);
+    }
+
+    @GetMapping("/stock-transactions/by-date-range")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
+    @Operation(summary = "Get transactions within a date range")
+    public ResponseEntity<List<StockTransactionDTO>> getTransactionsByDateRange(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        List<StockTransactionDTO> transactions = inventoryService.getTransactionsByDateRange(startDate, endDate);
+        return ResponseEntity.ok(transactions);
+    }
+
+    // --- Stock Level Management ---
+    @GetMapping("/stock-levels/{inventoryItemId}")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
+    @Operation(summary = "Get stock level for an inventory item")
+    public ResponseEntity<StockLevelDTO> getStockLevel(@PathVariable UUID inventoryItemId) {
+        StockLevelDTO stockLevel = inventoryService.getStockLevel(inventoryItemId);
+        return ResponseEntity.ok(stockLevel);
+    }
+
+    @GetMapping("/stock-levels/by-variant/{variantId}")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
+    @Operation(summary = "Get stock levels for a variant")
+    public ResponseEntity<List<StockLevelDTO>> getStockLevelsByVariant(@PathVariable UUID variantId) {
+        List<StockLevelDTO> levels = inventoryService.getStockLevelsByVariant(variantId);
+        return ResponseEntity.ok(levels);
+    }
+
+    @GetMapping("/stock-levels/low-stock")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
+    @Operation(summary = "Get low stock items")
+    public ResponseEntity<List<StockLevelDTO>> getLowStockItems() {
+        List<StockLevelDTO> lowStock = inventoryService.getLowStockItems();
+        return ResponseEntity.ok(lowStock);
+    }
+
+    // --- Batch/Lot Management ---
+    @PostMapping("/batch-lots")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_WRITE')")
+    @Operation(summary = "Create a new batch lot")
+    public ResponseEntity<BatchLotDTO> createBatchLot(@Valid @RequestBody CreateBatchLotDTO createDTO) {
+        BatchLotDTO batchLot = inventoryService.createBatchLot(createDTO);
+        return new ResponseEntity<>(batchLot, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/batch-lots")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
+    @Operation(summary = "Get all batch lots")
+    public ResponseEntity<List<BatchLotDTO>> getAllBatchLots() {
+        List<BatchLotDTO> batchLots = inventoryService.getAllBatchLots();
+        return ResponseEntity.ok(batchLots);
+    }
+
+    @GetMapping("/batch-lots/{id}")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
+    @Operation(summary = "Get batch lot by ID")
+    public ResponseEntity<BatchLotDTO> getBatchLotById(@PathVariable UUID id) {
+        BatchLotDTO batchLot = inventoryService.getBatchLotById(id);
+        return ResponseEntity.ok(batchLot);
+    }
+
+    @GetMapping("/batch-lots/expiring")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
+    @Operation(summary = "Get expiring batch lots")
+    public ResponseEntity<List<BatchLotDTO>> getExpiringBatchLots(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) java.time.LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) java.time.LocalDate endDate) {
+        List<BatchLotDTO> expiring = inventoryService.getExpiringBatchLots(startDate, endDate);
+        return ResponseEntity.ok(expiring);
+    }
+
+    // --- UoM Conversion Management ---
+    @PostMapping("/uom-conversions")
+    @PreAuthorize("hasAuthority('UOM_WRITE')")
+    @Operation(summary = "Create a UoM conversion")
+    public ResponseEntity<UoMConversionDTO> createUoMConversion(@Valid @RequestBody CreateUoMConversionDTO createDTO) {
+        UoMConversionDTO conversion = inventoryService.createUoMConversion(createDTO);
+        return new ResponseEntity<>(conversion, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/uom-conversions")
+    @PreAuthorize("hasAuthority('UOM_READ')")
+    @Operation(summary = "Get all UoM conversions")
+    public ResponseEntity<List<UoMConversionDTO>> getAllUoMConversions() {
+        List<UoMConversionDTO> conversions = inventoryService.getAllUoMConversions();
+        return ResponseEntity.ok(conversions);
+    }
+
+    @GetMapping("/uom-conversions/{id}")
+    @PreAuthorize("hasAuthority('UOM_READ')")
+    @Operation(summary = "Get UoM conversion by ID")
+    public ResponseEntity<UoMConversionDTO> getUoMConversionById(@PathVariable UUID id) {
+        UoMConversionDTO conversion = inventoryService.getUoMConversionById(id);
+        return ResponseEntity.ok(conversion);
+    }
+
+    @GetMapping("/uom-conversions/by-uom/{uomId}")
+    @PreAuthorize("hasAuthority('UOM_READ')")
+    @Operation(summary = "Get conversions for a UoM")
+    public ResponseEntity<List<UoMConversionDTO>> getConversionsByUom(@PathVariable UUID uomId) {
+        List<UoMConversionDTO> conversions = inventoryService.getConversionsByUom(uomId);
+        return ResponseEntity.ok(conversions);
+    }
+
+    @GetMapping("/uom-conversions/from/{fromUomId}/to/{toUomId}")
+    @PreAuthorize("hasAuthority('UOM_READ')")
+    @Operation(summary = "Get conversion between two UoMs")
+    public ResponseEntity<UoMConversionDTO> getConversion(@PathVariable UUID fromUomId, @PathVariable UUID toUomId) {
+        UoMConversionDTO conversion = inventoryService.getConversion(fromUomId, toUomId);
+        return ResponseEntity.ok(conversion);
+    }
+
+    // --- Stock Information & Checks ---
+    @GetMapping("/stock/total-by-variant/{variantId}")
+    @PreAuthorize("hasAuthority('STOCK_CHECK_READ')")
+    @Operation(summary = "Get total stock quantity for a variant")
+    public ResponseEntity<Integer> getTotalStockQuantityByVariant(@PathVariable UUID variantId) {
+        int totalQuantity = inventoryService.getTotalStockQuantity(variantId);
         return ResponseEntity.ok(totalQuantity);
     }
 
-    @GetMapping("/stock/at-location/{productId}/{locationId}")
-//    @PreAuthorize("hasAuthority('STOCK_CHECK_READ')")
-    @Operation(
-            summary = "Get stock quantity for a product at a specific location",
-            description = "Retrieves the quantity of a specific product available at a particular inventory location.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Stock quantity at location retrieved successfully", content = @Content(schema = @Schema(implementation = Integer.class))),
-                    @ApiResponse(responseCode = "404", description = "Product or Location not found", content = @Content),
-                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_VIEW_STOCK_LEVELS' authority", content = @Content)
-            }
-    )
+    @GetMapping("/stock/total-by-template/{templateId}")
+    @PreAuthorize("hasAuthority('STOCK_CHECK_READ')")
+    @Operation(summary = "Get total stock quantity for a template (sum across all variants)")
+    public ResponseEntity<Integer> getTotalStockQuantityByTemplate(@PathVariable UUID templateId) {
+        int totalQuantity = inventoryService.getTotalStockQuantityForTemplate(templateId);
+        return ResponseEntity.ok(totalQuantity);
+    }
+
+    @GetMapping("/stock/at-location/{variantId}/{locationId}")
+    @PreAuthorize("hasAuthority('STOCK_CHECK_READ')")
+    @Operation(summary = "Get stock quantity for a variant at a specific location")
     public ResponseEntity<Integer> getStockQuantityAtLocation(
-            @PathVariable UUID productId,
+            @PathVariable UUID variantId,
             @PathVariable UUID locationId) {
-        int quantity = inventoryService.getStockQuantityAtLocation(productId, locationId);
+        int quantity = inventoryService.getStockQuantityAtLocation(variantId, locationId);
         return ResponseEntity.ok(quantity);
     }
 
     @GetMapping("/stock/check-availability")
-//    @PreAuthorize("hasAuthority('STOCK_CHECK_READ')")
-    @Operation(
-            summary = "Check overall stock availability for a product",
-            description = "Checks if a requested quantity of a product is available across all locations.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Stock availability check successful", content = @Content(schema = @Schema(implementation = Boolean.class))),
-                    @ApiResponse(responseCode = "400", description = "Invalid quantity needed (must be positive)", content = @Content),
-                    @ApiResponse(responseCode = "404", description = "Product not found", content = @Content),
-                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_CHECK_STOCK_AVAILABILITY' authority", content = @Content)
-            }
-    )
+    @PreAuthorize("hasAuthority('STOCK_CHECK_READ')")
+    @Operation(summary = "Check overall stock availability for a variant")
     public ResponseEntity<Boolean> checkStockAvailability(
-            @Parameter(description = "ID of the product to check stock for", required = true)
-            @RequestParam UUID productId,
-            @Parameter(description = "Quantity of the product needed", required = true)
+            @RequestParam UUID variantId,
             @RequestParam int quantityNeeded) {
-        boolean available = inventoryService.checkStockAvailability(productId, quantityNeeded);
+        boolean available = inventoryService.checkStockAvailability(variantId, quantityNeeded);
         return ResponseEntity.ok(available);
     }
 
     @GetMapping("/stock/check-availability-at-location")
-//    @PreAuthorize("hasAuthority('STOCK_CHECK_READ')")
-    @Operation(
-            summary = "Check stock availability for a product at a specific location",
-            description = "Checks if a requested quantity of a product is available at a particular location.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Stock availability check successful", content = @Content(schema = @Schema(implementation = Boolean.class))),
-                    @ApiResponse(responseCode = "400", description = "Invalid quantity needed (must be positive)", content = @Content),
-                    @ApiResponse(responseCode = "404", description = "Product or Location not found", content = @Content),
-                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_CHECK_STOCK_AVAILABILITY' authority", content = @Content)
-            }
-    )
+    @PreAuthorize("hasAuthority('STOCK_CHECK_READ')")
+    @Operation(summary = "Check stock availability for a variant at a specific location")
     public ResponseEntity<Boolean> checkStockAvailabilityAtLocation(
-            @Parameter(description = "ID of the product to check stock for", required = true)
-            @RequestParam UUID productId,
-            @Parameter(description = "ID of the location to check stock at", required = true)
+            @RequestParam UUID variantId,
             @RequestParam UUID locationId,
-            @Parameter(description = "Quantity of the product needed", required = true)
             @RequestParam int quantityNeeded) {
-        boolean available = inventoryService.checkStockAvailabilityAtLocation(productId, locationId, quantityNeeded);
+        boolean available = inventoryService.checkStockAvailabilityAtLocation(variantId, locationId, quantityNeeded);
         return ResponseEntity.ok(available);
     }
 
-    @GetMapping("/stock/product-retail-price/{productId}")
-//    @PreAuthorize("hasAuthority('STOCK_CHECK_READ')")
-    @Operation(
-            summary = "Get retail price of a product",
-            description = "Retrieves the retail price of a product.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Retail price retrieved successfully", content = @Content(schema = @Schema(type = "number", format = "double"))),
-                    @ApiResponse(responseCode = "404", description = "Product not found", content = @Content),
-                    @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_VIEW_PRODUCT_PRICES' authority", content = @Content)
-            }
-    )
-    public ResponseEntity<java.math.BigDecimal> getInventoryItemRetailPrice(@PathVariable UUID productId) {
-        java.math.BigDecimal retailPrice = inventoryService.getInventoryItemRetailPrice(productId);
+    @GetMapping("/stock/variant-retail-price/{variantId}")
+    @PreAuthorize("hasAuthority('STOCK_CHECK_READ')")
+    @Operation(summary = "Get retail price of a variant")
+    public ResponseEntity<java.math.BigDecimal> getVariantRetailPrice(@PathVariable UUID variantId) {
+        java.math.BigDecimal retailPrice = inventoryService.getVariantRetailPrice(variantId);
         return ResponseEntity.ok(retailPrice);
     }
 }

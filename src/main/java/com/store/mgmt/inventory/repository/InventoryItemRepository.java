@@ -9,7 +9,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 import jakarta.persistence.LockModeType;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,35 +17,43 @@ import java.util.UUID;
 @Repository
 public interface InventoryItemRepository extends JpaRepository<InventoryItem, UUID> {
 
-    List<InventoryItem> findByProductTemplateId(UUID productTemplateId);
+    // Find by variant (replaces productTemplate)
+    List<InventoryItem> findByVariantId(UUID variantId);
 
+    // Find by location
     List<InventoryItem> findByLocationId(UUID locationId);
-    List<InventoryItem> findByProductTemplateIdAndLocationId(UUID productTemplateId, UUID locationId);
+    
+    // Find by variant and location
+    List<InventoryItem> findByVariantIdAndLocationId(UUID variantId, UUID locationId);
 
-    // For optimistic locking when updating stock
-    @Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT) // Ensures version is incremented
+    // Find by variant, location, and batch lot (unique constraint)
+    @Query("SELECT i FROM InventoryItem i WHERE i.variant.id = :variantId AND i.location.id = :locationId AND (:batchLotId IS NULL AND i.batchLot IS NULL OR i.batchLot.id = :batchLotId)")
+    Optional<InventoryItem> findByVariantIdAndLocationIdAndBatchLotId(
+            @Param("variantId") UUID variantId, 
+            @Param("locationId") UUID locationId, 
+            @Param("batchLotId") UUID batchLotId);
+
+    // For optimistic locking when updating
+    @Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT)
     Optional<InventoryItem> findById(@NonNull UUID id);
 
-    // Custom query to sum quantities for a product across all locations
-    @Query("SELECT SUM(ii.quantity) FROM InventoryItem ii WHERE ii.productTemplate.id = :productTemplateId")
-    Optional<Integer> getTotalQuantityByProductTemplateId(@Param("productTemplateId") UUID productTemplateId);
+    // Find items for a template (via variants)
+    @Query("SELECT i FROM InventoryItem i WHERE i.variant.template.id = :templateId AND i.deletedAt IS NULL")
+    List<InventoryItem> findByTemplateId(@Param("templateId") UUID templateId);
 
-    // Custom query to sum quantities for a product at a specific location
-    @Query("SELECT SUM(ii.quantity) FROM InventoryItem ii WHERE ii.productTemplate.id = :productTemplateId AND ii.location.id = :locationId")
-    Optional<Integer> getTotalQuantityByProductTemplateIdAndLocationId(@Param("productTemplateId") UUID productTemplateId, @Param("locationId") UUID locationId);
+    // Find by location and store (if needed for security)
+    @Query("SELECT i FROM InventoryItem i WHERE i.location.id = :locationId AND i.location.store.id = :storeId AND i.deletedAt IS NULL")
+    List<InventoryItem> findByLocationIdAndStoreId(@Param("locationId") UUID locationId, @Param("storeId") UUID storeId);
 
-    @Query("SELECT i FROM InventoryItem i WHERE i.store.id = :storeId AND i.store.organization.id = :orgId")
-    List<InventoryItem> findByStoreIdAndOrganizationId(@Param("storeId") UUID storeId, @Param("organizationId") UUID orgId);
+    // Find by variant and store (if needed for security)
+    @Query("SELECT i FROM InventoryItem i WHERE i.variant.id = :variantId AND i.location.store.id = :storeId AND i.deletedAt IS NULL")
+    List<InventoryItem> findByVariantIdAndStoreId(@Param("variantId") UUID variantId, @Param("storeId") UUID storeId);
 
-    Optional<InventoryItem> findByIdAndStoreId(UUID id, UUID storeId);
-    Optional<InventoryItem> findByProductTemplateIdAndStoreIdAndBatchNumberAndExpirationDate(
-            UUID productTemplateId, UUID storeId, String batchNumber, LocalDateTime expirationDate);
-    List<InventoryItem> findByProductTemplateIdAndStoreId(UUID productTemplateId, UUID storeId);
-    List<InventoryItem> findByLocationIdAndStoreId( UUID locationId, UUID storeId );
-    List<InventoryItem> findByProductTemplateIdAndStoreIdAndLocationId(
-            UUID productTemplateId, UUID storeId, UUID locationId);
-    Optional<Integer> getTotalQuantityByProductTemplateIdAndStoreId(
-            UUID productTemplateId, UUID storeId);
-    Optional<Integer> getTotalQuantityByProductTemplateIdAndStoreIdAndLocationId(
-            UUID productTemplateId, UUID storeId, UUID locationId);
+    // Find by batch lot
+    @Query("SELECT i FROM InventoryItem i WHERE i.batchLot.id = :batchLotId AND i.deletedAt IS NULL")
+    List<InventoryItem> findByBatchLotId(@Param("batchLotId") UUID batchLotId);
+
+    // Find items with expiry dates approaching
+    @Query("SELECT i FROM InventoryItem i WHERE i.expiryDate BETWEEN :startDate AND :endDate AND i.deletedAt IS NULL ORDER BY i.expiryDate ASC")
+    List<InventoryItem> findExpiringBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 }

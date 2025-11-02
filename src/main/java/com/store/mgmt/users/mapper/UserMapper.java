@@ -7,31 +7,48 @@ import com.store.mgmt.users.model.dto.UpdateUserDTO;
 import com.store.mgmt.users.model.dto.UserDTO;
 import com.store.mgmt.users.model.entity.Permission;
 import com.store.mgmt.users.model.entity.User;
+import com.store.mgmt.common.mapper.BaseMapperConfig;
+import org.mapstruct.InheritConfiguration;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping; // If you need complex mappings
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", config = BaseMapperConfig.class)
 public interface UserMapper {
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
     @Mapping(target = "permissions", expression = "java(mapPermissions(user))")
     @Mapping(target = "roles", expression = "java(mapRoles(user))")
+    @Mapping(target = "activeOrganization", ignore = true) // Complex mapping - handled separately
+    @Mapping(target = "activeStore", ignore = true) // Complex mapping - handled separately
     UserDTO toDto(User user);
 
+    // Base method with all BaseEntity ignores - other methods inherit from this
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
+    @Mapping(target = "deletedAt", ignore = true)
+    @Mapping(target = "deletedBy", ignore = true)
+    @Mapping(target = "passwordHash", ignore = true)
+    @Mapping(target = "organizationRoles", ignore = true)
     User toEntity(UserDTO userDTO);
-    @Mapping(target = "id", ignore = true) // Don't update the ID
-    @Mapping(target = "createdAt", ignore = true) // Don't update creation timestamp
-    @Mapping(target = "updatedAt", ignore = true) // Let @UpdateTimestamp handle this
-
-        // @Mapping(target = "username", source = "dto.username")
+    
+    @InheritConfiguration(name = "toEntity")
+    @Mapping(target = "imageUrl", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
+    @Mapping(target = "deletedAt", ignore = true)
+    @Mapping(target = "deletedBy", ignore = true)
+    @Mapping(target = "passwordHash", ignore = true)
+    @Mapping(target = "organizationRoles", ignore = true)
     void updateEntityFromDto(UpdateUserDTO dto, @MappingTarget User user);
     // Custom method to extract permissions from roles
     default Set<RoleType> mapRoles(User user) {

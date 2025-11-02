@@ -4,9 +4,9 @@ import com.store.mgmt.common.model.BaseEntity;
 import com.store.mgmt.organization.model.entity.Store;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 
@@ -15,9 +15,9 @@ import java.math.BigDecimal;
         @UniqueConstraint(columnNames = {"purchase_order_id", "product_template_id"})
 })
 @Data
-@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public class PurchaseOrderItem extends BaseEntity {
 
     @ManyToOne
@@ -40,5 +40,10 @@ public class PurchaseOrderItem extends BaseEntity {
 
     @Column(name = "unit_cost", nullable = false, precision = 10, scale = 2)
     private BigDecimal unitCost;
+
+    // Example: SaleItem
+@ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "variant_id", nullable = false)
+private ProductVariant variant;
 
 }

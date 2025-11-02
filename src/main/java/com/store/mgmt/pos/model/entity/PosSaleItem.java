@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "pos_sale_items")
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 public class PosSaleItem extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "sale_id", nullable = false)

@@ -1,23 +1,19 @@
 package com.store.mgmt.inventory.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.store.mgmt.common.model.BaseEntity;
 import com.store.mgmt.inventory.model.enums.LocationType;
 import com.store.mgmt.organization.model.entity.Store;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDateTime;
+import lombok.EqualsAndHashCode;
 import java.util.Set;
 
 @Entity
 @Table(name = "locations")
 @Data
-@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public class Location extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "store_id", nullable = false)

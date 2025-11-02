@@ -2,23 +2,20 @@ package com.store.mgmt.inventory.model.entity;
 
 import com.store.mgmt.common.model.BaseEntity;
 import com.store.mgmt.organization.model.entity.Organization;
-import lombok.*;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDateTime;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import java.util.Set;
 
 @Entity
 @Table(name = "suppliers")
 @Data
-@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public class Supplier extends BaseEntity {
         @ManyToOne
         @JoinColumn(name = "organization_id", nullable = false)

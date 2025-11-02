@@ -45,6 +45,13 @@ public class InventoryServiceImpl implements InventoryService {
     private final UserOrganizationRoleRepository userOrganizationRoleRepository;
     private final UnitOfMeasureRepository unitOfMeasureRepository;
     private final AuditLogService auditLogService;
+    
+    // New repositories
+    private final ProductVariantRepository productVariantRepository;
+    private final StockTransactionRepository stockTransactionRepository;
+    private final StockLevelRepository stockLevelRepository;
+    private final BatchLotRepository batchLotRepository;
+    private final UoMConversionRepository uomConversionRepository;
 
     // Mappers
     private final ProductTemplateMapper productTemplateMapper;
@@ -60,6 +67,13 @@ public class InventoryServiceImpl implements InventoryService {
     private final SupplierMapper supplierMapper;
     private final LocationMapper locationMapper;
     private final UnitOfMeasureMapper unitOfMeasureMapper;
+    
+    // New mappers
+    private final ProductVariantMapper productVariantMapper;
+    private final StockTransactionMapper stockTransactionMapper;
+    private final StockLevelMapper stockLevelMapper;
+    private final BatchLotMapper batchLotMapper;
+    private final UoMConversionMapper uomConversionMapper;
 
     public InventoryServiceImpl(
             ProductTemplateRepository productTemplateRepository,
@@ -89,7 +103,17 @@ public class InventoryServiceImpl implements InventoryService {
             DamageLossMapper damageLossMapper,
             SupplierMapper supplierMapper,
             LocationMapper locationMapper,
-            UnitOfMeasureMapper unitOfMeasureMapper
+            UnitOfMeasureMapper unitOfMeasureMapper,
+            ProductVariantRepository productVariantRepository,
+            StockTransactionRepository stockTransactionRepository,
+            StockLevelRepository stockLevelRepository,
+            BatchLotRepository batchLotRepository,
+            UoMConversionRepository uomConversionRepository,
+            ProductVariantMapper productVariantMapper,
+            StockTransactionMapper stockTransactionMapper,
+            StockLevelMapper stockLevelMapper,
+            BatchLotMapper batchLotMapper,
+            UoMConversionMapper uomConversionMapper
     ) {
         this.productTemplateRepository = productTemplateRepository;
         this.categoryRepository = categoryRepository;
@@ -106,6 +130,11 @@ public class InventoryServiceImpl implements InventoryService {
         this.unitOfMeasureRepository = unitOfMeasureRepository;
         this.userOrganizationRoleRepository = userOrganizationRoleRepository;
         this.auditLogService = auditLogService;
+        this.productVariantRepository = productVariantRepository;
+        this.stockTransactionRepository = stockTransactionRepository;
+        this.stockLevelRepository = stockLevelRepository;
+        this.batchLotRepository = batchLotRepository;
+        this.uomConversionRepository = uomConversionRepository;
         this.productTemplateMapper = productTemplateMapper;
         this.categoryMapper = categoryMapper;
         this.brandMapper = brandMapper;
@@ -119,6 +148,11 @@ public class InventoryServiceImpl implements InventoryService {
         this.supplierMapper = supplierMapper;
         this.locationMapper = locationMapper;
         this.unitOfMeasureMapper = unitOfMeasureMapper;
+        this.productVariantMapper = productVariantMapper;
+        this.stockTransactionMapper = stockTransactionMapper;
+        this.stockLevelMapper = stockLevelMapper;
+        this.batchLotMapper = batchLotMapper;
+        this.uomConversionMapper = uomConversionMapper;
     }
 
     // --- Helper Methods ---
@@ -149,8 +183,18 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     private InventoryItem findInventoryItemOrThrow(UUID inventoryItemId) {
-        return inventoryItemRepository.findByIdAndStoreId(inventoryItemId, TenantContext.getCurrentStoreId())
+        return inventoryItemRepository.findById(inventoryItemId)
                 .orElseThrow(() -> new ResourceNotFoundException("Inventory item not found with ID: " + inventoryItemId));
+    }
+
+    private ProductVariant findVariantOrThrow(UUID variantId) {
+        return productVariantRepository.findByIdAndOrganizationId(variantId, TenantContext.getCurrentOrganizationId())
+                .orElseThrow(() -> new ResourceNotFoundException("Product variant not found with ID: " + variantId));
+    }
+
+    private BatchLot findBatchLotOrThrow(UUID batchLotId) {
+        return batchLotRepository.findById(batchLotId)
+                .orElseThrow(() -> new ResourceNotFoundException("Batch lot not found with ID: " + batchLotId));
     }
 
     private PurchaseOrder findPurchaseOrderOrThrow(UUID purchaseOrderId) {
@@ -265,14 +309,7 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     @Transactional
     public ProductDTO createProduct(CreateProductDTO createDTO) {
-        log.info("Creating new product with SKU: {} for organization ID: {}", createDTO.getSku(), TenantContext.getCurrentOrganizationId());
-
-        if (productTemplateRepository.findBySkuAndOrganizationId(createDTO.getSku(), TenantContext.getCurrentOrganizationId()).isPresent()) {
-            throw new DuplicateResourceException("Product with SKU '" + createDTO.getSku() + "' already exists in organization.");
-        }
-        if (createDTO.getBarcode() != null && productTemplateRepository.findByBarcodeAndOrganizationId(createDTO.getBarcode(), TenantContext.getCurrentOrganizationId()).isPresent()) {
-            throw new DuplicateResourceException("Product with Barcode '" + createDTO.getBarcode() + "' already exists in organization.");
-        }
+        log.info("Creating new product template: {} for organization ID: {}", createDTO.getName(), TenantContext.getCurrentOrganizationId());
 
         Category category = findCategoryOrThrow(createDTO.getCategoryId());
         UnitOfMeasure uom = findUnitOfMeasureOrThrow(createDTO.getUnitOfMeasureId());
@@ -282,9 +319,13 @@ public class InventoryServiceImpl implements InventoryService {
         newProduct.setCategory(category);
         newProduct.setUnitOfMeasure(uom);
 
+        if (createDTO.getBrandId() != null) {
+            newProduct.setBrand(findBrandOrThrow(createDTO.getBrandId()));
+        }
+
         ProductTemplate savedProduct = productTemplateRepository.save(newProduct);
-        logAuditEntry("CREATE_PRODUCT", savedProduct.getId(), "Created product: " + savedProduct.getName());
-        log.info("Product created with ID: {}", savedProduct.getId());
+        logAuditEntry("CREATE_PRODUCT", savedProduct.getId(), "Created product template: " + savedProduct.getName());
+        log.info("Product template created with ID: {}", savedProduct.getId());
         return productTemplateMapper.toDto(savedProduct);
     }
 
@@ -310,28 +351,18 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     @Transactional
     public ProductDTO updateProduct(UUID productId, UpdateProductDTO updateDTO) {
-        log.info("Updating product with ID: {} for organization ID: {}", productId, TenantContext.getCurrentOrganizationId());
+        log.info("Updating product template with ID: {} for organization ID: {}", productId, TenantContext.getCurrentOrganizationId());
         ProductTemplate existingProduct = findProductTemplateOrThrow(productId);
-
-        if (updateDTO.getSku() != null && !updateDTO.getSku().equals(existingProduct.getSku())) {
-            if (productTemplateRepository.findBySkuAndOrganizationId(updateDTO.getSku(), TenantContext.getCurrentOrganizationId()).isPresent()) {
-                throw new DuplicateResourceException("SKU '" + updateDTO.getSku() + "' is already in use by another product in organization.");
-            }
-        }
-        if (updateDTO.getBarcode() != null && !updateDTO.getBarcode().equals(existingProduct.getBarcode())) {
-            if (productTemplateRepository.findByBarcodeAndOrganizationId(updateDTO.getBarcode(), TenantContext.getCurrentOrganizationId()).isPresent()) {
-                throw new DuplicateResourceException("Barcode '" + updateDTO.getBarcode() + "' is already in use by another product in organization.");
-            }
-        }
 
         productTemplateMapper.updateProductFromDto(updateDTO, existingProduct);
 
         if (updateDTO.getCategoryId() != null) existingProduct.setCategory(findCategoryOrThrow(updateDTO.getCategoryId()));
         if (updateDTO.getUnitOfMeasureId() != null) existingProduct.setUnitOfMeasure(findUnitOfMeasureOrThrow(updateDTO.getUnitOfMeasureId()));
+        if (updateDTO.getBrandId() != null) existingProduct.setBrand(findBrandOrThrow(updateDTO.getBrandId()));
 
         ProductTemplate updatedProduct = productTemplateRepository.save(existingProduct);
-        logAuditEntry("UPDATE_PRODUCT", updatedProduct.getId(), "Updated product: " + updatedProduct.getName());
-        log.info("Product updated with ID: {}", updatedProduct.getId());
+        logAuditEntry("UPDATE_PRODUCT", updatedProduct.getId(), "Updated product template: " + updatedProduct.getName());
+        log.info("Product template updated with ID: {}", updatedProduct.getId());
         return productTemplateMapper.toDto(updatedProduct);
     }
 
@@ -351,39 +382,46 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     @Transactional
     public InventoryItemDTO createInventoryItem(CreateInventoryItemDTO createDTO) {
-        log.info("Creating new inventory item for product ID: {} in store ID: {}", createDTO.getProductTemplateId(), TenantContext.getCurrentStoreId());
-        ProductTemplate product = findProductTemplateOrThrow(createDTO.getProductTemplateId());
+        log.info("Creating new inventory item for variant ID: {} at location ID: {}", createDTO.getVariantId(), createDTO.getLocationId());
+        
+        ProductVariant variant = findVariantOrThrow(createDTO.getVariantId());
         Location location = findLocationOrThrow(createDTO.getLocationId());
 
-        if (!location.getStore().getId().equals(TenantContext.getCurrentStoreId())) {
-            throw new SecurityException("Location does not belong to current store.");
+        // Check if inventory item already exists (variant + location + batchLot combination)
+        Optional<InventoryItem> existing = inventoryItemRepository
+                .findByVariantIdAndLocationIdAndBatchLotId(
+                    createDTO.getVariantId(), 
+                    createDTO.getLocationId(), 
+                    createDTO.getBatchLotId());
+
+        if (existing.isPresent()) {
+            throw new DuplicateResourceException("Inventory item already exists for this variant, location, and batch combination.");
         }
 
-        Optional<InventoryItem> existingItem = inventoryItemRepository.findByProductTemplateIdAndStoreIdAndBatchNumberAndExpirationDate(
-                product.getId(), TenantContext.getCurrentStoreId(), createDTO.getBatchNumber(), createDTO.getExpirationDate());
-
-        if (existingItem.isPresent()) {
-            InventoryItem itemToUpdate = existingItem.get();
-            itemToUpdate.setQuantity(itemToUpdate.getQuantity() + createDTO.getQuantity());
-            itemToUpdate.setRetailPrice(createDTO.getRetailPrice());
-            itemToUpdate.setCostPrice(createDTO.getCostPrice());
-            itemToUpdate.setLastStockUpdate(LocalDateTime.now());
-            inventoryItemRepository.save(itemToUpdate);
-            logAuditEntry("UPDATE_INVENTORY_ITEM", itemToUpdate.getId(), "Updated inventory item quantity: " + itemToUpdate.getQuantity());
-            log.info("Updated existing inventory item ID {} with new quantity {}", itemToUpdate.getId(), itemToUpdate.getQuantity());
-            return inventoryItemMapper.toDto(itemToUpdate);
-        } else {
-            InventoryItem newInventoryItem = inventoryItemMapper.toEntity(createDTO);
-            newInventoryItem.setProductTemplate(product);
-            newInventoryItem.setStore(TenantContext.getCurrentStore());
-            newInventoryItem.setLocation(location);
-            newInventoryItem.setLastStockUpdate(LocalDateTime.now());
-
-            InventoryItem savedItem = inventoryItemRepository.save(newInventoryItem);
-            logAuditEntry("CREATE_INVENTORY_ITEM", savedItem.getId(), "Created inventory item for product: " + product.getName());
-            log.info("New inventory item created with ID: {}", savedItem.getId());
-            return inventoryItemMapper.toDto(savedItem);
+        InventoryItem newItem = new InventoryItem();
+        newItem.setVariant(variant);
+        newItem.setLocation(location);
+        
+        if (createDTO.getBatchLotId() != null) {
+            newItem.setBatchLot(findBatchLotOrThrow(createDTO.getBatchLotId()));
         }
+        if (createDTO.getExpiryDate() != null) {
+            newItem.setExpiryDate(createDTO.getExpiryDate());
+        }
+
+        InventoryItem savedItem = inventoryItemRepository.save(newItem);
+
+        // Create initial stock level (will be updated by transactions)
+        StockLevel stockLevel = new StockLevel();
+        stockLevel.setInventoryItem(savedItem);
+        stockLevel.setOnHand(0);
+        stockLevel.setCommitted(0);
+        stockLevel.setAvailable(0);
+        stockLevelRepository.save(stockLevel);
+
+        logAuditEntry("CREATE_INVENTORY_ITEM", savedItem.getId(), "Created inventory item for variant: " + variant.getSku());
+        log.info("New inventory item created with ID: {}", savedItem.getId());
+        return inventoryItemMapper.toDto(savedItem);
     }
 
     @Override
@@ -396,40 +434,37 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<InventoryItemDTO> getInventoryItemsForProduct(UUID productId) {
-        log.debug("Fetching all inventory items for product ID: {} in store ID: {}", productId, TenantContext.getCurrentStoreId());
-        findProductTemplateOrThrow(productId);
-        List<InventoryItem> items = inventoryItemRepository.findByProductTemplateIdAndStoreId(productId, TenantContext.getCurrentStoreId());
+    public List<InventoryItemDTO> getInventoryItemsForTemplate(UUID templateId) {
+        log.debug("Fetching all inventory items for template ID: {}", templateId);
+        findProductTemplateOrThrow(templateId);
+        // Get via variants
+        List<ProductVariant> variants = productVariantRepository.findByTemplateId(templateId);
+        return variants.stream()
+                .flatMap(v -> inventoryItemRepository.findByVariantId(v.getId()).stream())
+                .map(inventoryItemMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<InventoryItemDTO> getInventoryItemsForVariant(UUID variantId) {
+        log.debug("Fetching all inventory items for variant ID: {}", variantId);
+        findVariantOrThrow(variantId);
+        List<InventoryItem> items = inventoryItemRepository.findByVariantId(variantId);
         return inventoryItemMapper.toDtoList(items);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<InventoryItemDTO> getInventoryItemsAtLocation(UUID locationId) {
-        log.debug("Fetching all inventory items at location ID: {} in store ID: {}", locationId, TenantContext.getCurrentStoreId());
+        log.debug("Fetching all inventory items at location ID: {}", locationId);
         findLocationOrThrow(locationId);
-        List<InventoryItem> items = inventoryItemRepository.findByLocationIdAndStoreId(locationId, TenantContext.getCurrentStoreId());
+        List<InventoryItem> items = inventoryItemRepository.findByLocationId(locationId);
         return inventoryItemMapper.toDtoList(items);
     }
 
-    @Override
-    @Transactional
-    public InventoryItemDTO updateInventoryItemQuantity(UUID inventoryItemId, Integer quantityChange) {
-        log.info("Updating quantity for inventory item ID {}: change {}", inventoryItemId, TenantContext.getCurrentStoreId());
-        InventoryItem item = findInventoryItemOrThrow(inventoryItemId);
-
-        int newQuantity = item.getQuantity() + quantityChange;
-        if (newQuantity < 0) {
-            throw new InsufficientStockException("Inventory item ID " + inventoryItemId + " stock cannot be negative. Current: " + item.getQuantity() + ", Change: " + quantityChange);
-        }
-
-        item.setQuantity(newQuantity);
-        item.setLastStockUpdate(LocalDateTime.now());
-        InventoryItem updatedItem = inventoryItemRepository.save(item);
-        logAuditEntry("UPDATE_INVENTORY_QUANTITY", updatedItem.getId(), "Updated inventory item quantity to: " + newQuantity);
-        log.info("Inventory item ID {} quantity updated to {}", updatedItem.getId(), updatedItem.getQuantity());
-        return inventoryItemMapper.toDto(updatedItem);
-    }
+    // REMOVED: updateInventoryItemQuantity - use createStockTransaction instead
+    // All quantity changes must go through StockTransaction for audit trail
 
     @Override
     @Transactional
@@ -495,15 +530,20 @@ public class InventoryServiceImpl implements InventoryService {
         log.info("Sale with ID {} processed successfully.", savedSale.getId());
     }
 
-    private List<InventoryItem> getAvailableInventoryItems(UUID productId) {
-        return inventoryItemRepository.findByProductTemplateIdAndStoreId(productId, TenantContext.getCurrentStoreId()).stream()
-                .filter(item -> item.getQuantity() > 0)
+    private List<InventoryItem> getAvailableInventoryItems(UUID variantId) {
+        List<InventoryItem> items = inventoryItemRepository.findByVariantId(variantId);
+        // Filter by available stock levels and sort by expiry
+        return items.stream()
+                .filter(item -> {
+                    StockLevel stockLevel = stockLevelRepository.findByInventoryItemId(item.getId()).orElse(null);
+                    return stockLevel != null && stockLevel.getAvailable() > 0;
+                })
                 .sorted((item1, item2) -> {
-                    if (item1.getExpirationDate() != null && item2.getExpirationDate() != null) {
-                        return item1.getExpirationDate().compareTo(item2.getExpirationDate());
+                    if (item1.getExpiryDate() != null && item2.getExpiryDate() != null) {
+                        return item1.getExpiryDate().compareTo(item2.getExpiryDate());
                     }
-                    if (item1.getExpirationDate() != null) return -1;
-                    if (item2.getExpirationDate() != null) return 1;
+                    if (item1.getExpiryDate() != null) return -1;
+                    if (item2.getExpiryDate() != null) return 1;
                     return item1.getCreatedAt().compareTo(item2.getCreatedAt());
                 })
                 .collect(Collectors.toList());
@@ -511,14 +551,26 @@ public class InventoryServiceImpl implements InventoryService {
 
     private void allocateStock(List<InventoryItem> availableInventoryItems, int quantityToSell, String productName) {
         int remainingToSell = quantityToSell;
-        for (InventoryItem inventoryItemToUpdate : availableInventoryItems) {
+        for (InventoryItem inventoryItem : availableInventoryItems) {
             if (remainingToSell <= 0) break;
 
-            int quantityTaken = Math.min(remainingToSell, inventoryItemToUpdate.getQuantity());
+            // Get current stock level for this inventory item
+            StockLevel stockLevel = stockLevelRepository.findByInventoryItemId(inventoryItem.getId())
+                    .orElse(new StockLevel());
+            int availableQuantity = stockLevel.getAvailable();
+            
+            int quantityTaken = Math.min(remainingToSell, availableQuantity);
             if (quantityTaken > 0) {
-                updateInventoryItemQuantity(inventoryItemToUpdate.getId(), -quantityTaken);
+                // Create stock transaction for the sale
+                CreateStockTransactionDTO transactionDTO = new CreateStockTransactionDTO();
+                transactionDTO.setInventoryItemId(inventoryItem.getId());
+                transactionDTO.setQuantityDelta(-quantityTaken);
+                transactionDTO.setType(TransactionType.SALE.name());
+                transactionDTO.setReference("SALE");
+                
+                createStockTransaction(transactionDTO);
                 remainingToSell -= quantityTaken;
-                log.debug("Decremented {} units from inventory item ID {} for product {}", quantityTaken, inventoryItemToUpdate.getId(), productName);
+                log.debug("Decremented {} units from inventory item ID {} for product {}", quantityTaken, inventoryItem.getId(), productName);
             }
         }
 
@@ -567,41 +619,63 @@ public class InventoryServiceImpl implements InventoryService {
             purchaseOrderItemRepository.save(orderItem);
 
             Location receiptLocation = findLocationOrThrow(receivedItemDTO.getLocationId());
-
-            Optional<InventoryItem> existingInventoryItem = inventoryItemRepository
-                    .findByProductTemplateIdAndStoreIdAndBatchNumberAndExpirationDate(
-                            orderItem.getProductTemplate().getId(), TenantContext.getCurrentStoreId(), receivedItemDTO.getBatchNumber(), receivedItemDTO.getExpirationDate());
-
-            if (existingInventoryItem.isPresent()) {
-                InventoryItem item = existingInventoryItem.get();
-                item.setQuantity(item.getQuantity() + receivedItemDTO.getQuantity());
-                item.setRetailPrice(receivedItemDTO.getRetailPrice());
-                item.setCostPrice(receivedItemDTO.getCostPrice());
-                item.setLastStockUpdate(LocalDateTime.now());
-                inventoryItemRepository.save(item);
-                logAuditEntry("UPDATE_INVENTORY_ITEM", item.getId(), "Updated inventory item with received quantity: " + receivedItemDTO.getQuantity());
-                log.debug("Updated existing inventory item ID {} with new received quantity {}. New total: {}", item.getId(), receivedItemDTO.getQuantity(), item.getQuantity());
-            } else {
-                InventoryItem newInventoryItem = inventoryItemMapper.toEntity(new CreateInventoryItemDTO(
-                        orderItem.getProductTemplate().getId(),
-                        receiptLocation.getId(),
-                        receivedItemDTO.getQuantity(),
-                        receivedItemDTO.getCostPrice(),
-                        receivedItemDTO.getRetailPrice(),
-                        receivedItemDTO.getExpirationDate(),
-                        receivedItemDTO.getBatchNumber(),
-                        receivedItemDTO.getLotNumber()
-                ));
-                newInventoryItem.setProductTemplate(orderItem.getProductTemplate());
-                newInventoryItem.setStore(TenantContext.getCurrentStore());
-                newInventoryItem.setLocation(receiptLocation);
-                newInventoryItem.setRetailPrice(receivedItemDTO.getRetailPrice());
-                newInventoryItem.setCostPrice(receivedItemDTO.getCostPrice());
-                newInventoryItem.setLastStockUpdate(LocalDateTime.now());
-                inventoryItemRepository.save(newInventoryItem);
-                logAuditEntry("CREATE_INVENTORY_ITEM", newInventoryItem.getId(), "Created inventory item for received product: " + orderItem.getProductTemplate().getName());
-                log.debug("Created new inventory item ID {} for received product {}.", newInventoryItem.getId(), orderItem.getProductTemplate().getName());
+            ProductVariant variant = orderItem.getVariant();
+            
+            // Find or create BatchLot if batch/lot info is provided
+            BatchLot batchLot = null;
+            if (receivedItemDTO.getBatchNumber() != null && !receivedItemDTO.getBatchNumber().isEmpty()) {
+                batchLot = batchLotRepository.findByBatchNumber(receivedItemDTO.getBatchNumber())
+                        .orElseGet(() -> {
+                            CreateBatchLotDTO batchLotDTO = new CreateBatchLotDTO();
+                            batchLotDTO.setBatchNumber(receivedItemDTO.getBatchNumber());
+                            if (receivedItemDTO.getExpirationDate() != null) {
+                                batchLotDTO.setExpiryDate(receivedItemDTO.getExpirationDate().toLocalDate());
+                            }
+                            batchLotDTO.setSupplierId(purchaseOrder.getSupplier().getId());
+                            BatchLot newBatchLot = batchLotMapper.toEntity(batchLotDTO);
+                            newBatchLot.setSupplier(purchaseOrder.getSupplier());
+                            return batchLotRepository.save(newBatchLot);
+                        });
             }
+            
+            // Find or create InventoryItem
+            Optional<InventoryItem> existingItem = inventoryItemRepository
+                    .findByVariantIdAndLocationIdAndBatchLotId(
+                            variant.getId(), 
+                            receiptLocation.getId(),
+                            batchLot != null ? batchLot.getId() : null);
+            
+            InventoryItem inventoryItem;
+            if (existingItem.isPresent()) {
+                inventoryItem = existingItem.get();
+            } else {
+                inventoryItem = new InventoryItem();
+                inventoryItem.setVariant(variant);
+                inventoryItem.setLocation(receiptLocation);
+                if (batchLot != null) {
+                    inventoryItem.setBatchLot(batchLot);
+                }
+                if (receivedItemDTO.getExpirationDate() != null) {
+                    inventoryItem.setExpiryDate(receivedItemDTO.getExpirationDate().toLocalDate());
+                }
+                inventoryItem = inventoryItemRepository.save(inventoryItem);
+            }
+            
+            // Create StockTransaction for receipt
+            StockTransaction receiptTransaction = new StockTransaction();
+            receiptTransaction.setInventoryItem(inventoryItem);
+            receiptTransaction.setType(TransactionType.RECEIPT);
+            receiptTransaction.setQuantityDelta(receivedItemDTO.getQuantity());
+            receiptTransaction.setReference("PO-" + purchaseOrderId);
+            receiptTransaction.setUser(TenantContext.getCurrentUser());
+            receiptTransaction.setTimestamp(LocalDateTime.now());
+            stockTransactionRepository.save(receiptTransaction);
+            
+            // Update stock level
+            updateStockLevelFromTransaction(receiptTransaction);
+            
+            logAuditEntry("PROCESS_PO_RECEIPT", inventoryItem.getId(), 
+                    "Received " + receivedItemDTO.getQuantity() + " units of variant " + variant.getSku());
 
             if (orderItem.getReceivedQuantity() < orderItem.getOrderedQuantity()) {
                 allItemsReceived = false;
@@ -636,10 +710,14 @@ public class InventoryServiceImpl implements InventoryService {
             throw new InvalidOperationException("Quantity for damage/loss must be positive.");
         }
 
-        Optional<InventoryItem> itemToDecrementOpt = inventoryItemRepository
-                .findByProductTemplateIdAndStoreIdAndLocationId(product.getId(), TenantContext.getCurrentStoreId(), location.getId())
-                .stream()
-                .filter(item -> item.getQuantity() >= createDTO.getQuantity() && item.getQuantity() > 0)
+        // Find inventory items for this product template via variants
+        List<InventoryItem> itemsForTemplate = inventoryItemRepository.findByTemplateId(product.getId());
+        Optional<InventoryItem> itemToDecrementOpt = itemsForTemplate.stream()
+                .filter(item -> item.getLocation().getId().equals(location.getId()))
+                .filter(item -> {
+                    StockLevel stockLevel = stockLevelRepository.findByInventoryItemId(item.getId()).orElse(null);
+                    return stockLevel != null && stockLevel.getAvailable() >= createDTO.getQuantity() && stockLevel.getAvailable() > 0;
+                })
                 .findFirst();
 
         if (itemToDecrementOpt.isEmpty()) {
@@ -647,7 +725,15 @@ public class InventoryServiceImpl implements InventoryService {
         }
 
         InventoryItem itemToDecrement = itemToDecrementOpt.get();
-        updateInventoryItemQuantity(itemToDecrement.getId(), -createDTO.getQuantity());
+        
+        // Create stock transaction for damage/loss
+        CreateStockTransactionDTO transactionDTO = new CreateStockTransactionDTO();
+        transactionDTO.setInventoryItemId(itemToDecrement.getId());
+        transactionDTO.setQuantityDelta(-createDTO.getQuantity());
+        transactionDTO.setType(TransactionType.DAMAGE.name());
+        transactionDTO.setReference("DAMAGE_LOSS");
+        
+        createStockTransaction(transactionDTO);
 
         DamageLoss damageLoss = damageLossMapper.toEntity(createDTO);
         damageLoss.setProductTemplate(product);
@@ -662,53 +748,342 @@ public class InventoryServiceImpl implements InventoryService {
         return damageLossMapper.toDto(savedDamageLoss);
     }
 
+    // --- Product Variant Management ---
+
+    @Override
+    @Transactional
+    public ProductVariantDTO createProductVariant(CreateProductVariantDTO createDTO) {
+        log.info("Creating new product variant with SKU: {} for organization ID: {}", 
+            createDTO.getSku(), TenantContext.getCurrentOrganizationId());
+        
+        if (productVariantRepository.findBySkuAndOrganizationId(
+                createDTO.getSku(), TenantContext.getCurrentOrganizationId()).isPresent()) {
+            throw new DuplicateResourceException("Variant with SKU '" + createDTO.getSku() + "' already exists in organization.");
+        }
+        
+        if (createDTO.getBarcode() != null && productVariantRepository.findByBarcodeAndOrganizationId(
+                createDTO.getBarcode(), TenantContext.getCurrentOrganizationId()).isPresent()) {
+            throw new DuplicateResourceException("Variant with barcode '" + createDTO.getBarcode() + "' already exists in organization.");
+        }
+        
+        ProductTemplate template = findProductTemplateOrThrow(createDTO.getTemplateId());
+        
+        ProductVariant newVariant = productVariantMapper.toEntity(createDTO);
+        newVariant.setOrganization(TenantContext.getCurrentOrganization());
+        newVariant.setTemplate(template);
+        
+        ProductVariant savedVariant = productVariantRepository.save(newVariant);
+        logAuditEntry("CREATE_PRODUCT_VARIANT", savedVariant.getId(), "Created variant: " + savedVariant.getSku());
+        return productVariantMapper.toDto(savedVariant);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProductVariantDTO> getVariantsByTemplate(UUID templateId) {
+        findProductTemplateOrThrow(templateId);
+        List<ProductVariant> variants = productVariantRepository.findByTemplateId(templateId);
+        return productVariantMapper.toDtoList(variants);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProductVariantDTO> getAllVariants(boolean includeInactive) {
+        List<ProductVariant> variants = productVariantRepository.findByOrganizationId(TenantContext.getCurrentOrganizationId());
+        if (!includeInactive) {
+            variants = variants.stream().filter(ProductVariant::isActive).collect(Collectors.toList());
+        }
+        return productVariantMapper.toDtoList(variants);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProductVariantDTO getVariantById(UUID variantId) {
+        ProductVariant variant = findVariantOrThrow(variantId);
+        return productVariantMapper.toDto(variant);
+    }
+
+    @Override
+    @Transactional
+    public ProductVariantDTO updateVariant(UUID variantId, UpdateProductVariantDTO updateDTO) {
+        ProductVariant existing = findVariantOrThrow(variantId);
+        
+        if (updateDTO.getSku() != null && !updateDTO.getSku().equals(existing.getSku())) {
+            if (productVariantRepository.findBySkuAndOrganizationId(updateDTO.getSku(), 
+                    TenantContext.getCurrentOrganizationId()).isPresent()) {
+                throw new DuplicateResourceException("SKU '" + updateDTO.getSku() + "' already in use");
+            }
+        }
+        
+        if (updateDTO.getBarcode() != null && !updateDTO.getBarcode().equals(existing.getBarcode())) {
+            if (productVariantRepository.findByBarcodeAndOrganizationId(updateDTO.getBarcode(), 
+                    TenantContext.getCurrentOrganizationId()).isPresent()) {
+                throw new DuplicateResourceException("Barcode '" + updateDTO.getBarcode() + "' already in use");
+            }
+        }
+        
+        productVariantMapper.updateVariantFromDto(updateDTO, existing);
+        ProductVariant saved = productVariantRepository.save(existing);
+        logAuditEntry("UPDATE_PRODUCT_VARIANT", saved.getId(), "Updated variant: " + saved.getSku());
+        return productVariantMapper.toDto(saved);
+    }
+
+    @Override
+    @Transactional
+    public void deleteVariant(UUID variantId) {
+        ProductVariant variant = findVariantOrThrow(variantId);
+        variant.setActive(false);
+        productVariantRepository.save(variant);
+        logAuditEntry("DELETE_PRODUCT_VARIANT", variantId, "Deactivated variant: " + variant.getSku());
+    }
+
+    // --- Stock Transaction Management ---
+
+    @Override
+    @Transactional
+    public StockTransactionDTO createStockTransaction(CreateStockTransactionDTO createDTO) {
+        InventoryItem inventoryItem = inventoryItemRepository.findById(createDTO.getInventoryItemId())
+                .orElseThrow(() -> new ResourceNotFoundException("Inventory item not found: " + createDTO.getInventoryItemId()));
+        
+        if (createDTO.getQuantityDelta() == 0) {
+            throw new InvalidOperationException("Quantity delta cannot be zero");
+        }
+        
+        // For negative deltas, check stock availability
+        if (createDTO.getQuantityDelta() < 0) {
+            StockLevel stockLevel = stockLevelRepository.findByInventoryItemId(createDTO.getInventoryItemId())
+                    .orElse(new StockLevel());
+            if (stockLevel.getAvailable() < Math.abs(createDTO.getQuantityDelta())) {
+                throw new InsufficientStockException("Insufficient stock available. Available: " + 
+                    stockLevel.getAvailable() + 
+                    ", Requested: " + Math.abs(createDTO.getQuantityDelta()));
+            }
+        }
+        
+        StockTransaction transaction = stockTransactionMapper.toEntity(createDTO);
+        transaction.setInventoryItem(inventoryItem);
+        transaction.setUser(TenantContext.getCurrentUser());
+        transaction.setTimestamp(LocalDateTime.now());
+        
+        StockTransaction savedTransaction = stockTransactionRepository.save(transaction);
+        
+        // Update stock level
+        updateStockLevelFromTransaction(savedTransaction);
+        
+        logAuditEntry("CREATE_STOCK_TRANSACTION", savedTransaction.getId(), 
+            "Transaction: " + savedTransaction.getType() + ", delta: " + savedTransaction.getQuantityDelta());
+        
+        return stockTransactionMapper.toDto(savedTransaction);
+    }
+
+    private void updateStockLevelFromTransaction(StockTransaction transaction) {
+        StockLevel stockLevel = stockLevelRepository.findByInventoryItemId(transaction.getInventoryItem().getId())
+                .orElseGet(() -> {
+                    StockLevel newLevel = new StockLevel();
+                    newLevel.setInventoryItem(transaction.getInventoryItem());
+                    newLevel.setOnHand(0);
+                    newLevel.setCommitted(0);
+                    newLevel.setAvailable(0);
+                    return stockLevelRepository.save(newLevel);
+                });
+        
+        stockLevel.setOnHand(stockLevel.getOnHand() + transaction.getQuantityDelta());
+        stockLevel.setAvailable(stockLevel.getOnHand() - stockLevel.getCommitted());
+        
+        stockLevelRepository.save(stockLevel);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<StockTransactionDTO> getTransactionsByInventoryItem(UUID inventoryItemId) {
+        List<StockTransaction> transactions = stockTransactionRepository
+                .findByInventoryItemIdOrderByTimestampDesc(inventoryItemId);
+        return stockTransactionMapper.toDtoList(transactions);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public StockTransactionDTO getTransactionById(UUID transactionId) {
+        StockTransaction transaction = stockTransactionRepository.findById(transactionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Stock transaction not found: " + transactionId));
+        return stockTransactionMapper.toDto(transaction);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<StockTransactionDTO> getTransactionsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
+        List<StockTransaction> transactions = stockTransactionRepository.findByTimestampBetween(startDate, endDate);
+        return stockTransactionMapper.toDtoList(transactions);
+    }
+
+    // --- Stock Level Management ---
+
+    @Override
+    @Transactional(readOnly = true)
+    public StockLevelDTO getStockLevel(UUID inventoryItemId) {
+        StockLevel stockLevel = stockLevelRepository.findByInventoryItemId(inventoryItemId)
+                .orElseThrow(() -> new ResourceNotFoundException("Stock level not found for inventory item: " + inventoryItemId));
+        return stockLevelMapper.toDto(stockLevel);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<StockLevelDTO> getStockLevelsByVariant(UUID variantId) {
+        List<StockLevel> stockLevels = stockLevelRepository.findByVariantId(variantId);
+        return stockLevelMapper.toDtoList(stockLevels);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<StockLevelDTO> getLowStockItems() {
+        List<StockLevel> lowStock = stockLevelRepository.findLowStockItems();
+        return stockLevelMapper.toDtoList(lowStock);
+    }
+
+    // --- Batch/Lot Management ---
+
+    @Override
+    @Transactional
+    public BatchLotDTO createBatchLot(CreateBatchLotDTO createDTO) {
+        if (batchLotRepository.findByBatchNumber(createDTO.getBatchNumber()).isPresent()) {
+            throw new DuplicateResourceException("Batch lot with number '" + createDTO.getBatchNumber() + "' already exists");
+        }
+        
+        BatchLot newBatchLot = batchLotMapper.toEntity(createDTO);
+        if (createDTO.getSupplierId() != null) {
+            newBatchLot.setSupplier(findSupplierOrThrow(createDTO.getSupplierId()));
+        }
+        
+        BatchLot saved = batchLotRepository.save(newBatchLot);
+        logAuditEntry("CREATE_BATCH_LOT", saved.getId(), "Created batch: " + saved.getBatchNumber());
+        return batchLotMapper.toDto(saved);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BatchLotDTO> getAllBatchLots() {
+        List<BatchLot> batchLots = batchLotRepository.findAll();
+        return batchLotMapper.toDtoList(batchLots);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public BatchLotDTO getBatchLotById(UUID batchLotId) {
+        BatchLot batchLot = findBatchLotOrThrow(batchLotId);
+        return batchLotMapper.toDto(batchLot);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BatchLotDTO> getExpiringBatchLots(LocalDate startDate, LocalDate endDate) {
+        List<BatchLot> expiring = batchLotRepository.findExpiringBetween(startDate, endDate);
+        return batchLotMapper.toDtoList(expiring);
+    }
+
+    // --- UoM Conversion Management ---
+
+    @Override
+    @Transactional
+    public UoMConversionDTO createUoMConversion(CreateUoMConversionDTO createDTO) {
+        UnitOfMeasure fromUom = findUnitOfMeasureOrThrow(createDTO.getFromUomId());
+        UnitOfMeasure toUom = findUnitOfMeasureOrThrow(createDTO.getToUomId());
+        
+        if (fromUom.getId().equals(toUom.getId())) {
+            throw new InvalidOperationException("From and To UoM cannot be the same");
+        }
+        
+        if (uomConversionRepository.findByFromUomIdAndToUomId(createDTO.getFromUomId(), createDTO.getToUomId()).isPresent()) {
+            throw new DuplicateResourceException("Conversion already exists for these UoMs");
+        }
+        
+        if (createDTO.getRatio().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new InvalidOperationException("Conversion ratio must be positive");
+        }
+        
+        UoMConversion conversion = uomConversionMapper.toEntity(createDTO);
+        conversion.setFromUom(fromUom);
+        conversion.setToUom(toUom);
+        
+        UoMConversion saved = uomConversionRepository.save(conversion);
+        logAuditEntry("CREATE_UOM_CONVERSION", saved.getId(), 
+            "Created conversion: " + fromUom.getName() + " to " + toUom.getName());
+        return uomConversionMapper.toDto(saved);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UoMConversionDTO> getAllUoMConversions() {
+        List<UoMConversion> conversions = uomConversionRepository.findAll();
+        return uomConversionMapper.toDtoList(conversions);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UoMConversionDTO getUoMConversionById(UUID conversionId) {
+        UoMConversion conversion = uomConversionRepository.findById(conversionId)
+                .orElseThrow(() -> new ResourceNotFoundException("UoM conversion not found: " + conversionId));
+        return uomConversionMapper.toDto(conversion);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UoMConversionDTO> getConversionsByUom(UUID uomId) {
+        List<UoMConversion> conversions = uomConversionRepository.findAllByUomId(uomId);
+        return uomConversionMapper.toDtoList(conversions);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UoMConversionDTO getConversion(UUID fromUomId, UUID toUomId) {
+        UoMConversion conversion = uomConversionRepository.findByFromUomIdAndToUomId(fromUomId, toUomId)
+                .orElseThrow(() -> new ResourceNotFoundException("Conversion not found from UoM " + fromUomId + " to " + toUomId));
+        return uomConversionMapper.toDto(conversion);
+    }
+
     // --- Stock Check & Information ---
 
     @Override
     @Transactional(readOnly = true)
-    public int getTotalStockQuantity(UUID productId) {
-        log.debug("Getting total stock quantity for product ID: {} in store ID: {}", productId, TenantContext.getCurrentStoreId());
-        findProductTemplateOrThrow(productId);
-        return inventoryItemRepository.getTotalQuantityByProductTemplateIdAndStoreId(productId, TenantContext.getCurrentStoreId()).orElse(0);
+    public int getTotalStockQuantity(UUID variantId) {
+        Integer total = stockLevelRepository.getTotalOnHandByVariantId(variantId);
+        return total != null ? total : 0;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public int getStockQuantityAtLocation(UUID productId, UUID locationId) {
-        log.debug("Getting stock quantity for product ID {} at location ID {} in store ID: {}", productId, locationId, TenantContext.getCurrentStoreId());
-        findProductTemplateOrThrow(productId);
-        findLocationOrThrow(locationId);
-        return inventoryItemRepository.getTotalQuantityByProductTemplateIdAndStoreIdAndLocationId(productId, TenantContext.getCurrentStoreId(), locationId).orElse(0);
+    public int getTotalStockQuantityForTemplate(UUID templateId) {
+        List<ProductVariant> variants = productVariantRepository.findByTemplateId(templateId);
+        return variants.stream()
+                .mapToInt(v -> getTotalStockQuantity(v.getId()))
+                .sum();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public BigDecimal getInventoryItemRetailPrice(UUID inventoryItemId) {
-        log.debug("Getting retail price for inventory item ID: {} in store ID: {}", inventoryItemId, TenantContext.getCurrentStoreId());
-        InventoryItem item = findInventoryItemOrThrow(inventoryItemId);
-        return item.getRetailPrice();
+    public int getStockQuantityAtLocation(UUID variantId, UUID locationId) {
+        List<StockLevel> levels = stockLevelRepository.findByVariantId(variantId);
+        return levels.stream()
+                .filter(sl -> sl.getInventoryItem().getLocation().getId().equals(locationId))
+                .mapToInt(StockLevel::getOnHand)
+                .sum();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public boolean checkStockAvailability(UUID productId, int quantityNeeded) {
-        log.debug("Checking stock availability for product ID {}: needed {} in store ID: {}", productId, quantityNeeded, TenantContext.getCurrentStoreId());
-        if (quantityNeeded <= 0) {
-            throw new IllegalArgumentException("Quantity needed must be positive.");
-        }
-        int available = getTotalStockQuantity(productId);
-        return available >= quantityNeeded;
+    public BigDecimal getVariantRetailPrice(UUID variantId) {
+        ProductVariant variant = findVariantOrThrow(variantId);
+        return variant.getRetailPrice();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public boolean checkStockAvailabilityAtLocation(UUID productId, UUID locationId, int quantityNeeded) {
-        log.debug("Checking stock availability for product ID {} at location ID {}: needed {} in store ID: {}", productId, locationId, quantityNeeded, TenantContext.getCurrentStoreId());
-        if (quantityNeeded <= 0) {
-            throw new IllegalArgumentException("Quantity needed must be positive.");
-        }
-        int available = getStockQuantityAtLocation(productId, locationId);
-        return available >= quantityNeeded;
+    public boolean checkStockAvailability(UUID variantId, int quantityNeeded) {
+        return getTotalStockQuantity(variantId) >= quantityNeeded;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean checkStockAvailabilityAtLocation(UUID variantId, UUID locationId, int quantityNeeded) {
+        return getStockQuantityAtLocation(variantId, locationId) >= quantityNeeded;
     }
 
     // --- Category Management ---

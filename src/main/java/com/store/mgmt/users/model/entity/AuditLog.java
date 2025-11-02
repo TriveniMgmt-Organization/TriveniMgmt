@@ -10,13 +10,12 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.hibernate.annotations.Type;
 
-import java.util.Set;
 import java.util.UUID;
 //-- Audit log for permission/role changes
 @Entity
 @Table(name = "audit_logs")
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 public class AuditLog extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "organization_id", nullable = false)

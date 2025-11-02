@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
 @Entity
 @Table(name = "stock_transfers")
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 public class StockTransfer extends BaseEntity {
 
     @ManyToOne
@@ -31,4 +31,9 @@ public class StockTransfer extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private StockStatus status;
+
+    // Example: SaleItem
+@ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "variant_id", nullable = false)
+private ProductVariant variant;
 }

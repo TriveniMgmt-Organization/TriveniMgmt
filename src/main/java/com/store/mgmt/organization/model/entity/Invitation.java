@@ -4,12 +4,14 @@ import com.store.mgmt.common.model.BaseEntity;
 import com.store.mgmt.users.model.entity.Role;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "invitations")
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class Invitation extends BaseEntity {
     @Column(nullable = false)
     private String email;

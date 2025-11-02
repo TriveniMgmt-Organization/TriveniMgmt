@@ -1,15 +1,14 @@
 package com.store.mgmt.inventory.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.store.mgmt.common.model.BaseEntity;
 import com.store.mgmt.inventory.model.enums.DiscountType;
 import com.store.mgmt.organization.model.entity.Organization;
 import com.store.mgmt.organization.model.entity.Store;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -17,9 +16,9 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "discounts")
 @Data
-@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public class Discount extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "organization_id", nullable = false)

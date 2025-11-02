@@ -2,11 +2,13 @@ package com.store.mgmt.organization.model.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Schema(name = "UpdateOrganization", description = "Data Transfer Object for a organization account")
 @NoArgsConstructor
 public class UpdateOrganizationDTO extends CreateOrganizationDTO {

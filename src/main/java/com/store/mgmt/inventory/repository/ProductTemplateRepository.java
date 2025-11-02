@@ -12,10 +12,6 @@ import java.util.UUID;
 
 @Repository
 public interface ProductTemplateRepository extends JpaRepository<ProductTemplate, UUID> {
-    @Query("SELECT u FROM ProductTemplate u WHERE u.sku = :sku AND u.deletedAt IS NULL")
-    Optional<ProductTemplate> findBySku(String sku);
-    @Query("SELECT u FROM ProductTemplate u WHERE u.barcode = :barcode AND u.deletedAt IS NULL")
-    Optional<ProductTemplate> findByBarcode(String barcode);
     @Query("SELECT u FROM ProductTemplate u WHERE u.id = :id AND u.deletedAt IS NULL")
     @NonNull
     Optional<ProductTemplate> findById(@org.springframework.lang.NonNull UUID id);
@@ -29,8 +25,6 @@ public interface ProductTemplateRepository extends JpaRepository<ProductTemplate
     List<ProductTemplate> findAll();
 
     Optional<ProductTemplate> findByIdAndOrganizationId(UUID id, UUID organizationId);
-    Optional<ProductTemplate> findBySkuAndOrganizationId(String sku, UUID organizationId);
-    Optional<ProductTemplate> findByBarcodeAndOrganizationId(String barcode, UUID organizationId);
     List<ProductTemplate> findByOrganizationId(UUID organizationId);
     List<ProductTemplate> findByCategoryIdAndOrganizationId(UUID categoryId, UUID organizationId);
     List<ProductTemplate> findByUnitOfMeasureIdAndOrganizationId(UUID unitOfMeasureId, UUID organizationId);

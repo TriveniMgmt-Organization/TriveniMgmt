@@ -1,15 +1,12 @@
 package com.store.mgmt.inventory.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-import com.fasterxml.jackson.databind.ser.Serializers;
 import com.store.mgmt.common.model.BaseEntity;
 import com.store.mgmt.inventory.model.enums.PaymentMethod;
 import com.store.mgmt.organization.model.entity.Store;
 import com.store.mgmt.users.model.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -18,9 +15,9 @@ import java.util.Set;
 @Entity
 @Table(name = "sales")
 @Data
-@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public class Sale extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)

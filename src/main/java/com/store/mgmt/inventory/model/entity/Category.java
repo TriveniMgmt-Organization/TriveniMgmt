@@ -9,23 +9,22 @@ import lombok.EqualsAndHashCode;
 import java.util.UUID;
 
 @Entity
-@Table(name = "categories")
+@Table(name = "categories", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"organization_id", "code"}),
+    @UniqueConstraint(columnNames = {"organization_id", "name"})
+})
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 public class Category extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "organization_id", nullable = false)
     private Organization organization;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String code;
 
-    @Column(nullable = false, unique = true)
-    private String name;
-
-    @Column
-    private String description;
-
     @Column(nullable = false)
+    private String name;
+    private String description;
     private boolean isActive = true;
 }

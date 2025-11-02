@@ -5,10 +5,12 @@ import com.store.mgmt.organization.enums.StoreStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
+import lombok.EqualsAndHashCode;
 
 @Entity
 @Table(name = "stores")
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class Store extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "organization_id", nullable = false)

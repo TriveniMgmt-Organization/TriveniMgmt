@@ -1,7 +1,6 @@
 package com.store.mgmt.reporting.model.entity;
 
 import com.store.mgmt.common.model.BaseEntity;
-import com.store.mgmt.inventory.model.entity.StockTransfer;
 import com.store.mgmt.organization.model.entity.Organization;
 import com.store.mgmt.organization.model.entity.Store;
 import jakarta.persistence.*;
@@ -11,7 +10,7 @@ import lombok.EqualsAndHashCode;
 @Entity
 @Table(name = "reports")
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 public class Report extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "organization_id", nullable = false)
