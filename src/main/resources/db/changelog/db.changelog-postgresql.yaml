@@ -25,3 +25,21 @@ databaseChangeLog:
                   name: updated_at
                   type: TIMESTAMP
                   defaultValueComputed: CURRENT_TIMESTAMP
+  - changeSet:
+      id: add-applied-template-code-to-organizations
+      author: system
+      preConditions:
+        - dbms:
+            type: postgresql
+        - not:
+            - columnExists:
+                tableName: organizations
+                columnName: applied_template_code
+      changes:
+        - addColumn:
+            tableName: organizations
+            columns:
+              - column:
+                  name: applied_template_code
+                  type: VARCHAR(50)
+                  remarks: "Code of the global template applied to this organization. Template application is a one-time operation."

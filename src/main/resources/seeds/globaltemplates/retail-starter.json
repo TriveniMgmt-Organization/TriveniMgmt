@@ -1,0 +1,245 @@
+{
+    "template": {
+      "name": "General Retail Starter Pack",
+      "code": "RETAIL_PRO",
+      "type": "RETAIL",
+      "version": 1,
+      "description": "Perfect for apparel, gift shops, home goods, and general merchandise stores."
+    },
+    "items": [
+      {
+        "entity_type": "BRAND",
+        "data": {
+          "name": "Levi's",
+          "description": "Denim & Casual Wear",
+          "logo_url": "https://logo.clearbit.com/levi.com"
+        }
+      },
+      {
+        "entity_type": "BRAND",
+        "data": {
+          "name": "Nike",
+          "description": "Athletic Apparel & Shoes"
+        }
+      },
+      {
+        "entity_type": "BRAND",
+        "data": {
+          "name": "Yankee Candle",
+          "description": "Scented Candles"
+        }
+      },
+      {
+        "entity_type": "BRAND",
+        "data": {
+          "name": "Hallmark",
+          "description": "Greeting Cards & Gifts"
+        }
+      },
+      {
+        "entity_type": "BRAND",
+        "data": {
+          "name": "Generic",
+          "description": "Store Brand"
+        }
+      },
+  
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "APPAREL",
+          "name": "Apparel"
+        }
+      },
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "MENS",
+          "name": "Men's Clothing",
+          "parent_code": "APPAREL"
+        }
+      },
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "WOMENS",
+          "name": "Women's Clothing",
+          "parent_code": "APPAREL"
+        }
+      },
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "SHOES",
+          "name": "Footwear"
+        }
+      },
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "ACCESSORIES",
+          "name": "Accessories"
+        }
+      },
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "GIFTS",
+          "name": "Gifts & Decor"
+        }
+      },
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "CANDLES",
+          "name": "Candles",
+          "parent_code": "GIFTS"
+        }
+      },
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "CARDS",
+          "name": "Greeting Cards",
+          "parent_code": "GIFTS"
+        }
+      },
+  
+      {
+        "entity_type": "UOM",
+        "data": {
+          "code": "PC",
+          "name": "Piece"
+        }
+      },
+      {
+        "entity_type": "UOM",
+        "data": {
+          "code": "PAIR",
+          "name": "Pair"
+        }
+      },
+  
+      {
+        "entity_type": "TAX_RULE",
+        "data": {
+          "country_code": "US",
+          "tax_rate": 8.25,
+          "description": "Standard Retail Sales Tax"
+        }
+      },
+  
+      {
+        "entity_type": "PRODUCT_TEMPLATE",
+        "data": {
+          "name": "Levi's 501 Jeans - Blue",
+          "category_code": "MENS",
+          "brand_name": "Levi's",
+          "uom_code": "PC",
+          "cost_price": 38.00,
+          "retail_price": 69.99,
+          "sku_prefix": "APP-LEV501",
+          "requires_expiry": false,
+          "reorder_point": 12
+        }
+      },
+      {
+        "entity_type": "PRODUCT_TEMPLATE",
+        "data": {
+          "name": "Nike Air Force 1 - White",
+          "category_code": "SHOES",
+          "brand_name": "Nike",
+          "uom_code": "PAIR",
+          "cost_price": 75.00,
+          "retail_price": 110.00,
+          "sku_prefix": "SHOE-NAF1",
+          "requires_expiry": false,
+          "reorder_point": 8
+        }
+      },
+      {
+        "entity_type": "PRODUCT_TEMPLATE",
+        "data": {
+          "name": "Yankee Candle Large Jar",
+          "category_code": "CANDLES",
+          "brand_name": "Yankee Candle",
+          "uom_code": "PC",
+          "cost_price": 16.00,
+          "retail_price": 29.99,
+          "sku_prefix": "GIFT-YC",
+          "requires_expiry": false,
+          "reorder_point": 24
+        }
+      },
+      {
+        "entity_type": "PRODUCT_TEMPLATE",
+        "data": {
+          "name": "Hallmark Birthday Card",
+          "category_code": "CARDS",
+          "brand_name": "Hallmark",
+          "uom_code": "PC",
+          "cost_price": 1.20,
+          "retail_price": 4.99,
+          "sku_prefix": "CARD-BDAY",
+          "requires_expiry": false,
+          "reorder_point": 50
+        }
+      },
+  
+      {
+        "entity_type": "SUPPLIER",
+        "data": {
+          "name": "Apparel Wholesale Inc.",
+          "contact_person": "Lisa Chen",
+          "email": "orders@apparelwholesale.com",
+          "phone": "+1-800-555-0199"
+        }
+      },
+      {
+        "entity_type": "SUPPLIER",
+        "data": {
+          "name": "GiftCo Distributors",
+          "contact_person": "Mark Rivera",
+          "email": "supply@giftco.com",
+          "phone": "+1-800-555-0200"
+        }
+      },
+  
+      {
+        "entity_type": "LOCATION",
+        "data": {
+          "name": "Front Display",
+          "type": "DISPLAY"
+        }
+      },
+      {
+        "entity_type": "LOCATION",
+        "data": {
+          "name": "Back Stockroom",
+          "type": "STORAGE"
+        }
+      },
+      {
+        "entity_type": "LOCATION",
+        "data": {
+          "name": "Fitting Rooms",
+          "type": "FITTING"
+    }
+      },
+  
+      {
+        "entity_type": "DAMAGE_LOSS_REASON",
+        "data": {
+          "name": "Damaged in Transit",
+          "is_active": true
+        }
+      },
+      {
+        "entity_type": "DAMAGE_LOSS_REASON",
+        "data": {
+          "name": "Customer Return (Defective)",
+          "is_active": true
+        }
+      }
+    ]
+  }

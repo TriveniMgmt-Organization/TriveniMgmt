@@ -1,6 +1,7 @@
 package com.store.mgmt.organization.service;
 
 import com.store.mgmt.organization.mapper.OrganizationMapper;
+import com.store.mgmt.globaltemplates.service.TemplateCopyService;
 import com.store.mgmt.organization.model.dto.CreateOrganizationDTO;
 import com.store.mgmt.organization.model.dto.OrganizationDTO;
 import com.store.mgmt.organization.model.dto.UpdateOrganizationDTO;
@@ -32,19 +33,22 @@ public class OrganizationServiceImpl implements OrganizationService {
     private final RoleRepository roleRepository;
     private final OrganizationMapper organizationMapper;
     private final AuditLogService auditLogService;
+    private final TemplateCopyService templateCopyService;
 
     public OrganizationServiceImpl(OrganizationMapper organizationMapper,
                                    OrganizationRepository organizationRepository,
                                    UserOrganizationRoleRepository userOrganizationRoleRepository,
                                    AuditLogService auditLogService,
                                       RoleRepository roleRepository,
-                                   UserRepository userRepository) {
+                                   UserRepository userRepository,
+                                   TemplateCopyService templateCopyService) {
         this.organizationMapper = organizationMapper;
         this.organizationRepository = organizationRepository;
         this.userOrganizationRoleRepository = userOrganizationRoleRepository;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.auditLogService = auditLogService;
+        this.templateCopyService = templateCopyService;
     }
 
     @Transactional
@@ -74,6 +78,21 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         logAuditEntry("CREATE_ORGANIZATION", savedOrganization.getId(),
                 "Organization '" + savedOrganization.getName() + "' created by user: " + currentUserName);
+
+        // Apply template if provided and not "CUSTOM" (one-time operation)
+        if (dto.getTemplateCode() != null && !dto.getTemplateCode().trim().isEmpty() && !dto.getTemplateCode().equalsIgnoreCase("CUSTOM")) {
+            try {
+                templateCopyService.applyTemplate(savedOrganization, dto.getTemplateCode());
+                savedOrganization.setAppliedTemplateCode(dto.getTemplateCode());
+                savedOrganization = organizationRepository.save(savedOrganization); // Save the template code
+                logAuditEntry("APPLY_TEMPLATE", savedOrganization.getId(),
+                        "Template '" + dto.getTemplateCode() + "' applied to organization: " + savedOrganization.getName());
+            } catch (Exception e) {
+                // Log error but don't fail organization creation
+                logAuditEntry("APPLY_TEMPLATE_ERROR", savedOrganization.getId(),
+                        "Failed to apply template '" + dto.getTemplateCode() + "': " + e.getMessage());
+            }
+        }
 
         return organizationMapper.toDto(savedOrganization);
     }
@@ -111,6 +130,36 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         organizationRepository.delete(organization);
         logAuditEntry("DELETE_ORGANIZATION", id, "Deleted organization: " + organization.getName());
+    }
+
+    @Override
+    @Transactional
+    public void applyTemplate(UUID organizationId, String templateCode) {
+        if (templateCode == null || templateCode.trim().isEmpty() || templateCode.equalsIgnoreCase("CUSTOM")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid template code provided");
+        }
+
+        Organization organization = organizationRepository.findById(organizationId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Organization not found"));
+
+        // Check if a template has already been applied (one-time operation)
+        if (organization.getAppliedTemplateCode() != null && !organization.getAppliedTemplateCode().trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "A template has already been applied to this organization. Template application is a one-time operation and cannot be changed.");
+        }
+
+        try {
+            templateCopyService.applyTemplate(organization, templateCode);
+            organization.setAppliedTemplateCode(templateCode);
+            organizationRepository.save(organization); // Save the template code
+            logAuditEntry("APPLY_TEMPLATE", organizationId,
+                    "Template '" + templateCode + "' applied to organization: " + organization.getName());
+        } catch (Exception e) {
+            logAuditEntry("APPLY_TEMPLATE_ERROR", organizationId,
+                    "Failed to apply template '" + templateCode + "': " + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Failed to apply template: " + e.getMessage());
+        }
     }
 
     private void logAuditEntry(String action, UUID entityId, String message) {

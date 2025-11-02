@@ -23,6 +23,9 @@ public class Organization extends BaseEntity {
     @Column(name = "contact_info")
     private String contactInfo;
 
+    @Column(name = "applied_template_code", length = 50)
+    private String appliedTemplateCode; // Tracks which global template was applied (one-time operation)
+
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private Set<Store> stores;

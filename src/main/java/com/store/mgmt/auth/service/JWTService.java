@@ -252,7 +252,8 @@ public class JWTService {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                log.debug("Cookie Name: {}, Cookie Value: {}", cookie.getName(), cookie.getValue());
+                // log.debug("Cookie Name: {}, Cookie Value: {}", cookie.getName(), cookie.getValue());
+                log.debug("Cookie Name: {}, Cookie Value: {}", cookie.getName(), "********");
             }
         } else {
             log.debug("No cookies found in the request");
@@ -260,7 +261,7 @@ public class JWTService {
 
         Cookie cookie = WebUtils.getCookie(request, ACCESS_TOKEN_COOKIE_NAME);
         if (cookie != null) {
-            log.debug("Found session_token cookie with value: {}", cookie.getValue());
+            // log.debug("Found session_token cookie with value: {}", cookie.getValue());
             return cookie.getValue();
         } else {
             log.debug("session_token cookie not found");

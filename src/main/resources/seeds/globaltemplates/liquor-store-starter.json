@@ -1,0 +1,282 @@
+{
+    "template": {
+      "name": "Liquor Store Starter Pack",
+      "code": "LIQUOR_PRO",
+      "type": "LIQUOR",
+      "version": 1,
+      "description": "For wine, beer, spirits shops. Includes age verification, excise tax, and shelf organization."
+    },
+    "items": [
+      {
+        "entity_type": "BRAND",
+        "data": {
+          "name": "Jack Daniel's",
+          "description": "Tennessee Whiskey"
+        }
+      },
+      {
+        "entity_type": "BRAND",
+        "data": {
+          "name": "Tito's",
+          "description": "Handmade Vodka"
+        }
+      },
+      {
+        "entity_type": "BRAND",
+        "data": {
+          "name": "Heineken",
+          "description": "Lager Beer"
+        }
+      },
+      {
+        "entity_type": "BRAND",
+        "data": {
+          "name": "Yellow Tail",
+          "description": "Australian Wine"
+        }
+      },
+      {
+        "entity_type": "BRAND",
+        "data": {
+          "name": "Patrón",
+          "description": "Premium Tequila"
+        }
+      },
+  
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "SPIRITS",
+          "name": "Spirits"
+        }
+      },
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "WHISKEY",
+          "name": "Whiskey",
+          "parent_code": "SPIRITS"
+        }
+      },
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "VODKA",
+          "name": "Vodka",
+          "parent_code": "SPIRITS"
+        }
+      },
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "TEQUILA",
+          "name": "Tequila",
+          "parent_code": "SPIRITS"
+        }
+      },
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "WINE",
+          "name": "Wine"
+        }
+      },
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "RED_WINE",
+          "name": "Red Wine",
+          "parent_code": "WINE"
+        }
+      },
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "WHITE_WINE",
+          "name": "White Wine",
+          "parent_code": "WINE"
+        }
+      },
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "BEER",
+          "name": "Beer"
+        }
+      },
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "MIXERS",
+          "name": "Mixers & Soft Drinks"
+        }
+      },
+  
+      {
+        "entity_type": "UNIT_OF_MEASURE",
+        "data": {
+          "code": "BTL",
+          "name": "Bottle"
+        }
+      },
+      {
+        "entity_type": "UNIT_OF_MEASURE",
+        "data": {
+          "code": "CAN",
+          "name": "Can"
+        }
+      },
+      {
+        "entity_type": "UNIT_OF_MEASURE",
+        "data": {
+          "code": "CASE",
+          "name": "Case"
+        }
+      },
+  
+      {
+        "entity_type": "TAX_RULE",
+        "data": {
+          "country_code": "US",
+          "tax_rate": 8.25,
+          "description": "Sales Tax"
+        }
+      },
+      {
+        "entity_type": "TAX_RULE",
+        "data": {
+          "country_code": "US",
+          "tax_rate": 0.30,
+          "description": "Excise Tax per Liter (Spirits)"
+        }
+      },
+  
+      {
+        "entity_type": "PRODUCT_TEMPLATE",
+        "data": {
+          "name": "Jack Daniel's Old No.7 750ml",
+          "category_code": "WHISKEY",
+          "brand_name": "Jack Daniel's",
+          "unitOfMeasure_code": "BTL",
+          "cost_price": 18.50,
+          "retail_price": 29.99,
+          "sku": "SPIR-JD750",
+          "requires_expiry": false,
+          "reorder_point": 12
+        }
+      },
+      {
+        "entity_type": "PRODUCT_TEMPLATE",
+        "data": {
+          "name": "Tito's Vodka 1L",
+          "category_code": "VODKA",
+          "brand_name": "Tito's",
+          "unitOfMeasure_code": "BTL",
+          "cost_price": 16.00,
+          "retail_price": 24.99,
+          "sku": "SPIR-TITO1L",
+          "requires_expiry": false,
+          "reorder_point": 15
+        }
+      },
+      {
+        "entity_type": "PRODUCT_TEMPLATE",
+        "data": {
+          "name": "Yellow Tail Merlot 750ml",
+          "category_code": "RED_WINE",
+          "brand_name": "Yellow Tail",
+          "unitOfMeasure_code": "BTL",
+          "cost_price": 5.50,
+          "retail_price": 9.99,
+          "sku": "WINE-YT-MER",
+          "requires_expiry": false,
+          "reorder_point": 24
+        }
+      },
+      {
+        "entity_type": "PRODUCT_TEMPLATE",
+        "data": {
+          "name": "Heineken 12oz Can (6-Pack)",
+          "category_code": "BEER",
+          "brand_name": "Heineken",
+          "unitOfMeasure_code": "CASE",
+          "cost_price": 8.00,
+          "retail_price": 12.99,
+          "sku": "BEER-HEIN6",
+          "requires_expiry": true,
+          "reorder_point": 20
+        }
+      },
+  
+      {
+        "entity_type": "SUPPLIER",
+        "data": {
+          "name": "Southern Glazer's Wine & Spirits",
+          "contact_person": "Robert Diaz",
+          "email": "orders@southernglazers.com",
+          "phone": "+1-800-555-4321"
+        }
+      },
+      {
+        "entity_type": "SUPPLIER",
+        "data": {
+          "name": "Breakthru Beverage",
+          "contact_person": "Emily Wong",
+          "email": "supply@breakthru.com",
+          "phone": "+1-800-555-6789"
+        }
+      },
+  
+      {
+        "entity_type": "LOCATION",
+        "data": {
+          "name": "Wine Wall",
+          "type": "WALL"
+        }
+      },
+      {
+        "entity_type": "LOCATION",
+        "data": {
+          "name": "Beer Cooler",
+          "type": "COOLER"
+        }
+      },
+      {
+        "entity_type": "LOCATION",
+        "data": {
+          "name": "Spirits Shelf",
+          "type": "SHELF"
+        }
+      },
+      {
+        "entity_type": "LOCATION",
+        "data": {
+          "name": "Back Liquor Storage",
+          "type": "STORAGE"
+        }
+      },
+  
+      {
+        "entity_type": "DAMAGE_LOSS_REASON",
+        "data": {
+          "name": "Broken Bottle",
+          "is_active": true
+        }
+      },
+      {
+        "entity_type": "DAMAGE_LOSS_REASON",
+        "data": {
+          "name": "Corked Wine",
+          "is_active": true
+        }
+      },
+  
+      {
+        "entity_type": "PAYMENT_METHOD",
+        "data": {
+          "name": "ID Check Required",
+          "code": "AGE_VERIFY"
+        }
+      }
+    ]
+  }

@@ -24,6 +24,7 @@ import com.store.mgmt.users.repository.RefreshTokenRepository;
 import com.store.mgmt.users.repository.RoleRepository;
 import com.store.mgmt.users.repository.UserRepository;
 import com.store.mgmt.users.service.AuditLogService;
+import com.store.mgmt.globaltemplates.service.TemplateCopyService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -69,6 +70,7 @@ private final UserOrganizationRoleRepository userOrganizationRoleRepository;
     private final OrganizationMapper organizationMapper;
     private final StoreMapper storeMapper;
     private final StoreRepository storeRepository;
+    private final TemplateCopyService templateCopyService;
 
     public AuthServiceImpl(UserRepository userRepository, RoleRepository roleRepository,
                            PasswordEncoder passwordEncoder, JWTService jwtService,
@@ -77,7 +79,8 @@ private final UserOrganizationRoleRepository userOrganizationRoleRepository;
                             OrganizationRepository organizationRepository, UserOrganizationRoleRepository userOrganizationRoleRepository,
                             AuditLogService auditLogService,
                            OrganizationMapper organizationMapper, StoreMapper storeMapper,
-                           UserMapper userMapper, RefreshTokenRepository refreshTokenRepository) {
+                           UserMapper userMapper, RefreshTokenRepository refreshTokenRepository,
+                           TemplateCopyService templateCopyService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.userOrganizationRoleRepository = userOrganizationRoleRepository;
@@ -92,6 +95,7 @@ private final UserOrganizationRoleRepository userOrganizationRoleRepository;
         this.organizationMapper = organizationMapper;
         this.authenticationManager = authenticationManager;
         this.auditLogService = auditLogService;
+        this.templateCopyService = templateCopyService;
     }
 
     private AuthResponse handleJWTGeneration(User user){
@@ -280,6 +284,22 @@ private final UserOrganizationRoleRepository userOrganizationRoleRepository;
             Organization organization = new Organization();
             organization.setName(orgName);
             Organization savedOrganization = organizationRepository.save(organization);
+
+            // Apply template if provided and not "CUSTOM" (one-time operation)
+            if (registrationData.getTemplateCode() != null && !registrationData.getTemplateCode().trim().isEmpty() 
+                    && !registrationData.getTemplateCode().equalsIgnoreCase("CUSTOM")) {
+                try {
+                    templateCopyService.applyTemplate(savedOrganization, registrationData.getTemplateCode());
+                    savedOrganization.setAppliedTemplateCode(registrationData.getTemplateCode());
+                    organizationRepository.save(savedOrganization); // Save the template code
+                    logAuditEntry("APPLY_TEMPLATE", savedOrganization.getId(),
+                            "Template '" + registrationData.getTemplateCode() + "' applied during registration");
+                } catch (Exception e) {
+                    // Log error but don't fail registration
+                    logAuditEntry("APPLY_TEMPLATE_ERROR", savedOrganization.getId(),
+                            "Failed to apply template '" + registrationData.getTemplateCode() + "': " + e.getMessage());
+                }
+            }
 
             activeOrganizationId = savedOrganization.getId();
             // New user without invitation becomes SUPER_ADMIN

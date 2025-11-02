@@ -1,0 +1,265 @@
+{
+  "template": {
+    "name": "Grocery Store Starter Pack",
+    "code": "GROCERY_PRO",
+    "type": "GROCERY",
+    "version": 1,
+    "description": "Complete setup for supermarkets: fresh, frozen, bakery, dairy, and household."
+  },
+  "items": [
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Kraft",
+        "description": "Cheese & Dairy"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Tropicana",
+        "description": "Orange Juice"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Heinz",
+        "description": "Ketchup & Sauces"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Charmin",
+        "description": "Toilet Paper"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Nestlé",
+        "description": "Chocolate & Coffee"
+      }
+    },
+
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "PRODUCE",
+        "name": "Fresh Produce"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "FRUITS",
+        "name": "Fruits",
+        "parent_code": "PRODUCE"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "VEGETABLES",
+        "name": "Vegetables",
+        "parent_code": "PRODUCE"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "DAIRY",
+        "name": "Dairy & Eggs"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "MILK",
+        "name": "Milk",
+        "parent_code": "DAIRY"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "CHEESE",
+        "name": "Cheese",
+        "parent_code": "DAIRY"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "FROZEN",
+        "name": "Frozen Foods"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "BAKERY",
+        "name": "Bakery"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "BEVERAGES",
+        "name": "Beverages"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "HOUSEHOLD",
+        "name": "Household & Cleaning"
+      }
+    },
+
+    {
+      "entity_type": "UNIT_OF_MEASURE",
+      "data": {
+        "code": "LB",
+        "name": "Pound"
+      }
+    },
+    {
+      "entity_type": "UNIT_OF_MEASURE",
+      "data": {
+        "code": "KG",
+        "name": "Kilogram"
+      }
+    },
+    {
+      "entity_type": "UNIT_OF_MEASURE",
+      "data": {
+        "code": "DOZ",
+        "name": "Dozen"
+      }
+    },
+    {
+      "entity_type": "UNIT_OF_MEASURE",
+      "data": {
+        "code": "L",
+        "name": "Liter"
+      }
+    },
+
+    {
+      "entity_type": "TAX_RULE",
+      "data": {
+        "country_code": "US",
+        "tax_rate": 0.00,
+        "description": "Grocery Food (Tax Exempt)"
+      }
+    },
+    {
+      "entity_type": "TAX_RULE",
+      "data": {
+        "country_code": "US",
+        "tax_rate": 8.25,
+        "description": "Non-Food Items"
+      }
+    },
+
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Bananas (per lb)",
+        "category_code": "FRUITS",
+        "brand_name": "Generic",
+        "unitOfMeasure_code": "LB",
+        "cost_price": 0.39,
+        "retail_price": 0.69,
+        "sku": "PROD-BAN",
+        "requires_expiry": true,
+        "reorder_point": 50
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "2% Milk Gallon",
+        "category_code": "MILK",
+        "brand_name": "Kraft",
+        "unitOfMeasure_code": "GAL",
+        "cost_price": 2.50,
+        "retail_price": 3.99,
+        "sku": "DAIRY-MILK2",
+        "requires_expiry": true,
+        "reorder_point": 24
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Heinz Ketchup 32oz",
+        "category_code": "CONDIMENTS",
+        "brand_name": "Heinz",
+        "unitOfMeasure_code": "PC",
+        "cost_price": 2.10,
+        "retail_price": 3.99,
+        "sku": "COND-KETCH",
+        "requires_expiry": true,
+        "reorder_point": 36
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Charmin Ultra Soft 12-roll",
+        "category_code": "HOUSEHOLD",
+        "brand_name": "Charmin",
+        "unitOfMeasure_code": "PACK",
+        "cost_price": 8.50,
+        "retail_price": 12.99,
+        "sku": "HH-CHARMIN12",
+        "requires_expiry": false,
+        "reorder_point": 20
+      }
+    },
+
+    {
+      "entity_type": "SUPPLIER",
+      "data": {
+        "name": "Sysco Food Services",
+        "contact_person": "Mike Chen",
+        "email": "orders@sysco.com",
+        "phone": "+1-800-123-4567"
+      }
+    },
+    {
+      "entity_type": "SUPPLIER",
+      "data": {
+        "name": "Local Farm Co-op",
+        "contact_person": "Sarah Green",
+        "email": "produce@localfarm.coop",
+        "phone": "+1-555-9876"
+      }
+    },
+
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Produce Cooler",
+        "type": "COOLER"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Dairy Walk-In",
+        "type": "WALKIN"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Dry Storage",
+        "type": "STORAGE"
+      }
+    }
+  ]
+}

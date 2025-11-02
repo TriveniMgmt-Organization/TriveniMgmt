@@ -1,0 +1,348 @@
+{
+    "template": {
+      "name": "Gas Station & C-Store Starter Pack",
+      "code": "GAS_STATION_PRO",
+      "type": "GAS_STATION",
+      "version": 1,
+      "description": "Pre-configured for gas stations with fuel pumps, convenience store, and common inventory items."
+    },
+    "items": [
+      {
+        "entity_type": "BRAND",
+        "data": {
+          "name": "Shell",
+          "description": "Shell Fuel & Lubricants",
+          "logo_url": "https://logo.clearbit.com/shell.com"
+        }
+      },
+      {
+        "entity_type": "BRAND",
+        "data": {
+          "name": "Marlboro",
+          "description": "Cigarettes"
+        }
+      },
+      {
+        "entity_type": "BRAND",
+        "data": {
+          "name": "Coca-Cola",
+          "description": "Soft Drinks"
+        }
+      },
+      {
+        "entity_type": "BRAND",
+        "data": {
+          "name": "Red Bull",
+          "description": "Energy Drinks"
+        }
+      },
+      {
+        "entity_type": "BRAND",
+        "data": {
+          "name": "Lays",
+          "description": "Chips & Snacks"
+        }
+      },
+  
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "FUEL",
+          "name": "Fuel",
+          "description": "Gasoline and Diesel"
+        }
+      },
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "REGULAR_GAS",
+          "name": "Regular Unleaded",
+          "parent_code": "FUEL"
+        }
+      },
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "PREMIUM_GAS",
+          "name": "Premium Unleaded",
+          "parent_code": "FUEL"
+        }
+      },
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "DIESEL",
+          "name": "Diesel",
+          "parent_code": "FUEL"
+        }
+      },
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "BEVERAGES",
+          "name": "Beverages"
+        }
+      },
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "SOFT_DRINKS",
+          "name": "Soft Drinks",
+          "parent_code": "BEVERAGES"
+        }
+      },
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "ENERGY_DRINKS",
+          "name": "Energy Drinks",
+          "parent_code": "BEVERAGES"
+        }
+      },
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "SNACKS",
+          "name": "Snacks"
+        }
+      },
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "CHIPS",
+          "name": "Chips",
+          "parent_code": "SNACKS"
+        }
+      },
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "CIGARETTES",
+          "name": "Cigarettes"
+        }
+      },
+      {
+        "entity_type": "CATEGORY",
+        "data": {
+          "code": "LOTTERY",
+          "name": "Lottery Tickets"
+        }
+      },
+  
+      {
+        "entity_type": "UNIT_OF_MEASURE",
+        "data": {
+          "code": "GAL",
+          "name": "Gallon"
+        }
+      },
+      {
+        "entity_type": "UNIT_OF_MEASURE",
+        "data": {
+          "code": "PC",
+          "name": "Piece"
+        }
+      },
+      {
+        "entity_type": "UNIT_OF_MEASURE",
+        "data": {
+          "code": "PACK",
+          "name": "Pack"
+        }
+      },
+  
+      {
+        "entity_type": "TAX_RULE",
+        "data": {
+          "country_code": "US",
+          "tax_rate": 8.25,
+          "description": "Standard Sales Tax (excl. fuel)"
+        }
+      },
+      {
+        "entity_type": "TAX_RULE",
+        "data": {
+          "country_code": "US",
+          "tax_rate": 0.00,
+          "description": "Fuel Tax (handled separately)"
+        }
+      },
+  
+      {
+        "entity_type": "PRODUCT_TEMPLATE",
+        "data": {
+          "name": "Regular Unleaded (87 Octane)",
+          "category_code": "REGULAR_GAS",
+          "brand_name": "Shell",
+          "unitOfMeasure_code": "GAL",
+          "cost_price": 2.85,
+          "retail_price": 3.49,
+          "sku": "FUEL-REG",
+          "requires_expiry": false,
+          "reorder_point": 500
+        }
+      },
+      {
+        "entity_type": "PRODUCT_TEMPLATE",
+        "data": {
+          "name": "Premium Unleaded (93 Octane)",
+          "category_code": "PREMIUM_GAS",
+          "brand_name": "Shell",
+          "unitOfMeasure_code": "GAL",
+          "cost_price": 3.25,
+          "retail_price": 3.99,
+          "sku": "FUEL-PREM",
+          "requires_expiry": false,
+          "reorder_point": 300
+        }
+      },
+      {
+        "entity_type": "PRODUCT_TEMPLATE",
+        "data": {
+          "name": "Diesel",
+          "category_code": "DIESEL",
+          "brand_name": "Shell",
+          "unitOfMeasure_code": "GAL",
+          "cost_price": 3.10,
+          "retail_price": 3.79,
+          "sku": "FUEL-DIESEL",
+          "requires_expiry": false,
+          "reorder_point": 400
+        }
+      },
+      {
+        "entity_type": "PRODUCT_TEMPLATE",
+        "data": {
+          "name": "Coca-Cola 20oz",
+          "category_code": "SOFT_DRINKS",
+          "brand_name": "Coca-Cola",
+          "unitOfMeasure_code": "PC",
+          "cost_price": 1.20,
+          "retail_price": 2.49,
+          "sku": "BEV-COKE20",
+          "requires_expiry": true,
+          "reorder_point": 48
+        }
+      },
+      {
+        "entity_type": "PRODUCT_TEMPLATE",
+        "data": {
+          "name": "Red Bull 8.4oz",
+          "category_code": "ENERGY_DRINKS",
+          "brand_name": "Red Bull",
+          "unitOfMeasure_code": "PC",
+          "cost_price": 1.80,
+          "retail_price": 3.29,
+          "sku": "BEV-RB8",
+          "requires_expiry": true,
+          "reorder_point": 36
+        }
+      },
+      {
+        "entity_type": "PRODUCT_TEMPLATE",
+        "data": {
+          "name": "Lays Classic 1oz",
+          "category_code": "CHIPS",
+          "brand_name": "Lays",
+          "unitOfMeasure_code": "PC",
+          "cost_price": 0.60,
+          "retail_price": 1.49,
+          "sku": "SNK-LAYS1",
+          "requires_expiry": true,
+          "reorder_point": 60
+        }
+      },
+      {
+        "entity_type": "PRODUCT_TEMPLATE",
+        "data": {
+          "name": "Marlboro Red (Pack)",
+          "category_code": "CIGARETTES",
+          "brand_name": "Marlboro",
+          "uom_code": "PACK",
+          "cost_price": 6.50,
+          "retail_price": 9.99,
+          "sku_prefix": "TOB-MARLRED",
+          "requires_expiry": false,
+          "reorder_point": 20
+        }
+      },
+  
+      {
+        "entity_type": "SUPPLIER",
+        "data": {
+          "name": "Shell Fuel Distributor",
+          "contact_person": "John Doe",
+          "email": "supply@shellfuel.com",
+          "phone": "+1-555-0199"
+        }
+      },
+      {
+        "entity_type": "SUPPLIER",
+        "data": {
+          "name": "Coca-Cola Bottling Co.",
+          "contact_person": "Jane Smith",
+          "email": "orders@coke.com",
+          "phone": "+1-555-0200"
+        }
+      },
+  
+      {
+        "entity_type": "LOCATION",
+        "data": {
+          "name": "Pump Island 1-4",
+          "type": "PUMP_ISLAND"
+        }
+      },
+      {
+        "entity_type": "LOCATION",
+        "data": {
+          "name": "Convenience Store Floor",
+          "type": "STORE"
+        }
+      },
+      {
+        "entity_type": "LOCATION",
+        "data": {
+          "name": "Backroom Storage",
+          "type": "STORAGE"
+        }
+      },
+  
+      {
+        "entity_type": "DAMAGE_LOSS_REASON",
+        "data": {
+          "name": "Spilled Fuel",
+          "is_active": true
+        }
+      },
+      {
+        "entity_type": "DAMAGE_LOSS_REASON",
+        "data": {
+          "name": "Expired Beverage",
+          "is_active": true
+        }
+      },
+  
+      {
+        "entity_type": "PAYMENT_METHOD",
+        "data": {
+          "name": "Fleet Card",
+          "code": "FLEET"
+        }
+      },
+      {
+        "entity_type": "PAYMENT_METHOD",
+        "data": {
+          "name": "Cash",
+          "code": "CASH"
+        }
+      },
+      {
+        "entity_type": "PAYMENT_METHOD",
+        "data": {
+          "name": "Credit Card",
+          "code": "CARD"
+        }
+      }
+    ]
+  }

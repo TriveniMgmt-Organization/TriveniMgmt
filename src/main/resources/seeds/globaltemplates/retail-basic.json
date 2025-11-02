@@ -1,0 +1,46 @@
+{
+  "template": {
+    "name": "Retail Starter",
+    "code": "RETAIL_BASIC",
+    "type": "RETAIL",
+    "version": 1,
+    "isActive": true
+  },
+  "items": [
+    {
+      "entityType": "CATEGORY",
+      "sortOrder": 0,
+      "code": "ELECT",
+      "name": "Electronics",
+      "description": "Electronic devices and gadgets"
+    },
+    {
+      "entityType": "CATEGORY",
+      "sortOrder": 1,
+      "code": "CLOTH",
+      "name": "Clothing",
+      "description": "Apparel and accessories"
+    },
+    {
+      "entityType": "BRAND",
+      "sortOrder": 2,
+      "name": "Generic Brand",
+      "description": "Default brand for retail stores"
+    },
+    {
+      "entityType": "UOM",
+      "sortOrder": 3,
+      "code": "pc",
+      "name": "Piece",
+      "description": "Standard unit for counting items"
+    },
+    {
+      "entityType": "UOM",
+      "sortOrder": 4,
+      "code": "kg",
+      "name": "Kilogram",
+      "description": "Standard unit for weight"
+    }
+  ]
+}
+

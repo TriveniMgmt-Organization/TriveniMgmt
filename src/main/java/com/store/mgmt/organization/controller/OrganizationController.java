@@ -67,4 +67,21 @@ public class OrganizationController {
         OrganizationDTO updatedOrganization = organizationService.updateOrganization(id, dto);
         return ResponseEntity.ok(updatedOrganization);
     }
+
+    @PostMapping("/{id}/apply-template")
+    @Operation(
+            summary = "Apply a global template to an organization",
+            description = "Applies a global template to an existing organization, creating all entities defined in the template.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Template applied successfully"),
+                    @ApiResponse(responseCode = "404", description = "Organization or template not found"),
+                    @ApiResponse(responseCode = "400", description = "Invalid template code")
+            }
+    )
+    public ResponseEntity<Void> applyTemplate(
+            @Parameter(description = "Organization ID", required = true) @PathVariable UUID id,
+            @Parameter(description = "Template code to apply", required = true) @RequestParam String templateCode) {
+        organizationService.applyTemplate(id, templateCode);
+        return ResponseEntity.ok().build();
+    }
 }

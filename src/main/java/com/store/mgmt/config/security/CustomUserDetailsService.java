@@ -40,7 +40,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                     }
                     try {
                         Collection<? extends GrantedAuthority> authorities = getAuthorities(user);
-                        logger.debug("Authorities for user {}: {}", user.getEmail(), authorities);
+                        // logger.debug("Authorities for user {}: {}", user.getEmail(), authorities);
                         return new org.springframework.security.core.userdetails.User(
                                 user.getEmail(),
                                 user.getPasswordHash(),

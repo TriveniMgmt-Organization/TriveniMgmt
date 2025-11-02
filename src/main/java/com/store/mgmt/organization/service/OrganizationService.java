@@ -30,4 +30,12 @@ public interface OrganizationService {
      * @param id the ID of the organization to delete
      */
     void deleteOrganization(UUID id);
+
+    /**
+     * Applies a global template to an existing organization.
+     *
+     * @param organizationId the ID of the organization
+     * @param templateCode the code of the template to apply
+     */
+    void applyTemplate(UUID organizationId, String templateCode);
 }

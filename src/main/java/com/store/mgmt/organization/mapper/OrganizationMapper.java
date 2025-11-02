@@ -28,6 +28,7 @@ public interface OrganizationMapper {
     @Mapping(target = "deletedBy", ignore = true)
     @Mapping(target = "stores", ignore = true)
     @Mapping(target = "userRoles", ignore = true)
+    @Mapping(target = "appliedTemplateCode", ignore = true) // Template is applied separately
     Organization toEntity(CreateOrganizationDTO dto);
     
     @InheritConfiguration(name = "toEntity")

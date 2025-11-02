@@ -30,4 +30,11 @@ public class CreateOrganizationDTO {
             example = "john"
     )
     private String contactInfo;
+
+    @Schema(
+            description = "Optional global template code to apply when creating organization. Use 'CUSTOM' or leave empty for no template.",
+            example = "RETAIL_BASIC",
+            nullable = true
+    )
+    private String templateCode;
 }

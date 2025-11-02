@@ -78,4 +78,11 @@ public class RegisterCredentials {
             example = "abc123xyz456"
     )
     private String invitationToken;
+
+    @Schema(
+            description = "Optional global template code to apply when creating default organization. Use 'CUSTOM' or leave empty for no template.",
+            example = "RETAIL_BASIC",
+            nullable = true
+    )
+    private String templateCode;
 }

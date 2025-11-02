@@ -40,4 +40,11 @@ public class OrganizationDTO {
             example = "[{\"id\": \"a1b2c3d4-e5f6-7890-1234-567890abcdef\", \"name\": \"Store 1\"}, {\"id\": \"b2c3d4e5-f6g7-8901-2345-67890abcdefg\", \"name\": \"Store 2\"}]"
     )
     private List<StoreDTO> stores;
+
+    @Schema(
+            description = "Code of the global template that was applied to this organization (read-only, one-time operation)",
+            example = "RETAIL_BASIC",
+            nullable = true
+    )
+    private String appliedTemplateCode;
 }
