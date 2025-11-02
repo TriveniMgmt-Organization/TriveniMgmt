@@ -10,11 +10,11 @@ import lombok.EqualsAndHashCode;
 @Entity
 @Table(name = "stores")
 @Data
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = false, exclude = "organization")
+@ToString(exclude = "organization")
 public class Store extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "organization_id", nullable = false)
-    @ToString.Exclude
     private Organization organization;
 
     @Column(nullable = false)

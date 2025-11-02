@@ -11,11 +11,11 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(componentModel = "spring", config = BaseMapperConfig.class)
+@Mapper(componentModel = "spring", config = BaseMapperConfig.class, uses = StoreMapper.class)
 public interface OrganizationMapper {
     OrganizationMapper INSTANCE = Mappers.getMapper(OrganizationMapper.class);
 
-    @Mapping(target = "stores", ignore = true) // Ignore organizationId mapping in StoreDTO - it's handled separately
+    // Map stores using StoreMapper
     OrganizationDTO toDto(Organization organization);
     
     // Base method with all BaseEntity ignores - other methods inherit from this

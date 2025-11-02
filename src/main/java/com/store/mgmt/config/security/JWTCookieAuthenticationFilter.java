@@ -65,9 +65,6 @@ public class JWTCookieAuthenticationFilter  extends OncePerRequestFilter{
 
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    logger.debug("Authentication: {}, Authorities: {}", 
-                            authentication.getName(),
-                            authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(", ")));
                     authentication.setDetails(claims);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 

@@ -4,6 +4,7 @@ import com.store.mgmt.organization.mapper.OrganizationMapper;
 import com.store.mgmt.globaltemplates.service.TemplateCopyService;
 import com.store.mgmt.organization.model.dto.CreateOrganizationDTO;
 import com.store.mgmt.organization.model.dto.OrganizationDTO;
+import com.store.mgmt.organization.model.dto.StoreDTO;
 import com.store.mgmt.organization.model.dto.UpdateOrganizationDTO;
 import com.store.mgmt.organization.model.entity.Organization;
 import com.store.mgmt.organization.model.entity.UserOrganizationRole;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -130,6 +132,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         organizationRepository.delete(organization);
         logAuditEntry("DELETE_ORGANIZATION", id, "Deleted organization: " + organization.getName());
+    }
+
+    @Override
+    @Transactional
+    public List<StoreDTO> getStores(UUID organizationId) {
+        Organization organization = organizationRepository.findByIdWithStores(organizationId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Organization not found"));
+        return organizationMapper.toDto(organization).getStores();
     }
 
     @Override

@@ -381,7 +381,8 @@ private final UserOrganizationRoleRepository userOrganizationRoleRepository;
 //        userDTO.setActiveOrganization(organizationMapper.toDto((Organization) organizationArray[0]));
 //        userDTO.setActiveStore(storeMapper.toDto((Store) organizationArray[1]));
         UserDTO userDTO = userMapper.toDto(user);
-        Organization organization = organizationRepository.findById(orgId)
+        // Eagerly fetch organization with stores
+        Organization organization = organizationRepository.findByIdWithStores(orgId)
                 .orElseThrow(() -> new EntityNotFoundException("Organization not found: " + orgId));
         OrganizationDTO organizationDTO = organizationMapper.toDto(organization);
         userDTO.setActiveOrganization(organizationDTO);

@@ -25,11 +25,13 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @NonNull
     List<User> findAll();
 
-    @Query("SELECT u FROM User u " +
+    @Query("SELECT DISTINCT u FROM User u " +
             "LEFT JOIN FETCH u.organizationRoles ur " +     // Eagerly fetch User's roles
             "LEFT JOIN FETCH ur.organization o " +         // Eagerly fetch Organization for each role
+            "LEFT JOIN FETCH o.stores os " +                // Eagerly fetch Organization's stores to prevent lazy loading issues
             "LEFT JOIN FETCH ur.store s " +                // Eagerly fetch Store for each role (if role has one)
-            "WHERE u.username = :username")
+            "WHERE u.username = :username AND u.deletedAt IS NULL " +
+            "AND (os.deletedAt IS NULL OR os IS NULL)")     // Filter out soft-deleted stores
     Optional<User> findByUsernameWithAllRelatedData(@Param("username") String username);
 
     @Query("SELECT DISTINCT u FROM User u " +

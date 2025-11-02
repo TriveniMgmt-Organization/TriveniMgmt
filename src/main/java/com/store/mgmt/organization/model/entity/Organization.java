@@ -12,7 +12,8 @@ import java.util.Set;
 @Entity
 @Table(name = "organizations")
 @Data
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = false, exclude = {"stores", "userRoles"})
+@ToString(exclude = {"stores", "userRoles"})
 public class Organization extends BaseEntity {
     @Column(nullable = false)
     private String name;
@@ -27,11 +28,9 @@ public class Organization extends BaseEntity {
     private String appliedTemplateCode; // Tracks which global template was applied (one-time operation)
 
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude
     private Set<Store> stores;
 
     @OneToMany(mappedBy = "organization" )
-    @ToString.Exclude
     private Set<UserOrganizationRole> userRoles;
 
     // @Override

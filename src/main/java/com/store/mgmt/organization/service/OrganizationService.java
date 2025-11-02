@@ -2,9 +2,11 @@ package com.store.mgmt.organization.service;
 
 import com.store.mgmt.organization.model.dto.CreateOrganizationDTO;
 import com.store.mgmt.organization.model.dto.OrganizationDTO;
+import com.store.mgmt.organization.model.dto.StoreDTO;
 import com.store.mgmt.organization.model.dto.UpdateOrganizationDTO;
 import com.store.mgmt.organization.model.entity.Organization;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface OrganizationService {
@@ -38,4 +40,12 @@ public interface OrganizationService {
      * @param templateCode the code of the template to apply
      */
     void applyTemplate(UUID organizationId, String templateCode);
+
+    /**
+     * Gets all stores for an organization.
+     *
+     * @param organizationId the ID of the organization
+     * @return the list of stores
+     */
+    List<StoreDTO> getStores(UUID organizationId);
 }

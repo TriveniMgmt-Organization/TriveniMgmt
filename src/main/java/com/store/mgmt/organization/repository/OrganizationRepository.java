@@ -22,6 +22,12 @@ public interface OrganizationRepository extends JpaRepository<Organization, UUID
     @Query("SELECT u FROM Organization u WHERE u.id = :id AND u.deletedAt IS NULL")
     @NonNull
     Optional<Organization> findById(@NonNull UUID id);
+
+    @Query("SELECT DISTINCT o FROM Organization o " +
+           "LEFT JOIN FETCH o.stores s " +
+           "WHERE o.id = :id AND o.deletedAt IS NULL " +
+           "AND (s.deletedAt IS NULL OR s IS NULL)")
+    Optional<Organization> findByIdWithStores(@Param("id") UUID id);
     @Query("SELECT u FROM Organization u WHERE u.deletedAt IS NULL ORDER BY u.createdAt DESC")
     @NonNull
     List<Organization> findAll();

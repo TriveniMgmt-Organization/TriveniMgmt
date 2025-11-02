@@ -2,6 +2,7 @@ package com.store.mgmt.organization.controller;
 
 import com.store.mgmt.organization.model.dto.CreateOrganizationDTO;
 import com.store.mgmt.organization.model.dto.OrganizationDTO;
+import com.store.mgmt.organization.model.dto.StoreDTO;
 import com.store.mgmt.organization.model.dto.UpdateOrganizationDTO;
 import com.store.mgmt.organization.service.OrganizationServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -83,5 +85,18 @@ public class OrganizationController {
             @Parameter(description = "Template code to apply", required = true) @RequestParam String templateCode) {
         organizationService.applyTemplate(id, templateCode);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}/stores")
+    @Operation(
+            summary = "Get all stores for an organization",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Stores retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StoreDTO.class))),
+                    @ApiResponse(responseCode = "404", description = "Organization not found")
+            }
+    )
+    public ResponseEntity<List<StoreDTO>> getStores(@Parameter(description = "Organization ID", required = true) @PathVariable UUID id) {
+        List<StoreDTO> stores = organizationService.getStores(id);
+        return ResponseEntity.ok(stores);
     }
 }
