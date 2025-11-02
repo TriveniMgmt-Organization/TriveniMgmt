@@ -11,6 +11,9 @@ public class UnitOfMeasureDTO {
     @Schema(description = "Unique identifier for the unit of measure")
     private UUID id;
 
+    @Schema(description = "Unique code for the unit of measure")
+    private String code;
+
     @Schema(description = "Name of the unit of measure")
     private String name;
 

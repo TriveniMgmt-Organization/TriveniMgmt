@@ -14,6 +14,8 @@ public enum PermissionType {
     INVENTORY_ITEM_WRITE,
     CATEGORY_READ,
     CATEGORY_WRITE,
+    BRAND_READ,
+    BRAND_WRITE,
     SUPPLIER_READ,
     SUPPLIER_WRITE,
     LOCATION_READ,
@@ -33,5 +35,5 @@ public enum PermissionType {
     ORG_READ,
     ORG_WRITE,
     STORE_WRITE,
-    STORE_READ
+    STORE_READ 
 }

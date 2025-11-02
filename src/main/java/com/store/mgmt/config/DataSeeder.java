@@ -78,6 +78,8 @@ public class DataSeeder {
         permissions.put("INVENTORY_ITEM_WRITE", "Permission to modify inventory items");
         permissions.put("CATEGORY_READ", "Permission to read category details");
         permissions.put("CATEGORY_WRITE", "Permission to modify category details");
+        permissions.put("BRAND_READ", "Permission to read brand details");
+        permissions.put("BRAND_WRITE", "Permission to modify brand details");
         permissions.put("SUPPLIER_READ", "Permission to read supplier details");
         permissions.put("SUPPLIER_WRITE", "Permission to modify supplier details");
         permissions.put("LOCATION_READ", "Permission to read location details");
@@ -94,6 +96,8 @@ public class DataSeeder {
         permissions.put("DAMAGE_LOSS_WRITE", "Permission to modify damage and loss details");
         permissions.put("STOCK_CHECK_READ", "Permission to read stock check details");
         permissions.put("REPORT_READ", "Permission to read reports");
+        permissions.put("STORE_READ", "Permission to read store details");
+        permissions.put("STORE_WRITE", "Permission to modify store details");
 
         long permissionCount = permissionRepository.count();
         List<Permission> newPermissions = new ArrayList<>();
@@ -140,45 +144,45 @@ public class DataSeeder {
         Map<String, List<String>> rolePermissions = new HashMap<>();
         rolePermissions.put("SUPER_ADMIN", Arrays.asList(
                 "PRODUCT_READ", "PRODUCT_WRITE", "USER_READ", "USER_WRITE", "ROLE_READ", "ROLE_WRITE",
-                "INVENTORY_ITEM_READ", "INVENTORY_ITEM_WRITE", "CATEGORY_READ", "CATEGORY_WRITE",
+                "INVENTORY_ITEM_READ", "INVENTORY_ITEM_WRITE", "CATEGORY_READ", "CATEGORY_WRITE", "BRAND_READ", "BRAND_WRITE",
                 "SUPPLIER_READ", "SUPPLIER_WRITE", "LOCATION_READ", "LOCATION_WRITE", "UOM_READ", "UOM_WRITE",
                 "PO_READ", "PO_WRITE", "SALE_READ", "SALE_WRITE", "DISCOUNT_READ", "DISCOUNT_WRITE",
-                "DAMAGE_LOSS_READ", "DAMAGE_LOSS_WRITE", "STOCK_CHECK_READ", "REPORT_READ", "ORG_READ", "ORG_WRITE", "STORE_WRITE", "STORE_READ"
+                "DAMAGE_LOSS_READ", "DAMAGE_LOSS_WRITE", "STOCK_CHECK_READ", "REPORT_READ", "ORG_READ", "ORG_WRITE", "STORE_READ", "STORE_WRITE"
         ));
         rolePermissions.put("ORG_ADMIN", Arrays.asList(
                 "USER_READ", "USER_WRITE", "ROLE_READ", "ROLE_WRITE",
-                "INVENTORY_ITEM_READ", "INVENTORY_ITEM_WRITE", "CATEGORY_READ", "CATEGORY_WRITE",
+                "INVENTORY_ITEM_READ", "INVENTORY_ITEM_WRITE", "CATEGORY_READ", "CATEGORY_WRITE", "BRAND_READ", "BRAND_WRITE",
                 "SUPPLIER_READ", "SUPPLIER_WRITE", "LOCATION_READ", "LOCATION_WRITE", "UOM_READ", "UOM_WRITE",
                 "PO_READ", "PO_WRITE", "SALE_READ", "SALE_WRITE", "DISCOUNT_READ", "DISCOUNT_WRITE",
-                "DAMAGE_LOSS_READ", "DAMAGE_LOSS_WRITE", "STOCK_CHECK_READ","ORG_READ", "ORG_WRITE", "STORE_WRITE", "STORE_READ"
+                "DAMAGE_LOSS_READ", "DAMAGE_LOSS_WRITE", "STOCK_CHECK_READ","ORG_READ", "ORG_WRITE", "STORE_READ", "STORE_WRITE"
         ));
         rolePermissions.put("STORE_MANAGER", Arrays.asList(
                 "USER_READ", "USER_WRITE",
                 "INVENTORY_ITEM_READ", "INVENTORY_ITEM_WRITE",
                 "SUPPLIER_READ", "SUPPLIER_WRITE", "LOCATION_READ", "LOCATION_WRITE", "UOM_READ",
-                "PO_READ", "PO_WRITE", "SALE_READ", "SALE_WRITE", "DISCOUNT_READ",
+                "PO_READ", "PO_WRITE", "SALE_READ", "SALE_WRITE", "DISCOUNT_READ", "BRAND_READ", "CATEGORY_READ", "PRODUCT_READ", "PRODUCT_WRITE",
                 "DAMAGE_LOSS_READ", "DAMAGE_LOSS_WRITE", "STOCK_CHECK_READ", "STORE_WRITE", "STORE_READ"
         ));
         rolePermissions.put("ADMIN", Arrays.asList(
-                "PRODUCT_READ", "PRODUCT_WRITE", "USER_READ", "USER_WRITE", "ROLE_READ", "ROLE_WRITE",
-                "INVENTORY_ITEM_READ", "INVENTORY_ITEM_WRITE", "CATEGORY_READ", "CATEGORY_WRITE",
-                "SUPPLIER_READ", "SUPPLIER_WRITE", "LOCATION_READ", "LOCATION_WRITE", "UOM_READ", "UOM_WRITE",
-                "PO_READ", "PO_WRITE", "SALE_READ", "SALE_WRITE", "DISCOUNT_READ", "DISCOUNT_WRITE",
-                "DAMAGE_LOSS_READ", "DAMAGE_LOSS_WRITE", "STOCK_CHECK_READ", "REPORT_READ"
+                "PRODUCT_READ", "PRODUCT_WRITE", "USER_READ", "USER_WRITE", "ROLE_READ",
+                "INVENTORY_ITEM_READ", "INVENTORY_ITEM_WRITE", "CATEGORY_READ", "BRAND_READ",
+                "SUPPLIER_READ", "SUPPLIER_WRITE", "LOCATION_READ", "LOCATION_WRITE", "UOM_READ",
+                "PO_READ", "PO_WRITE", "SALE_READ", "SALE_WRITE", "DISCOUNT_READ",
+                "DAMAGE_LOSS_READ", "DAMAGE_LOSS_WRITE", "STOCK_CHECK_READ", "REPORT_READ", "STORE_READ"
         ));
         rolePermissions.put("MANAGER", Arrays.asList(
                 "PRODUCT_READ", "SALE_READ", "SALE_WRITE", "DISCOUNT_READ", "STOCK_CHECK_READ",
-                "INVENTORY_ITEM_READ", "CATEGORY_READ", "SUPPLIER_READ", "LOCATION_READ",
-                "UOM_READ", "PO_READ", "SALE_READ", "DISCOUNT_READ", "DAMAGE_LOSS_READ", "STOCK_CHECK_READ"
+                "INVENTORY_ITEM_READ", "CATEGORY_READ", "BRAND_READ", "SUPPLIER_READ", "LOCATION_READ",
+                "UOM_READ", "PO_READ", "SALE_READ", "DISCOUNT_READ", "DAMAGE_LOSS_READ", "STOCK_CHECK_READ", "STORE_READ"
         ));
         rolePermissions.put("CASHIER", Arrays.asList(
-                "SALE_READ", "SALE_WRITE", "DISCOUNT_READ", "STOCK_CHECK_READ"
+                "SALE_READ", "SALE_WRITE", "DISCOUNT_READ", "STOCK_CHECK_READ", "STORE_READ"
         ));
         rolePermissions.put("SUPPORT", Arrays.asList(
-                "USER_READ", "USER_WRITE"
+                "USER_READ", "USER_WRITE", "STORE_READ"
         ));
         rolePermissions.put("CUSTOMER", Arrays.asList(
-                "DISCOUNT_READ", "STOCK_CHECK_READ"
+                "DISCOUNT_READ", "STOCK_CHECK_READ", "STORE_READ"
         ));
 
         long roleCount = roleRepository.count();

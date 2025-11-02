@@ -320,7 +320,6 @@ public class InventoryController {
 
     // --- Category Management ---
     @PostMapping("/categories")
-   @PreAuthorize("hasAuthority('CATEGORY_WRITE')")
     @Operation(
             summary = "Create a new product category",
             description = "Adds a new category definition.",
@@ -337,7 +336,6 @@ public class InventoryController {
     }
 
     @GetMapping("/categories")
-   @PreAuthorize("hasAuthority('CATEGORY_READ')")
     @Operation(
             summary = "Get all product categories",
             description = "Retrieves a list of all defined product categories.",
@@ -352,7 +350,6 @@ public class InventoryController {
     }
 
     @GetMapping("/categories/{id}")
-   @PreAuthorize("hasAuthority('CATEGORY_READ')")
     @Operation(
             summary = "Get category by ID",
             description = "Retrieves a category by its unique ID.",
@@ -368,7 +365,6 @@ public class InventoryController {
     }
 
     @PutMapping("/categories/{id}")
-   @PreAuthorize("hasAuthority('CATEGORY_WRITE')")
     @Operation(
             summary = "Update an existing category",
             description = "Updates the details of an existing category.",
@@ -386,7 +382,6 @@ public class InventoryController {
     }
 
     @DeleteMapping("/categories/{id}")
-   @PreAuthorize("hasAuthority('CATEGORY_WRITE')")
     @Operation(
             summary = "Delete a category",
             description = "Deletes a category by its unique ID. Fails if products are associated.",
@@ -404,7 +399,6 @@ public class InventoryController {
 
     // --- Brand Management ---
     @PostMapping("/brands")
-   @PreAuthorize("hasAuthority('BRAND_WRITE')")
     @Operation(
             summary = "Create a new product brand",
             description = "Adds a new brand definition to the system.",
@@ -421,7 +415,6 @@ public class InventoryController {
     }
 
     @GetMapping("/brands")
-   @PreAuthorize("hasAuthority('BRAND_READ')")
     @Operation(
             summary = "Get all product brands",
             description = "Retrieves a list of all defined product brands.",
@@ -438,7 +431,6 @@ public class InventoryController {
     }
 
     @GetMapping("/brands/{id}")
-   @PreAuthorize("hasAuthority('BRAND_READ')")
     @Operation(
             summary = "Get brand by ID",
             description = "Retrieves a brand by its unique ID.",
@@ -454,7 +446,6 @@ public class InventoryController {
     }
 
     @PutMapping("/brands/{id}")
-   @PreAuthorize("hasAuthority('BRAND_WRITE')")
     @Operation(
             summary = "Update an existing brand",
             description = "Updates the details of an existing brand.",
