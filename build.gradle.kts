@@ -63,3 +63,8 @@ dependencies {
 tasks.withType<Test> {
 	useJUnitPlatform()
 }
+
+// This is needed to onrender deployment for main class
+tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
+	mainClass.set("com.store.mgmt.StoreMgmtApplication")
+}
