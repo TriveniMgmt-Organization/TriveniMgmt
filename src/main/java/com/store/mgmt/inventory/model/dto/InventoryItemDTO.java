@@ -39,7 +39,7 @@ public class InventoryItemDTO {
     private UUID locationId;
 
     @Schema(description = "Location details", nullable = true)
-    private LocationDTO location;
+    private InventoryLocationDTO location;
 
     @Schema(description = "Batch/lot associated with this inventory item")
     private UUID batchLotId;

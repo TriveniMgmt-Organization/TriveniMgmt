@@ -35,7 +35,7 @@ public class InventoryServiceImpl implements InventoryService {
     private final BrandRepository brandRepository;
     private final SupplierRepository supplierRepository;
     private final InventoryItemRepository inventoryItemRepository;
-    private final LocationRepository locationRepository;
+    private final InventoryLocationRepository inventoryLocationRepository;
     private final SaleRepository saleRepository;
     private final SaleItemRepository saleItemRepository;
     private final PurchaseOrderRepository purchaseOrderRepository;
@@ -65,7 +65,7 @@ public class InventoryServiceImpl implements InventoryService {
     private final DiscountMapper discountMapper;
     private final DamageLossMapper damageLossMapper;
     private final SupplierMapper supplierMapper;
-    private final LocationMapper locationMapper;
+    private final InventoryLocationMapper inventoryLocationMapper;
     private final UnitOfMeasureMapper unitOfMeasureMapper;
     
     // New mappers
@@ -81,7 +81,7 @@ public class InventoryServiceImpl implements InventoryService {
             BrandRepository brandRepository,
             SupplierRepository supplierRepository,
             InventoryItemRepository inventoryItemRepository,
-            LocationRepository locationRepository,
+            InventoryLocationRepository inventoryLocationRepository,
             SaleRepository saleRepository,
             SaleItemRepository saleItemRepository,
             PurchaseOrderRepository purchaseOrderRepository,
@@ -102,7 +102,7 @@ public class InventoryServiceImpl implements InventoryService {
             DiscountMapper discountMapper,
             DamageLossMapper damageLossMapper,
             SupplierMapper supplierMapper,
-            LocationMapper locationMapper,
+            InventoryLocationMapper inventoryLocationMapper,
             UnitOfMeasureMapper unitOfMeasureMapper,
             ProductVariantRepository productVariantRepository,
             StockTransactionRepository stockTransactionRepository,
@@ -120,7 +120,7 @@ public class InventoryServiceImpl implements InventoryService {
         this.brandRepository = brandRepository;
         this.supplierRepository = supplierRepository;
         this.inventoryItemRepository = inventoryItemRepository;
-        this.locationRepository = locationRepository;
+        this.inventoryLocationRepository = inventoryLocationRepository;
         this.saleRepository = saleRepository;
         this.saleItemRepository = saleItemRepository;
         this.purchaseOrderRepository = purchaseOrderRepository;
@@ -146,7 +146,7 @@ public class InventoryServiceImpl implements InventoryService {
         this.discountMapper = discountMapper;
         this.damageLossMapper = damageLossMapper;
         this.supplierMapper = supplierMapper;
-        this.locationMapper = locationMapper;
+        this.inventoryLocationMapper = inventoryLocationMapper;
         this.unitOfMeasureMapper = unitOfMeasureMapper;
         this.productVariantMapper = productVariantMapper;
         this.stockTransactionMapper = stockTransactionMapper;
@@ -172,8 +172,8 @@ public class InventoryServiceImpl implements InventoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with ID: " + categoryId));
     }
 
-    private Location findLocationOrThrow(UUID locationId) {
-        return locationRepository.findByIdAndStoreId(locationId, TenantContext.getCurrentStoreId())
+    private InventoryLocation findInventoryLocationOrThrow(UUID locationId) {
+        return inventoryLocationRepository.findByIdAndStoreId(locationId, TenantContext.getCurrentStoreId())
                 .orElseThrow(() -> new ResourceNotFoundException("Location not found with ID: " + locationId));
     }
 
@@ -335,7 +335,7 @@ public class InventoryServiceImpl implements InventoryService {
         log.debug("Fetching all products for organization ID: {}, includeInactive: {}", TenantContext.getCurrentOrganizationId(), includeInactive);
         List<ProductTemplate> products = productTemplateRepository.findByOrganizationId(TenantContext.getCurrentOrganizationId());
         if (!includeInactive) {
-            products = products.stream().filter(ProductTemplate::isActive).collect(Collectors.toList());
+            products = products.stream().filter(pt -> pt.isActive()).collect(Collectors.toList());
         }
         return productTemplateMapper.toDtoList(products);
     }
@@ -385,7 +385,7 @@ public class InventoryServiceImpl implements InventoryService {
         log.info("Creating new inventory item for variant ID: {} at location ID: {}", createDTO.getVariantId(), createDTO.getLocationId());
         
         ProductVariant variant = findVariantOrThrow(createDTO.getVariantId());
-        Location location = findLocationOrThrow(createDTO.getLocationId());
+        InventoryLocation location = findInventoryLocationOrThrow(createDTO.getLocationId());
 
         // Check if inventory item already exists (variant + location + batchLot combination)
         Optional<InventoryItem> existing = inventoryItemRepository
@@ -434,6 +434,18 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<InventoryItemDTO> getAllInventoryItems() {
+        UUID storeId = TenantContext.getCurrentStoreId();
+        log.debug("Fetching all inventory items for store ID: {}", storeId);
+        if (storeId == null) {
+            throw new IllegalStateException("Store context is not set. Cannot fetch inventory items without a store context.");
+        }
+        List<InventoryItem> items = inventoryItemRepository.findByStoreId(storeId);
+        return inventoryItemMapper.toDtoList(items);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<InventoryItemDTO> getInventoryItemsForTemplate(UUID templateId) {
         log.debug("Fetching all inventory items for template ID: {}", templateId);
         findProductTemplateOrThrow(templateId);
@@ -458,7 +470,7 @@ public class InventoryServiceImpl implements InventoryService {
     @Transactional(readOnly = true)
     public List<InventoryItemDTO> getInventoryItemsAtLocation(UUID locationId) {
         log.debug("Fetching all inventory items at location ID: {}", locationId);
-        findLocationOrThrow(locationId);
+        findInventoryLocationOrThrow(locationId);
         List<InventoryItem> items = inventoryItemRepository.findByLocationId(locationId);
         return inventoryItemMapper.toDtoList(items);
     }
@@ -618,7 +630,7 @@ public class InventoryServiceImpl implements InventoryService {
             orderItem.setReceivedQuantity(newReceivedQuantity);
             purchaseOrderItemRepository.save(orderItem);
 
-            Location receiptLocation = findLocationOrThrow(receivedItemDTO.getLocationId());
+            InventoryLocation receiptLocation = findInventoryLocationOrThrow(receivedItemDTO.getLocationId());
             ProductVariant variant = orderItem.getVariant();
             
             // Find or create BatchLot if batch/lot info is provided
@@ -666,9 +678,9 @@ public class InventoryServiceImpl implements InventoryService {
             receiptTransaction.setInventoryItem(inventoryItem);
             receiptTransaction.setType(TransactionType.RECEIPT);
             receiptTransaction.setQuantityDelta(receivedItemDTO.getQuantity());
-            receiptTransaction.setReference("PO-" + purchaseOrderId);
+            receiptTransaction.setReferenceType("PURCHASE_ORDER");
+            receiptTransaction.setReferenceId(purchaseOrderId);
             receiptTransaction.setUser(TenantContext.getCurrentUser());
-            receiptTransaction.setTimestamp(LocalDateTime.now());
             stockTransactionRepository.save(receiptTransaction);
             
             // Update stock level
@@ -699,7 +711,7 @@ public class InventoryServiceImpl implements InventoryService {
     public DamageLossDTO recordDamageLoss(CreateDamageLossDTO createDTO) {
         log.info("Recording damage/loss for product ID: {} in store ID: {}", createDTO.getProductTemplateId(), TenantContext.getCurrentStoreId());
         ProductTemplate product = findProductTemplateOrThrow(createDTO.getProductTemplateId());
-        Location location = findLocationOrThrow(createDTO.getLocationId());
+        InventoryLocation location = findInventoryLocationOrThrow(createDTO.getLocationId());
         User user = findUserOrThrow(createDTO.getUserId());
 
         if (!location.getStore().getId().equals(TenantContext.getCurrentStoreId())) {
@@ -730,7 +742,7 @@ public class InventoryServiceImpl implements InventoryService {
         CreateStockTransactionDTO transactionDTO = new CreateStockTransactionDTO();
         transactionDTO.setInventoryItemId(itemToDecrement.getId());
         transactionDTO.setQuantityDelta(-createDTO.getQuantity());
-        transactionDTO.setType(TransactionType.DAMAGE.name());
+        transactionDTO.setType(TransactionType.DAMAGE_LOSS.name());
         transactionDTO.setReference("DAMAGE_LOSS");
         
         createStockTransaction(transactionDTO);
@@ -1224,73 +1236,73 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     @Transactional
-    public LocationDTO createLocation(CreateLocationDTO createDTO) {
+    public InventoryLocationDTO createInventoryLocation(CreateInventoryLocationDTO createDTO) {
         log.info("Creating new location: {} for store ID: {}", createDTO.getName(), TenantContext.getCurrentStoreId());
-        if (locationRepository.findByNameAndStoreId(createDTO.getName(), TenantContext.getCurrentStoreId()).isPresent()) {
+        if (inventoryLocationRepository.findByNameAndStoreId(createDTO.getName(), TenantContext.getCurrentStoreId()).isPresent()) {
             throw new DuplicateResourceException("Location with name '" + createDTO.getName() + "' already exists in store.");
         }
-        Location newLocation = locationMapper.toEntity(createDTO);
+        InventoryLocation newLocation = inventoryLocationMapper.toEntity(createDTO);
         newLocation.setStore(TenantContext.getCurrentStore());
-        newLocation.setType(LocationType.valueOf(String.valueOf(createDTO.getType())));
-        Location savedLocation = locationRepository.save(newLocation);
-        logAuditEntry("CREATE_LOCATION", savedLocation.getId(), "Created location: " + savedLocation.getName());
+        newLocation.setType(InventoryLocationType.valueOf(String.valueOf(createDTO.getType())));
+        InventoryLocation savedLocation = inventoryLocationRepository.save(newLocation);
+        logAuditEntry("CREATE_INVENTORY_LOCATION", savedLocation.getId(), "Created location: " + savedLocation.getName());
         log.info("Location created with ID: {}", savedLocation.getId());
-        return locationMapper.toDto(savedLocation);
+        return inventoryLocationMapper.toDto(savedLocation);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<LocationDTO> getAllLocations() {
+    public List<InventoryLocationDTO> getAllInventoryLocations() {
         log.debug("Fetching all locations for store ID: {}", TenantContext.getCurrentStoreId());
-        List<Location> locations = locationRepository.findByStoreId(TenantContext.getCurrentStoreId());
-        return locationMapper.toDtoList(locations);
+        List<InventoryLocation> locations = inventoryLocationRepository.findByStoreId(TenantContext.getCurrentStoreId());
+        return inventoryLocationMapper.toDtoList(locations);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public LocationDTO getLocationById(UUID locationId) {
-        log.debug("Fetching location with ID: {} for store ID: {}", locationId, TenantContext.getCurrentStoreId());
-        Location location = findLocationOrThrow(locationId);
-        return locationMapper.toDto(location);
+    public InventoryLocationDTO getInventoryLocationById(UUID inventoryLocationId) {
+        log.debug("Fetching location with ID: {} for store ID: {}", inventoryLocationId, TenantContext.getCurrentStoreId());
+        InventoryLocation location = findInventoryLocationOrThrow(inventoryLocationId);
+        return inventoryLocationMapper.toDto(location);
     }
 
     @Override
     @Transactional
-    public LocationDTO updateLocation(UUID locationId, UpdateLocationDTO updateDTO) {
-        log.info("Updating location with ID: {} for store ID: {}", locationId, TenantContext.getCurrentStoreId());
-        Location existingLocation = findLocationOrThrow(locationId);
+    public InventoryLocationDTO updateInventoryLocation(UUID inventoryLocationId, UpdateInventoryLocationDTO updateDTO) {
+        log.info("Updating location with ID: {} for store ID: {}", inventoryLocationId, TenantContext.getCurrentStoreId());
+        InventoryLocation existingLocation = findInventoryLocationOrThrow(inventoryLocationId);
 
         if (updateDTO.getName() != null && !updateDTO.getName().equals(existingLocation.getName())) {
-            if (locationRepository.findByNameAndStoreId(updateDTO.getName(), TenantContext.getCurrentStoreId()).isPresent()) {
+            if (inventoryLocationRepository.findByNameAndStoreId(updateDTO.getName(), TenantContext.getCurrentStoreId()).isPresent()) {
                 throw new DuplicateResourceException("Location name '" + updateDTO.getName() + "' is already in use in store.");
             }
         }
 
-        locationMapper.updateLocationFromDto(updateDTO, existingLocation);
-        if (updateDTO.getType() != null) existingLocation.setType(LocationType.valueOf(String.valueOf(updateDTO.getType())));
+        inventoryLocationMapper.updateInventoryLocationFromDto(updateDTO, existingLocation);
+        if (updateDTO.getType() != null) existingLocation.setType(InventoryLocationType.valueOf(String.valueOf(updateDTO.getType())));
 
-        Location updatedLocation = locationRepository.save(existingLocation);
-        logAuditEntry("UPDATE_LOCATION", updatedLocation.getId(), "Updated location: " + updatedLocation.getName());
-        log.info("Location updated with ID: {}", updatedLocation.getId());
-        return locationMapper.toDto(updatedLocation);
+        InventoryLocation updatedLocation = inventoryLocationRepository.save(existingLocation);
+        logAuditEntry("UPDATE_INVENTORY_LOCATION", updatedLocation.getId(), "Updated inventory location: " + updatedLocation.getName());
+        log.info("Inventory location updated with ID: {}", updatedLocation.getId());
+        return inventoryLocationMapper.toDto(updatedLocation);
     }
 
     @Override
     @Transactional
-    public void deleteLocation(UUID locationId) {
-        log.warn("Attempting to delete location with ID: {} for store ID: {}", locationId, TenantContext.getCurrentStoreId());
-        Location location = findLocationOrThrow(locationId);
+    public void deleteInventoryLocation(UUID inventoryLocationId) {
+        log.warn("Attempting to delete location with ID: {} for store ID: {}", inventoryLocationId, TenantContext.getCurrentStoreId());
+        InventoryLocation location = findInventoryLocationOrThrow(inventoryLocationId);
 
-        if (!inventoryItemRepository.findByLocationIdAndStoreId(locationId, TenantContext.getCurrentStoreId()).isEmpty()) {
-            throw new InvalidOperationException("Cannot delete location ID " + locationId + " as inventory items are associated with it.");
+        if (!inventoryItemRepository.findByLocationIdAndStoreId(inventoryLocationId, TenantContext.getCurrentStoreId()).isEmpty()) {
+            throw new InvalidOperationException("Cannot delete location ID " + inventoryLocationId + " as inventory items are associated with it.");
         }
-        if (!damageLossRepository.findByLocationIdAndStoreId(locationId, TenantContext.getCurrentStoreId()).isEmpty()) {
-            throw new InvalidOperationException("Cannot delete location ID " + locationId + " as damage/loss records are associated with it.");
+        if (!damageLossRepository.findByLocationIdAndStoreId(inventoryLocationId, TenantContext.getCurrentStoreId()).isEmpty()) {
+            throw new InvalidOperationException("Cannot delete location ID " + inventoryLocationId + " as damage/loss records are associated with it.");
         }
 
-        locationRepository.delete(location);
-        logAuditEntry("DELETE_LOCATION", locationId, "Deleted location: " + location.getName());
-        log.info("Location with ID {} deleted successfully.", locationId);
+        inventoryLocationRepository.delete(location);
+        logAuditEntry("DELETE_INVENTORY_LOCATION", inventoryLocationId, "Deleted inventory location: " + location.getName());
+        log.info("Location with ID {} deleted successfully.", inventoryLocationId);
     }
 
     // --- Purchase Order Management ---

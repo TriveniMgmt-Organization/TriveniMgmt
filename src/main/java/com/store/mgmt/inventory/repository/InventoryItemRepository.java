@@ -56,4 +56,8 @@ public interface InventoryItemRepository extends JpaRepository<InventoryItem, UU
     // Find items with expiry dates approaching
     @Query("SELECT i FROM InventoryItem i WHERE i.expiryDate BETWEEN :startDate AND :endDate AND i.deletedAt IS NULL ORDER BY i.expiryDate ASC")
     List<InventoryItem> findExpiringBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    // Find all inventory items for a store (via location.store)
+    @Query("SELECT i FROM InventoryItem i WHERE i.location.store.id = :storeId AND i.deletedAt IS NULL ORDER BY i.createdAt DESC")
+    List<InventoryItem> findByStoreId(@Param("storeId") UUID storeId);
 }

@@ -36,7 +36,7 @@ public class DamageLoss extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location_id", nullable = false)
-    private Location location;
+    private InventoryLocation location;
 
     @Column(name = "quantity", nullable = false)
     private Integer quantity;

@@ -1,9 +1,9 @@
 package com.store.mgmt.inventory.mapper;
 import com.store.mgmt.common.mapper.BaseMapperConfig;
-import com.store.mgmt.inventory.model.dto.CreateLocationDTO;
-import com.store.mgmt.inventory.model.dto.LocationDTO;
-import com.store.mgmt.inventory.model.dto.UpdateLocationDTO;
-import com.store.mgmt.inventory.model.entity.Location;
+import com.store.mgmt.inventory.model.dto.CreateInventoryLocationDTO;
+import com.store.mgmt.inventory.model.dto.InventoryLocationDTO;
+import com.store.mgmt.inventory.model.dto.UpdateInventoryLocationDTO;
+import com.store.mgmt.inventory.model.entity.InventoryLocation;
 import org.mapstruct.InheritConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -15,11 +15,11 @@ import java.util.List;
 @Mapper(componentModel = "spring", 
         config = BaseMapperConfig.class,
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-public interface LocationMapper {
+public interface InventoryLocationMapper {
     @Mapping(target = "description", ignore = true) // Not in entity
     @Mapping(target = "contactNumber", ignore = true) // Not in entity
-    LocationDTO toDto(Location location);
-    List<LocationDTO> toDtoList(List<Location> locations);
+    InventoryLocationDTO toDto(InventoryLocation location);
+    List<InventoryLocationDTO> toDtoList(List<InventoryLocation> inventoryLocations);
     
     // Base method with all BaseEntity ignores - other methods inherit from this
     @Mapping(target = "id", ignore = true)
@@ -32,8 +32,8 @@ public interface LocationMapper {
     @Mapping(target = "store", ignore = true)
     @Mapping(target = "inventoryItems", ignore = true)
     @Mapping(target = "damageLosses", ignore = true)
-    Location toEntity(CreateLocationDTO locationDto);
+    InventoryLocation toEntity(CreateInventoryLocationDTO locationDto);
     
     @InheritConfiguration(name = "toEntity")
-    void updateLocationFromDto(UpdateLocationDTO locationDto, @MappingTarget Location location);
+    void updateInventoryLocationFromDto(UpdateInventoryLocationDTO locationDto, @MappingTarget InventoryLocation location);
 }

@@ -169,6 +169,29 @@ public class InventoryController {
         return ResponseEntity.ok(inventoryItems);
     }
 
+    @GetMapping("/items")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
+    @Operation(
+            summary = "Get all inventory items for the current store",
+            description = "Retrieves a list of all inventory item records for the current store context.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "List of inventory items retrieved successfully",
+                            content = @Content(array = @ArraySchema(schema = @Schema(implementation = InventoryItemDTO.class)))
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "Forbidden: User does not have 'INVENTORY_ITEM_READ' authority",
+                            content = @Content
+                    )
+            }
+    )
+    public ResponseEntity<List<InventoryItemDTO>> getAllInventoryItems() {
+        List<InventoryItemDTO> inventoryItems = inventoryService.getAllInventoryItems();
+        return ResponseEntity.ok(inventoryItems);
+    }
+
     @GetMapping("/items/by-location/{locationId}")
     @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
     @Operation(
@@ -570,14 +593,14 @@ public class InventoryController {
             summary = "Create a new inventory location",
             description = "Adds a new physical or logical location for inventory.",
             responses = {
-                    @ApiResponse(responseCode = "201", description = "Location created successfully", content = @Content(schema = @Schema(implementation = LocationDTO.class))),
+                    @ApiResponse(responseCode = "201", description = "Location created successfully", content = @Content(schema = @Schema(implementation = InventoryLocationDTO.class))),
                     @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
                     @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_CREATE_LOCATION' authority", content = @Content),
                     @ApiResponse(responseCode = "409", description = "Conflict: Location with this name already exists", content = @Content)
             }
     )
-    public ResponseEntity<LocationDTO> createLocation(@Valid @RequestBody CreateLocationDTO createDTO) {
-        LocationDTO newLocation = inventoryService.createLocation(createDTO);
+    public ResponseEntity<InventoryLocationDTO> createInventoryLocation(@Valid @RequestBody CreateInventoryLocationDTO createDTO) {
+        InventoryLocationDTO newLocation = inventoryService.createInventoryLocation(createDTO);
         return new ResponseEntity<>(newLocation, HttpStatus.CREATED);
     }
 
@@ -587,12 +610,12 @@ public class InventoryController {
             summary = "Get all inventory locations",
             description = "Retrieves a list of all defined inventory locations.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Locations retrieved successfully", content = @Content(array = @ArraySchema(schema = @Schema(implementation = LocationDTO.class)))),
+                    @ApiResponse(responseCode = "200", description = "Locations retrieved successfully", content = @Content(array = @ArraySchema(schema = @Schema(implementation = InventoryLocationDTO.class)))),
                     @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_VIEW_LOCATION' authority", content = @Content)
             }
     )
-    public ResponseEntity<List<LocationDTO>> getAllLocations() {
-        List<LocationDTO> locations = inventoryService.getAllLocations();
+    public ResponseEntity<List<InventoryLocationDTO>> getAllInventoryLocations() {
+        List<InventoryLocationDTO> locations = inventoryService.getAllInventoryLocations();
         return ResponseEntity.ok(locations);
     }
 
@@ -602,13 +625,13 @@ public class InventoryController {
             summary = "Get location by ID",
             description = "Retrieves a location by its unique ID.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Location retrieved successfully", content = @Content(schema = @Schema(implementation = LocationDTO.class))),
+                    @ApiResponse(responseCode = "200", description = "Location retrieved successfully", content = @Content(schema = @Schema(implementation = InventoryLocationDTO.class))),
                     @ApiResponse(responseCode = "404", description = "Location not found", content = @Content),
                     @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_VIEW_LOCATION' authority", content = @Content)
             }
     )
-    public ResponseEntity<LocationDTO> getLocationById(@PathVariable UUID id) {
-        LocationDTO location = inventoryService.getLocationById(id);
+    public ResponseEntity<InventoryLocationDTO> getInventoryLocationById(@PathVariable UUID id) {
+        InventoryLocationDTO location = inventoryService.getInventoryLocationById(id);
         return ResponseEntity.ok(location);
     }
 
@@ -618,15 +641,15 @@ public class InventoryController {
             summary = "Update an existing location",
             description = "Updates the details of an existing location.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Location updated successfully", content = @Content(schema = @Schema(implementation = LocationDTO.class))),
+                    @ApiResponse(responseCode = "200", description = "Location updated successfully", content = @Content(schema = @Schema(implementation = InventoryLocationDTO.class))),
                     @ApiResponse(responseCode = "400", description = "Invalid input", content = @Content),
                     @ApiResponse(responseCode = "404", description = "Location not found", content = @Content),
                     @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'PERM_UPDATE_LOCATION' authority", content = @Content),
                     @ApiResponse(responseCode = "409", description = "Conflict: Location name already in use", content = @Content)
             }
     )
-    public ResponseEntity<LocationDTO> updateLocation(@PathVariable UUID id, @Valid @RequestBody UpdateLocationDTO updateDTO) {
-        LocationDTO updatedLocation = inventoryService.updateLocation(id, updateDTO);
+    public ResponseEntity<InventoryLocationDTO> updateInventoryLocation(@PathVariable UUID id, @Valid @RequestBody UpdateInventoryLocationDTO updateDTO) {
+        InventoryLocationDTO updatedLocation = inventoryService.updateInventoryLocation(id, updateDTO);
         return ResponseEntity.ok(updatedLocation);
     }
 
@@ -642,8 +665,8 @@ public class InventoryController {
                     @ApiResponse(responseCode = "409", description = "Conflict: Location has associated inventory items or damage records", content = @Content)
             }
     )
-    public ResponseEntity<Void> deleteLocation(@PathVariable UUID id) {
-        inventoryService.deleteLocation(id);
+    public ResponseEntity<Void> deleteInventoryLocation(@PathVariable UUID id) {
+        inventoryService.deleteInventoryLocation(id);
         return ResponseEntity.noContent().build();
     }
 

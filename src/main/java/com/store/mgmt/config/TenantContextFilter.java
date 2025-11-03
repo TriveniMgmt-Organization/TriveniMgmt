@@ -50,40 +50,58 @@ public class TenantContextFilter extends OncePerRequestFilter {
                                 .orElseThrow(() -> new IllegalStateException("Store not found for id: " + storeId));
                         TenantContext.setCurrentStore(store);
                         log.debug("Set TenantContext with store_id: {}", storeId);
+                    } else {
+                        // JWT doesn't have storeId, check header as fallback
+                        String storeIdHeader = request.getHeader("X-Store-Id");
+                        if (storeIdHeader != null && TenantContext.getCurrentOrganization() != null) {
+                            try {
+                                UUID headerStoreId = UUID.fromString(storeIdHeader);
+                                Store store = storeRepository.findById(headerStoreId)
+                                        .orElseThrow(() -> new IllegalStateException("Store not found for id: " + headerStoreId));
+                                if (store.getOrganization().getId().equals(TenantContext.getCurrentOrganization().getId())) {
+                                    TenantContext.setCurrentStore(store);
+                                    log.debug("Set TenantContext with store_id from header (JWT had no storeId): {}", headerStoreId);
+                                } else {
+                                    log.warn("Store {} does not belong to organization {}", headerStoreId, TenantContext.getCurrentOrganization().getId());
+                                }
+                            } catch (IllegalArgumentException e) {
+                                log.warn("Invalid X-Store-Id header: {}", storeIdHeader);
+                            }
+                        }
                     }
                 } catch (Exception e) {
                     log.warn("Failed to set TenantContext from JWT: {}", e.getMessage());
                     // Continue without tenant context for public endpoints
                 }
-            } else {
-                // Optionally extract tenant context from headers for public endpoints
-                String orgIdHeader = request.getHeader("X-Organization-Id");
-                String storeIdHeader = request.getHeader("X-Store-Id");
-                if (orgIdHeader != null) {
-                    try {
-                        UUID orgId = UUID.fromString(orgIdHeader);
-                        Organization organization = organizationRepository.findById(orgId)
-                                .orElseThrow(() -> new IllegalStateException("Organization not found for id: " + orgId));
-                        TenantContext.setCurrentOrganization(organization);
-                        log.debug("Set TenantContext with organization_id from header: {}", orgId);
-                    } catch (IllegalArgumentException e) {
-                        log.warn("Invalid X-Organization-Id header: {}", orgIdHeader);
-                    }
+            }
+            
+            // Extract tenant context from headers as fallback (when no JWT or JWT missing org/store)
+            String orgIdHeader = request.getHeader("X-Organization-Id");
+            String storeIdHeader = request.getHeader("X-Store-Id");
+            if (orgIdHeader != null && TenantContext.getCurrentOrganization() == null) {
+                try {
+                    UUID orgId = UUID.fromString(orgIdHeader);
+                    Organization organization = organizationRepository.findById(orgId)
+                            .orElseThrow(() -> new IllegalStateException("Organization not found for id: " + orgId));
+                    TenantContext.setCurrentOrganization(organization);
+                    log.debug("Set TenantContext with organization_id from header: {}", orgId);
+                } catch (IllegalArgumentException e) {
+                    log.warn("Invalid X-Organization-Id header: {}", orgIdHeader);
                 }
-                if (storeIdHeader != null && TenantContext.getCurrentOrganization() != null) {
-                    try {
-                        UUID storeId = UUID.fromString(storeIdHeader);
-                        Store store = storeRepository.findById(storeId)
-                                .orElseThrow(() -> new IllegalStateException("Store not found for id: " + storeId));
-                        if (store.getOrganization().getId().equals(TenantContext.getCurrentOrganization().getId())) {
-                            TenantContext.setCurrentStore(store);
-                            log.debug("Set TenantContext with store_id from header: {}", storeId);
-                        } else {
-                            log.warn("Store {} does not belong to organization {}", storeId, TenantContext.getCurrentOrganization().getId());
-                        }
-                    } catch (IllegalArgumentException e) {
-                        log.warn("Invalid X-Store-Id header: {}", storeIdHeader);
+            }
+            if (storeIdHeader != null && TenantContext.getCurrentOrganization() != null && TenantContext.getCurrentStore() == null) {
+                try {
+                    UUID storeId = UUID.fromString(storeIdHeader);
+                    Store store = storeRepository.findById(storeId)
+                            .orElseThrow(() -> new IllegalStateException("Store not found for id: " + storeId));
+                    if (store.getOrganization().getId().equals(TenantContext.getCurrentOrganization().getId())) {
+                        TenantContext.setCurrentStore(store);
+                        log.debug("Set TenantContext with store_id from header: {}", storeId);
+                    } else {
+                        log.warn("Store {} does not belong to organization {}", storeId, TenantContext.getCurrentOrganization().getId());
                     }
+                } catch (IllegalArgumentException e) {
+                    log.warn("Invalid X-Store-Id header: {}", storeIdHeader);
                 }
             }
 

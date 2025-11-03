@@ -249,7 +249,10 @@ public class TemplateCopyService {
         pt.setRequiresExpiry(getBoolean(data, "requiresExpiry", false));
         pt.setReorderPoint(getInt(data, "reorderPoint", 0));
         pt.setActive(true);
-        setIfPresent(data, "description", pt::setDescription);
+        String description = getText(data, "description");
+        if (description != null) {
+            pt.setDescription(description);
+        }
 
         pt = productTemplateRepository.save(pt);
         log.info("Created ProductTemplate: {}", name);

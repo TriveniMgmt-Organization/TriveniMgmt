@@ -1,13 +1,13 @@
 package com.store.mgmt.inventory.model.dto;
 
-import com.store.mgmt.inventory.model.entity.Location;
-import com.store.mgmt.inventory.model.enums.LocationType;
+// No entity import needed for DTO
+import com.store.mgmt.inventory.model.enums.InventoryLocationType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
-@Schema(name = "CreateLocation", description = "Data Transfer Object for a product category")
-public class CreateLocationDTO {
+@Schema(name = "CreateInventoryLocation", description = "Data Transfer Object for a product category")
+public class CreateInventoryLocationDTO {
     @Schema(description = "Name of the location", required = true)
     private String name;
 
@@ -21,5 +21,5 @@ public class CreateLocationDTO {
     private String contactNumber;
 
     @Schema(description = "Type of the location", required = true)
-    private LocationType type;
+    private InventoryLocationType type;
 }

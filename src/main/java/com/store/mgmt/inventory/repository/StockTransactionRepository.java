@@ -26,8 +26,13 @@ public interface StockTransactionRepository extends JpaRepository<StockTransacti
     @Query("SELECT t FROM StockTransaction t WHERE t.timestamp BETWEEN :startDate AND :endDate ORDER BY t.timestamp DESC")
     List<StockTransaction> findByTimestampBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
     
-    // Find transactions by reference (e.g., PO ID, Sale ID)
-    List<StockTransaction> findByReference(String reference);
+    // Find transactions by reference type and ID (e.g., PURCHASE_ORDER + PO ID)
+    @Query("SELECT t FROM StockTransaction t WHERE t.referenceType = :referenceType AND t.referenceId = :referenceId ORDER BY t.timestamp DESC")
+    List<StockTransaction> findByReferenceTypeAndReferenceId(@Param("referenceType") String referenceType, @Param("referenceId") UUID referenceId);
+    
+    // Find transactions by reference type only
+    @Query("SELECT t FROM StockTransaction t WHERE t.referenceType = :referenceType ORDER BY t.timestamp DESC")
+    List<StockTransaction> findByReferenceType(@Param("referenceType") String referenceType);
     
     // Calculate sum of quantity deltas for an inventory item (for stock level calculation)
     @Query("SELECT COALESCE(SUM(t.quantityDelta), 0) FROM StockTransaction t WHERE t.inventoryItem.id = :inventoryItemId")

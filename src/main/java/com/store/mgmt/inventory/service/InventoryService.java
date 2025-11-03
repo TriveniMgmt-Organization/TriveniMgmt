@@ -31,6 +31,7 @@ public interface InventoryService {
     // --- Inventory Item Management (Stock specific) ---
     InventoryItemDTO createInventoryItem(CreateInventoryItemDTO createDTO); // Creating inventory item (no direct quantity)
     InventoryItemDTO getInventoryItemById(UUID inventoryItemId);
+    List<InventoryItemDTO> getAllInventoryItems(); // Get all inventory items for current store
     List<InventoryItemDTO> getInventoryItemsForVariant(UUID variantId);
     List<InventoryItemDTO> getInventoryItemsForTemplate(UUID templateId); // Via variants
     List<InventoryItemDTO> getInventoryItemsAtLocation(UUID locationId);
@@ -94,11 +95,11 @@ public interface InventoryService {
     void deleteSupplier(UUID supplierId);
 
     // --- Location Management ---
-    LocationDTO createLocation(CreateLocationDTO createDTO);
-    List<LocationDTO> getAllLocations();
-    LocationDTO getLocationById(UUID locationId);
-    LocationDTO updateLocation(UUID locationId, UpdateLocationDTO updateDTO);
-    void deleteLocation(UUID locationId);
+    InventoryLocationDTO createInventoryLocation(CreateInventoryLocationDTO createDTO);
+    List<InventoryLocationDTO> getAllInventoryLocations();
+    InventoryLocationDTO getInventoryLocationById(UUID inventoryLocationId);
+    InventoryLocationDTO updateInventoryLocation(UUID inventoryLocationId, UpdateInventoryLocationDTO updateDTO);
+    void deleteInventoryLocation(UUID inventoryLocationId);
 
     // --- Purchase Order Management ---
     PurchaseOrderDTO createPurchaseOrder(CreatePurchaseOrderDTO createDTO);
