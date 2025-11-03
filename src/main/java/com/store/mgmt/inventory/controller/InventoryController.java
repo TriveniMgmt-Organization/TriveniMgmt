@@ -884,7 +884,14 @@ public class InventoryController {
                     @ApiResponse(responseCode = "403", description = "Forbidden: User does not have 'SALE_READ' authority", content = @Content)
             }
     )
-    public ResponseEntity<List<SaleDTO>> getSalesByDateRange( @Valid @RequestBody SalesDateRangeDTO dateRange) {
+    public ResponseEntity<List<SaleDTO>> getSalesByDateRange(
+            @Parameter(description = "Start date (ISO format)", example = "2024-01-01T00:00:00", required = true)
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @Parameter(description = "End date (ISO format)", example = "2024-01-31T23:59:59", required = true)
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+        SalesDateRangeDTO dateRange = new SalesDateRangeDTO();
+        dateRange.setStartDate(startDate);
+        dateRange.setEndDate(endDate);
         List<SaleDTO> sales = inventoryService.getSalesByDateRange(dateRange);
         return ResponseEntity.ok(sales);
     }
