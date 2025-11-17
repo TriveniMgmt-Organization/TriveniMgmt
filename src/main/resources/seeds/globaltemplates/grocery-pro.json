@@ -243,6 +243,13 @@
     {
       "entity_type": "LOCATION",
       "data": {
+        "name": "Produce Section",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
         "name": "Produce Cooler",
         "type": "COOLER"
       }
@@ -250,15 +257,169 @@
     {
       "entity_type": "LOCATION",
       "data": {
-        "name": "Dairy Walk-In",
+        "name": "Meat Department",
+        "type": "DEPARTMENT"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Meat Case",
+        "type": "MEAT_CASE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Deli Counter",
+        "type": "COUNTER"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Bakery Department",
+        "type": "DEPARTMENT"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Bakery Display Case",
+        "type": "DISPLAY"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Dairy Walk-In Cooler",
         "type": "WALKIN"
       }
     },
     {
       "entity_type": "LOCATION",
       "data": {
-        "name": "Dry Storage",
+        "name": "Dairy Case",
+        "type": "DAIRY_CASE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Frozen Foods Section",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Frozen Walk-In",
+        "type": "WALKIN"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Grocery Aisle 1-5",
+        "type": "AISLE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Grocery Aisle 6-10",
+        "type": "AISLE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Grocery Aisle 11-15",
+        "type": "AISLE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Beverage Section",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Beverage Cooler",
+        "type": "COOLER"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Checkout Counters",
+        "type": "COUNTER"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Customer Service Desk",
+        "type": "DESK"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Dry Goods Storage",
         "type": "STORAGE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Cooler Storage",
+        "type": "STORAGE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Frozen Storage",
+        "type": "STORAGE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Receiving Dock",
+        "type": "DOCK"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Manager Office",
+        "type": "OFFICE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Employee Lounge",
+        "type": "BREAK_ROOM"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Restrooms",
+        "type": "RESTROOM"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Parking Lot",
+        "type": "OUTDOOR"
       }
     }
   ]

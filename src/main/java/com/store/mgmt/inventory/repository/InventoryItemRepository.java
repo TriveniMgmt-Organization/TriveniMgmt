@@ -33,8 +33,7 @@ public interface InventoryItemRepository extends JpaRepository<InventoryItem, UU
             @Param("locationId") UUID locationId, 
             @Param("batchLotId") UUID batchLotId);
 
-    // For optimistic locking when updating
-    @Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT)
+    // Standard findById with no special locking
     Optional<InventoryItem> findById(@NonNull UUID id);
 
     // Find items for a template (via variants)

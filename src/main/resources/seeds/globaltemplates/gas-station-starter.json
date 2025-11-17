@@ -289,22 +289,141 @@
     {
       "entity_type": "LOCATION",
       "data": {
-        "name": "Pump Island 1-4",
+        "name": "Pump Island 1-2",
         "type": "PUMP_ISLAND"
       }
     },
     {
       "entity_type": "LOCATION",
       "data": {
-        "name": "Convenience Store Floor",
-        "type": "STORE"
+        "name": "Pump Island 3-4",
+        "type": "PUMP_ISLAND"
       }
     },
     {
       "entity_type": "LOCATION",
       "data": {
-        "name": "Backroom Storage",
+        "name": "Pump Island 5-6",
+        "type": "PUMP_ISLAND"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Diesel Pumps",
+        "type": "PUMP_ISLAND"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Car Wash Bay",
+        "type": "CAR_WASH"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "C-Store Aisle 1-2",
+        "type": "AISLE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "C-Store Aisle 3-4",
+        "type": "AISLE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Beverage Cooler",
+        "type": "COOLER"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Dairy Case",
+        "type": "COOLER"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Tobacco Wall",
+        "type": "WALL"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Cashier Counter",
+        "type": "COUNTER"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Hot Food Case",
+        "type": "HOT_CASE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Bakery Display",
+        "type": "DISPLAY"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "ATM Area",
+        "type": "ATM"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Main Storage Room",
         "type": "STORAGE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Cooler Storage",
+        "type": "STORAGE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Fuel Tank Farm",
+        "type": "TANK_FARM"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Manager Office",
+        "type": "OFFICE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Employee Break Room",
+        "type": "BREAK_ROOM"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Restrooms",
+        "type": "RESTROOM"
       }
     },
 

@@ -1,8 +1,13 @@
 package com.store.mgmt.inventory.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.time.LocalDate;
 import com.store.mgmt.common.model.BaseEntity;
@@ -18,10 +23,15 @@ import com.store.mgmt.common.model.BaseEntity;
        indexes = {
            @Index(name = "idx_inventory_variant_location", columnList = "variant_id, location_id"),
            @Index(name = "idx_inventory_batch", columnList = "batch_lot_id"),
-           @Index(name = "idx_inventory_expiry", columnList = "expiry_date")
+           @Index(name = "idx_inventory_expiry", columnList = "expiry_date"),
+           @Index(name = "idx_inventory_store", columnList = "location_id") // For store-level queries
        })
-@Data
-@EqualsAndHashCode(callSuper = false, exclude = "stockLevel")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = false, exclude = {"variant", "location", "batchLot", "stockLevel"})
+@ToString(exclude = {"variant", "location", "batchLot", "stockLevel"})
 public class InventoryItem extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -42,19 +52,8 @@ public class InventoryItem extends BaseEntity {
     private LocalDate expiryDate;
 
     // --- Stock Level (Current Quantity) ---
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "stock_level_id", unique = true)
+    // StockLevel has its own ID and references back to InventoryItem
+    @OneToOne(mappedBy = "inventoryItem", fetch = FetchType.LAZY, cascade = {}, orphanRemoval = true)
+    @JsonIgnore
     private StockLevel stockLevel;
-
-    // --- Helper: Auto-create StockLevel on persist ---
-    @PrePersist
-    private void ensureStockLevel() {
-        if (stockLevel == null) {
-            stockLevel = new StockLevel();
-            stockLevel.setInventoryItem(this);
-            stockLevel.setOnHand(0);
-            stockLevel.setCommitted(0);
-            stockLevel.setAvailable(0);
-        }
-    }
 }

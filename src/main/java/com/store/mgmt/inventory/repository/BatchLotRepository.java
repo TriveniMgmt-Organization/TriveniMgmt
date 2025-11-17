@@ -28,5 +28,16 @@ public interface BatchLotRepository extends JpaRepository<BatchLot, UUID> {
     // Find batch lots by supplier
     @Query("SELECT bl FROM BatchLot bl WHERE bl.supplier.id = :supplierId AND bl.deletedAt IS NULL")
     List<BatchLot> findBySupplierId(@Param("supplierId") UUID supplierId);
+    
+    // Find batch lots created today (for sequence number generation)
+    @Query("SELECT bl FROM BatchLot bl WHERE bl.batchNumber LIKE :pattern AND bl.deletedAt IS NULL ORDER BY bl.batchNumber DESC")
+    List<BatchLot> findByBatchNumberPattern(@Param("pattern") String pattern);
+    
+    // Get max sequence number for a date prefix (optimized - returns only the max sequence)
+    // Uses PostgreSQL-compatible syntax
+    @Query(value = "SELECT MAX(CAST(SUBSTRING(bl.batch_number FROM :prefixLength + 1) AS INTEGER)) " +
+                   "FROM batch_lots bl " +
+                   "WHERE bl.batch_number LIKE :pattern AND bl.deleted_at IS NULL", nativeQuery = true)
+    Integer findMaxSequenceForPattern(@Param("pattern") String pattern, @Param("prefixLength") int prefixLength);
 }
 

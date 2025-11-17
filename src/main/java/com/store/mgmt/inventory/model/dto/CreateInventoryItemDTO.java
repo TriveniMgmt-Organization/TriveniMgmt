@@ -28,8 +28,11 @@ public class CreateInventoryItemDTO {
     )
     private UUID locationId;
 
-    @Schema(description = "Batch/lot identifier (optional, for batch tracking)")
+    @Schema(description = "Batch/lot identifier (optional, for batch tracking). If not provided, a batch lot will be auto-generated.")
     private UUID batchLotId;
+
+    @Schema(description = "Custom batch number (optional). If provided, will be used instead of auto-generation. Format: any string (e.g., supplier-provided lot number)")
+    private String customBatchNumber;
 
     @Schema(description = "Expiry date for this inventory item (optional)")
     private LocalDate expiryDate;

@@ -43,6 +43,11 @@ public abstract class BaseEntity {
     @Column(name = "deleted_by")
     private String deletedBy;
 
+    // Version field for optimistic locking
+    @Version
+    @Column(name = "version", nullable = false)
+    private Integer version = 0;
+
     @PrePersist
     protected void onCreate() {
         if (id == null) {

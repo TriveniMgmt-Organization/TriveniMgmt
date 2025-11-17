@@ -1,9 +1,11 @@
 package com.store.mgmt.config;
 
+import com.store.mgmt.organization.enums.StoreStatus;
 import com.store.mgmt.organization.model.entity.Organization;
 import com.store.mgmt.organization.model.entity.Store;
 import com.store.mgmt.organization.model.entity.UserOrganizationRole;
 import com.store.mgmt.organization.repository.OrganizationRepository;
+import com.store.mgmt.organization.repository.StoreRepository;
 import com.store.mgmt.organization.repository.UserOrganizationRoleRepository;
 import com.store.mgmt.users.model.entity.Permission;
 import com.store.mgmt.users.model.entity.Role;
@@ -32,18 +34,21 @@ public class DataSeeder {
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
     private final OrganizationRepository organizationRepository;
+    private final StoreRepository storeRepository;
     private final UserOrganizationRoleRepository userOrganizationRoleRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public DataSeeder(UserRepository userRepository, RoleRepository roleRepository,
                       OrganizationRepository organizationRepository,
-                        UserOrganizationRoleRepository userOrganizationRoleRepository,
+                      StoreRepository storeRepository,
+                      UserOrganizationRoleRepository userOrganizationRoleRepository,
                       PermissionRepository permissionRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.permissionRepository = permissionRepository;
         this.organizationRepository = organizationRepository;
+        this.storeRepository = storeRepository;
         this.userOrganizationRoleRepository = userOrganizationRoleRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -331,9 +336,20 @@ public class DataSeeder {
 
             Organization organization = new Organization();
             organization.setName(orgName);
-            organization.setCreatedAt(LocalDateTime.now()); // Set creation timestamp
-            organization.setCreatedBy(user.getEmail()); // The user is creating it
-            organization = organizationRepository.save(organization); // Save the organization
+            organization.setCreatedAt(LocalDateTime.now()); 
+            organization.setCreatedBy("system");
+            organization = organizationRepository.save(organization); 
+
+            // 2.5. Create default store for the organization
+            Store defaultStore = new Store();
+            defaultStore.setOrganization(organization);
+            defaultStore.setName("Main Store");
+            defaultStore.setLocation("Default Location");
+            defaultStore.setStatus(StoreStatus.ACTIVE);
+            defaultStore.setCreatedAt(LocalDateTime.now());
+            defaultStore.setCreatedBy("system");
+            storeRepository.save(defaultStore);
+            logger.info("Created default store 'Main Store' for organization '{}'", organization.getName());
 
             // 3. Create and Save UserOrganizationRole
             UserOrganizationRole userOrgRole = new UserOrganizationRole();

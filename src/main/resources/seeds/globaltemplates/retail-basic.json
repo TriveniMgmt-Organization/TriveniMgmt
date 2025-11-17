@@ -40,6 +40,34 @@
       "code": "kg",
       "name": "Kilogram",
       "description": "Standard unit for weight"
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Sales Floor",
+        "type": "FLOOR"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Checkout Counter",
+        "type": "COUNTER"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Back Storage",
+        "type": "STORAGE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Manager Office",
+        "type": "OFFICE"
+      }
     }
   ]
 }

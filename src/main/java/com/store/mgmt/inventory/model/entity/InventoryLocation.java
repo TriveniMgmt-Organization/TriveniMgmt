@@ -1,5 +1,6 @@
 package com.store.mgmt.inventory.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.store.mgmt.common.model.BaseEntity;
 import com.store.mgmt.inventory.model.enums.InventoryLocationType;
 import com.store.mgmt.inventory.model.entity.DamageLoss;
@@ -23,6 +24,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false, exclude = {"inventoryItems", "damageLosses"})
+@ToString(exclude = {"inventoryItems", "damageLosses"})
 public class InventoryLocation extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -43,11 +45,11 @@ public class InventoryLocation extends BaseEntity {
     private boolean isActive = true;
 
     // --- Relationships ---
-    @OneToMany(mappedBy = "location", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @ToString.Exclude
+    @OneToMany(mappedBy = "location", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
     private Set<InventoryItem> inventoryItems = new HashSet<>();
 
-    @OneToMany(mappedBy = "location", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @ToString.Exclude
+    @OneToMany(mappedBy = "location", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
     private Set<DamageLoss> damageLosses = new HashSet<>();
 }

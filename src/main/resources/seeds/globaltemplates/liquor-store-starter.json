@@ -230,8 +230,15 @@
     {
       "entity_type": "LOCATION",
       "data": {
-        "name": "Wine Wall",
+        "name": "Wine Display Wall",
         "type": "WALL"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Premium Wine Rack",
+        "type": "RACK"
       }
     },
     {
@@ -244,15 +251,120 @@
     {
       "entity_type": "LOCATION",
       "data": {
-        "name": "Spirits Shelf",
+        "name": "Craft Beer Section",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Spirits Shelf A",
         "type": "SHELF"
       }
     },
     {
       "entity_type": "LOCATION",
       "data": {
-        "name": "Back Liquor Storage",
+        "name": "Spirits Shelf B",
+        "type": "SHELF"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Whiskey Wall",
+        "type": "WALL"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Vodka & Gin Section",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Cordials & Liqueurs",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Mixers & Supplies",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Cashier Counter",
+        "type": "COUNTER"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Age Verification Station",
+        "type": "STATION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Beer Cave",
+        "type": "BEER_CAVE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Wine Storage Room",
         "type": "STORAGE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Spirits Storage",
+        "type": "STORAGE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Empty Bottle Storage",
+        "type": "STORAGE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Receiving Dock",
+        "type": "DOCK"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Manager Office",
+        "type": "OFFICE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Tasting Room",
+        "type": "TASTING"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Restrooms",
+        "type": "RESTROOM"
       }
     },
 

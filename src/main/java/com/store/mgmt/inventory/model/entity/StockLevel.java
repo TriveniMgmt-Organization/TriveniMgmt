@@ -1,23 +1,33 @@
 package com.store.mgmt.inventory.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.store.mgmt.common.model.BaseEntity;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Entity
 @Table(name = "stock_levels",
        indexes = {
            @Index(name = "idx_stock_available", columnList = "available"),
-           @Index(name = "idx_stock_low", columnList = "low_stock_threshold")
+           @Index(name = "idx_stock_low", columnList = "low_stock_threshold"),
+           @Index(name = "idx_stock_inventory_item", columnList = "inventory_item_id")
        })
-@Data
-@EqualsAndHashCode(callSuper = false)
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = false, exclude = "inventoryItem")
+@ToString(exclude = "inventoryItem")
 public class StockLevel extends BaseEntity {
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "inventory_item_id", nullable = false)
-    @MapsId // Share ID with InventoryItem
+    @JsonIgnore
     private InventoryItem inventoryItem;
 
     @Column(name = "on_hand", nullable = false)
@@ -36,7 +46,8 @@ public class StockLevel extends BaseEntity {
     private Integer maxStockLevel;
 
     // --- Update available on change ---
-    @PreUpdate @PrePersist
+    @PreUpdate
+    @PrePersist
     private void updateAvailable() {
         this.available = onHand - committed;
     }

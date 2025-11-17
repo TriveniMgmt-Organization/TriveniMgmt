@@ -1,5 +1,6 @@
 package com.store.mgmt.inventory.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.store.mgmt.common.model.BaseEntity;
 import com.store.mgmt.organization.model.entity.Organization;
 import jakarta.persistence.*;
@@ -50,6 +51,7 @@ public class ProductVariant extends BaseEntity {
 
     private boolean isActive = true;
 
-    @OneToMany(mappedBy = "variant")
+    @OneToMany(mappedBy = "variant", cascade = {}, fetch = FetchType.LAZY)
+    @JsonIgnore
     private Set<InventoryItem> inventoryItems;
 }

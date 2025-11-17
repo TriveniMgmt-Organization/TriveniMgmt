@@ -192,8 +192,8 @@
     {
       "entity_type": "LOCATION",
       "data": {
-        "name": "OTC Shelving",
-        "type": "SHELF"
+        "name": "Prescription Filling Station",
+        "type": "STATION"
       }
     },
     {
@@ -201,6 +201,132 @@
       "data": {
         "name": "Controlled Substances Vault",
         "type": "VAULT"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Narcotics Safe",
+        "type": "SAFE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Refrigerated Medications",
+        "type": "FRIDGE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "OTC Aisle 1-2",
+        "type": "AISLE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "OTC Aisle 3-4",
+        "type": "AISLE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Cosmetics Section",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Vitamins & Supplements",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "First Aid Section",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Baby Care Aisle",
+        "type": "AISLE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Personal Care Aisle",
+        "type": "AISLE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Medical Devices Section",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Cashier Counter",
+        "type": "COUNTER"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Drive-Thru Window",
+        "type": "WINDOW"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Pharmacy Storage",
+        "type": "STORAGE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "OTC Storage",
+        "type": "STORAGE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Receiving Area",
+        "type": "DOCK"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Pharmacist Office",
+        "type": "OFFICE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Consultation Room",
+        "type": "ROOM"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Restrooms",
+        "type": "RESTROOM"
       }
     }
   ]

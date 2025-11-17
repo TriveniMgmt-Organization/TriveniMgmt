@@ -12,12 +12,16 @@ import com.store.mgmt.inventory.model.entity.UnitOfMeasure;
 import com.store.mgmt.inventory.model.entity.ProductTemplate;
 import com.store.mgmt.inventory.model.entity.ProductVariant;
 import com.store.mgmt.inventory.model.entity.TaxRule;
+import com.store.mgmt.inventory.model.entity.InventoryLocation;
+import com.store.mgmt.inventory.model.enums.InventoryLocationType;
 import com.store.mgmt.inventory.repository.BrandRepository;
 import com.store.mgmt.inventory.repository.CategoryRepository;
 import com.store.mgmt.inventory.repository.UnitOfMeasureRepository;
 import com.store.mgmt.inventory.repository.ProductTemplateRepository;
 import com.store.mgmt.inventory.repository.ProductVariantRepository;
 import com.store.mgmt.inventory.repository.TaxRuleRepository;
+import com.store.mgmt.inventory.repository.InventoryLocationRepository;
+import com.store.mgmt.organization.model.entity.Store;
 import com.store.mgmt.organization.model.entity.Organization;
 import com.store.mgmt.organization.repository.OrganizationRepository;
 import jakarta.persistence.EntityManager;
@@ -48,6 +52,7 @@ public class TemplateCopyService {
     private final ProductTemplateRepository productTemplateRepository;
     private final ProductVariantRepository productVariantRepository;
     private final TaxRuleRepository taxRuleRepository;
+    private final InventoryLocationRepository inventoryLocationRepository;
     private final ObjectMapper objectMapper;
     private final EntityManager entityManager;
     private static final int BATCH_SIZE = 50;
@@ -98,6 +103,7 @@ public class TemplateCopyService {
                     case "UnitOfMeasure" -> copyUom(org, data, codeToId);
                     case "ProductTemplate" -> copyProductTemplate(org, data, codeToId);
                     case "TaxRule" -> copyTaxRule(org, data);
+                    case "InventoryLocation", "LOCATION" -> copyLocation(org, data);
                     default -> {
                         log.debug("Skipping unsupported entity type: {}", normalizedType);
                         skipped++;
@@ -288,6 +294,53 @@ public class TemplateCopyService {
         log.info("Created ProductVariant: {} (SKU: {})", template.getName(), sku);
     }
 
+    private void copyLocation(Organization org, JsonNode data) {
+        String name = getRequiredText(data, "name", "Location");
+        if (name == null) return;
+
+        String typeStr = getText(data, "type");
+        InventoryLocationType type = mapLocationType(typeStr);
+
+        // Get the first store of the organization to associate the location with
+        Store store = org.getStores().stream().findFirst().orElse(null);
+        if (store == null) {
+            log.warn("No stores found for organization '{}', skipping location '{}'", org.getName(), name);
+            return;
+        }
+
+        // Check if location with same name already exists for this store
+        if (inventoryLocationRepository.findByNameAndStoreId(name, store.getId()).isPresent()) {
+            log.debug("Location '{}' already exists for store '{}'", name, store.getName());
+            return;
+        }
+
+        InventoryLocation location = new InventoryLocation();
+        location.setName(name);
+        location.setType(type);
+        location.setStore(store);
+
+        // Optional fields
+        String address = getText(data, "address");
+        if (address != null) location.setAddress(address);
+
+        inventoryLocationRepository.save(location);
+        log.debug("Copied location '{}' to store '{}'", name, store.getName());
+    }
+
+    private InventoryLocationType mapLocationType(String typeStr) {
+        if (typeStr == null) return InventoryLocationType.OTHER;
+
+        return switch (typeStr.toUpperCase()) {
+            case "STORE", "COUNTER", "DESK", "WINDOW", "STATION", "ATM" -> InventoryLocationType.STORE;
+            case "WAREHOUSE", "STORAGE", "BACKROOM", "DOCK", "TANK_FARM" -> InventoryLocationType.WAREHOUSE;
+            case "SHELF", "AISLE", "WALL", "RACK", "SECTION", "DISPLAY", "HOT_CASE", "MEAT_CASE", "DAIRY_CASE",
+                 "DEPARTMENT", "FLOOR", "FITTING", "ROOM", "TASTING", "SAFE", "FRIDGE", "BEER_CAVE",
+                 "PUMP_ISLAND", "CAR_WASH", "BREAK_ROOM", "OFFICE", "RESTROOM", "OUTDOOR" -> InventoryLocationType.SHELF_AREA;
+            case "COOLER", "COLD_STORAGE", "WALKIN" -> InventoryLocationType.COLD_STORAGE;
+            default -> InventoryLocationType.OTHER;
+        };
+    }
+
     private void copyTaxRule(Organization org, JsonNode data) {
         String countryCode = getRequiredText(data, "countryCode", "TaxRule");
         BigDecimal taxRate = getRequiredDecimal(data, "taxRate", "TaxRule");
@@ -346,6 +399,7 @@ public class TemplateCopyService {
             case "TAX_RULE", "TAXRULE" -> "TaxRule";
             case "BRAND" -> "Brand";
             case "CATEGORY" -> "Category";
+            case "LOCATION", "INVENTORYLOCATION", "INVENTORY_LOCATION" -> "InventoryLocation";
             default -> upper.substring(0, 1) + upper.substring(1).toLowerCase();
         };
     }

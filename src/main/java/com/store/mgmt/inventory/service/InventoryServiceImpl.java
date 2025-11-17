@@ -17,6 +17,8 @@ import com.store.mgmt.users.service.AuditLogService;
 import lombok.extern.slf4j.Slf4j; // For logging
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // Spring's Transactional
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -52,6 +54,9 @@ public class InventoryServiceImpl implements InventoryService {
     private final StockLevelRepository stockLevelRepository;
     private final BatchLotRepository batchLotRepository;
     private final UoMConversionRepository uomConversionRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     // Mappers
     private final ProductTemplateMapper productTemplateMapper;
@@ -195,6 +200,39 @@ public class InventoryServiceImpl implements InventoryService {
     private BatchLot findBatchLotOrThrow(UUID batchLotId) {
         return batchLotRepository.findById(batchLotId)
                 .orElseThrow(() -> new ResourceNotFoundException("Batch lot not found with ID: " + batchLotId));
+    }
+
+    /**
+     * Gets or creates a batch lot. If customBatchNumber is provided, uses it; otherwise auto-generates.
+     * Auto-generated format: LOT-YYYYMMDD-SEQ (e.g., LOT-20251113-001)
+     */
+    private BatchLot getOrCreateBatchLot(String customBatchNumber, LocalDate expiryDate) {
+        String batchNumber = (customBatchNumber != null && !customBatchNumber.trim().isEmpty())
+            ? customBatchNumber.trim()
+            : generateBatchLotNumber();
+        
+        return batchLotRepository.findByBatchNumber(batchNumber)
+                .orElseGet(() -> {
+                    CreateBatchLotDTO dto = new CreateBatchLotDTO();
+                    dto.setBatchNumber(batchNumber);
+                    dto.setExpiryDate(expiryDate);
+                    BatchLot newBatchLot = batchLotMapper.toEntity(dto);
+                    BatchLot saved = batchLotRepository.save(newBatchLot);
+                    if (customBatchNumber == null || customBatchNumber.trim().isEmpty()) {
+                        log.debug("Auto-generated batch lot: {}", batchNumber);
+                    }
+                    return saved;
+                });
+    }
+
+    /**
+     * Generates a batch lot number in the format: LOT-YYYYMMDD-SEQ
+     * Uses optimized database query to get max sequence directly
+     */
+    private String generateBatchLotNumber() {
+        String datePrefix = "LOT-" + LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")) + "-";
+        Integer maxSeq = batchLotRepository.findMaxSequenceForPattern(datePrefix + "%", datePrefix.length());
+        return datePrefix + String.format("%03d", (maxSeq != null ? maxSeq : 0) + 1);
     }
 
     private PurchaseOrder findPurchaseOrderOrThrow(UUID purchaseOrderId) {
@@ -384,44 +422,105 @@ public class InventoryServiceImpl implements InventoryService {
     public InventoryItemDTO createInventoryItem(CreateInventoryItemDTO createDTO) {
         log.info("Creating new inventory item for variant ID: {} at location ID: {}", createDTO.getVariantId(), createDTO.getLocationId());
         
+        // Validate and fetch entities
         ProductVariant variant = findVariantOrThrow(createDTO.getVariantId());
         InventoryLocation location = findInventoryLocationOrThrow(createDTO.getLocationId());
 
-        // Check if inventory item already exists (variant + location + batchLot combination)
-        Optional<InventoryItem> existing = inventoryItemRepository
-                .findByVariantIdAndLocationIdAndBatchLotId(
-                    createDTO.getVariantId(), 
-                    createDTO.getLocationId(), 
-                    createDTO.getBatchLotId());
-
-        if (existing.isPresent()) {
-            throw new DuplicateResourceException("Inventory item already exists for this variant, location, and batch combination.");
+        // Validate business rules
+        if (!variant.isActive()) {
+            throw new InvalidOperationException("Cannot create inventory item for inactive variant: " + variant.getSku());
+        }
+        if (!location.isActive()) {
+            throw new InvalidOperationException("Cannot create inventory item for inactive location: " + location.getName());
+        }
+        // Validate that variant's organization matches location's store's organization
+        if (!variant.getOrganization().getId().equals(location.getStore().getOrganization().getId())) {
+            throw new SecurityException("Variant and location must belong to the same organization");
         }
 
+        // Get or create batch lot (synchronized to prevent race conditions)
+        BatchLot batchLot = createDTO.getBatchLotId() != null 
+            ? findBatchLotOrThrow(createDTO.getBatchLotId())
+            : getOrCreateBatchLotSynchronized(createDTO.getCustomBatchNumber(), createDTO.getExpiryDate());
+
+        // Create inventory item
         InventoryItem newItem = new InventoryItem();
         newItem.setVariant(variant);
         newItem.setLocation(location);
+        newItem.setBatchLot(batchLot);
         
-        if (createDTO.getBatchLotId() != null) {
-            newItem.setBatchLot(findBatchLotOrThrow(createDTO.getBatchLotId()));
-        }
         if (createDTO.getExpiryDate() != null) {
             newItem.setExpiryDate(createDTO.getExpiryDate());
         }
 
-        InventoryItem savedItem = inventoryItemRepository.save(newItem);
+        // Save inventory item - let database unique constraint handle duplicates
+        InventoryItem savedItem;
+        try {
+            savedItem = inventoryItemRepository.save(newItem);
+            // Flush to trigger constraint violation immediately if duplicate exists
+            entityManager.flush();
+        } catch (Exception e) {
+            // Check if it's a constraint violation
+            if (e.getMessage() != null && e.getMessage().toLowerCase().contains("uq_inventory_item")) {
+                throw new DuplicateResourceException("Inventory item already exists for this variant, location, and batch combination.");
+            }
+            throw e;
+        }
 
-        // Create initial stock level (will be updated by transactions)
+        // Create StockLevel in same transaction - if this fails, entire transaction rolls back
         StockLevel stockLevel = new StockLevel();
         stockLevel.setInventoryItem(savedItem);
         stockLevel.setOnHand(0);
         stockLevel.setCommitted(0);
         stockLevel.setAvailable(0);
-        stockLevelRepository.save(stockLevel);
+        stockLevel.setLowStockThreshold(10);
+
+        try {
+            stockLevelRepository.save(stockLevel);
+            entityManager.flush(); // Ensure it's persisted
+        } catch (Exception e) {
+            log.error("Failed to create StockLevel for InventoryItem {}: {}", savedItem.getId(), e.getMessage());
+            throw new InvalidOperationException("Failed to initialize stock level for inventory item: " + e.getMessage());
+        }
+
+        // Update the saved item reference for consistency
+        savedItem.setStockLevel(stockLevel);
 
         logAuditEntry("CREATE_INVENTORY_ITEM", savedItem.getId(), "Created inventory item for variant: " + variant.getSku());
         log.info("New inventory item created with ID: {}", savedItem.getId());
         return inventoryItemMapper.toDto(savedItem);
+    }
+
+    /**
+     * Synchronized method to prevent race conditions when creating batch lots.
+     * Uses database-level locking to ensure only one batch lot is created for a given batch number.
+     */
+    private synchronized BatchLot getOrCreateBatchLotSynchronized(String customBatchNumber, LocalDate expiryDate) {
+        String batchNumber = (customBatchNumber != null && !customBatchNumber.trim().isEmpty())
+            ? customBatchNumber.trim()
+            : generateBatchLotNumber();
+        
+        // Use pessimistic locking to prevent race conditions
+        return batchLotRepository.findByBatchNumber(batchNumber)
+                .orElseGet(() -> {
+                    CreateBatchLotDTO dto = new CreateBatchLotDTO();
+                    dto.setBatchNumber(batchNumber);
+                    dto.setExpiryDate(expiryDate);
+                    BatchLot newBatchLot = batchLotMapper.toEntity(dto);
+                    try {
+                        BatchLot saved = batchLotRepository.save(newBatchLot);
+                        entityManager.flush(); // Ensure it's persisted immediately
+                        if (customBatchNumber == null || customBatchNumber.trim().isEmpty()) {
+                            log.debug("Auto-generated batch lot: {}", batchNumber);
+                        }
+                        return saved;
+                    } catch (Exception e) {
+                        // If save fails due to duplicate, try to fetch again
+                        log.warn("Failed to save batch lot, attempting to retrieve existing: {}", e.getMessage());
+                        return batchLotRepository.findByBatchNumber(batchNumber)
+                                .orElseThrow(() -> new InvalidOperationException("Failed to create or retrieve batch lot: " + e.getMessage()));
+                    }
+                });
     }
 
     @Override
@@ -897,10 +996,10 @@ public class InventoryServiceImpl implements InventoryService {
                     newLevel.setAvailable(0);
                     return stockLevelRepository.save(newLevel);
                 });
-        
+
         stockLevel.setOnHand(stockLevel.getOnHand() + transaction.getQuantityDelta());
         stockLevel.setAvailable(stockLevel.getOnHand() - stockLevel.getCommitted());
-        
+
         stockLevelRepository.save(stockLevel);
     }
 

@@ -4,6 +4,7 @@ import com.store.mgmt.auth.model.dto.AuthCredentials;
 import com.store.mgmt.auth.model.dto.AuthResponse;
 import com.store.mgmt.auth.model.dto.RegisterCredentials;
 import com.store.mgmt.auth.model.entity.RefreshToken;
+import com.store.mgmt.organization.enums.StoreStatus;
 import com.store.mgmt.organization.mapper.OrganizationMapper;
 import com.store.mgmt.organization.mapper.StoreMapper;
 import com.store.mgmt.organization.model.dto.*;
@@ -278,6 +279,20 @@ private final UserOrganizationRoleRepository userOrganizationRoleRepository;
             Organization organization = new Organization();
             organization.setName(orgName);
             Organization savedOrganization = organizationRepository.save(organization);
+
+            // Create default store for the organization
+            Store defaultStore = new Store();
+            defaultStore.setOrganization(savedOrganization);
+            defaultStore.setName("Main Store");
+            defaultStore.setLocation("Default Location");
+            defaultStore.setStatus(StoreStatus.ACTIVE);
+            Store savedStore = storeRepository.save(defaultStore);
+            log.info("Created default store '{}' for organization '{}'", savedStore.getName(), savedOrganization.getName());
+            logAuditEntry("CREATE_DEFAULT_STORE", savedStore.getId(),
+                    "Default store created for organization: " + savedOrganization.getName());
+
+            // Set the default store as active store for the user
+            activeStoreId = savedStore.getId();
 
             // Apply template if provided and not "CUSTOM" (one-time operation)
             if (registrationData.getTemplateCode() != null && !registrationData.getTemplateCode().trim().isEmpty() 

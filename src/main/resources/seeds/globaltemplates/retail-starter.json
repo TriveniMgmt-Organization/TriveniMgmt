@@ -205,28 +205,91 @@
         }
       },
   
-      {
-        "entity_type": "LOCATION",
-        "data": {
-          "name": "Front Display",
-          "type": "DISPLAY"
-        }
-      },
-      {
-        "entity_type": "LOCATION",
-        "data": {
-          "name": "Back Stockroom",
-          "type": "STORAGE"
-        }
-      },
-      {
-        "entity_type": "LOCATION",
-        "data": {
-          "name": "Fitting Rooms",
-          "type": "FITTING"
-    }
-      },
-  
+        {
+          "entity_type": "LOCATION",
+          "data": {
+            "name": "Front Display Window",
+            "type": "DISPLAY"
+          }
+        },
+        {
+          "entity_type": "LOCATION",
+          "data": {
+            "name": "Sales Floor Aisle 1-3",
+            "type": "AISLE"
+          }
+        },
+        {
+          "entity_type": "LOCATION",
+          "data": {
+            "name": "Sales Floor Aisle 4-6",
+            "type": "AISLE"
+          }
+        },
+        {
+          "entity_type": "LOCATION",
+          "data": {
+            "name": "Checkout Counter",
+            "type": "COUNTER"
+          }
+        },
+        {
+          "entity_type": "LOCATION",
+          "data": {
+            "name": "Customer Service Desk",
+            "type": "DESK"
+          }
+        },
+        {
+          "entity_type": "LOCATION",
+          "data": {
+            "name": "Fitting Rooms",
+            "type": "FITTING"
+          }
+        },
+        {
+          "entity_type": "LOCATION",
+          "data": {
+            "name": "Seasonal Display",
+            "type": "DISPLAY"
+          }
+        },
+        {
+          "entity_type": "LOCATION",
+          "data": {
+            "name": "Back Stockroom",
+            "type": "STORAGE"
+          }
+        },
+        {
+          "entity_type": "LOCATION",
+          "data": {
+            "name": "Receiving Dock",
+            "type": "DOCK"
+          }
+        },
+        {
+          "entity_type": "LOCATION",
+          "data": {
+            "name": "Manager Office",
+            "type": "OFFICE"
+          }
+        },
+        {
+          "entity_type": "LOCATION",
+          "data": {
+            "name": "Employee Break Room",
+            "type": "BREAK_ROOM"
+          }
+        },
+        {
+          "entity_type": "LOCATION",
+          "data": {
+            "name": "Restrooms",
+            "type": "RESTROOM"
+          }
+        },
+
       {
         "entity_type": "DAMAGE_LOSS_REASON",
         "data": {

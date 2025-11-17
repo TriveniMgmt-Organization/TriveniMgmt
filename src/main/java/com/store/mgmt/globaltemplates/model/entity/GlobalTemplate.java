@@ -32,8 +32,6 @@ public class GlobalTemplate extends BaseEntity {
     @Column(name = "type", nullable = false, length = 50)
     private String type;
 
-    @Column(name = "version", nullable = false)
-    private Integer version = 1;
 
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;

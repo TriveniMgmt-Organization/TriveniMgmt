@@ -49,24 +49,24 @@ public class TenantContextFilter extends OncePerRequestFilter {
                         Store store = storeRepository.findById(storeId)
                                 .orElseThrow(() -> new IllegalStateException("Store not found for id: " + storeId));
                         TenantContext.setCurrentStore(store);
-                        log.debug("Set TenantContext with store_id: {}", storeId);
-                    } else {
-                        // JWT doesn't have storeId, check header as fallback
-                        String storeIdHeader = request.getHeader("X-Store-Id");
-                        if (storeIdHeader != null && TenantContext.getCurrentOrganization() != null) {
-                            try {
-                                UUID headerStoreId = UUID.fromString(storeIdHeader);
-                                Store store = storeRepository.findById(headerStoreId)
-                                        .orElseThrow(() -> new IllegalStateException("Store not found for id: " + headerStoreId));
-                                if (store.getOrganization().getId().equals(TenantContext.getCurrentOrganization().getId())) {
-                                    TenantContext.setCurrentStore(store);
-                                    log.debug("Set TenantContext with store_id from header (JWT had no storeId): {}", headerStoreId);
-                                } else {
-                                    log.warn("Store {} does not belong to organization {}", headerStoreId, TenantContext.getCurrentOrganization().getId());
-                                }
-                            } catch (IllegalArgumentException e) {
-                                log.warn("Invalid X-Store-Id header: {}", storeIdHeader);
+                        log.debug("Set TenantContext with store_id from JWT: {}", storeId);
+                    }
+                    // Always check header - header can override JWT storeId if present
+                    // This allows context switching without JWT refresh
+                    String storeIdHeader = request.getHeader("X-Store-Id");
+                    if (storeIdHeader != null && TenantContext.getCurrentOrganization() != null) {
+                        try {
+                            UUID headerStoreId = UUID.fromString(storeIdHeader);
+                            Store store = storeRepository.findById(headerStoreId)
+                                    .orElseThrow(() -> new IllegalStateException("Store not found for id: " + headerStoreId));
+                            if (store.getOrganization().getId().equals(TenantContext.getCurrentOrganization().getId())) {
+                                TenantContext.setCurrentStore(store);
+                                log.debug("Set TenantContext with store_id from header: {} (JWT had: {})", headerStoreId, storeId);
+                            } else {
+                                log.warn("Store {} does not belong to organization {}", headerStoreId, TenantContext.getCurrentOrganization().getId());
                             }
+                        } catch (IllegalArgumentException e) {
+                            log.warn("Invalid X-Store-Id header: {}", storeIdHeader);
                         }
                     }
                 } catch (Exception e) {
