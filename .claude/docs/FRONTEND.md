@@ -113,6 +113,7 @@ const {
   navItems,          // Filtered nav items
   switchToOrganizationLevel,
   switchToStoreLevel,
+  prefetchRoute,     // Prefetch route on hover for faster navigation
 } = useNavigationContext();
 ```
 
@@ -192,8 +193,11 @@ import { LogIn, Inventory, EditProduct } from '@/constants/routes';
 
 ### Server State (React Query)
 - All API data managed via generated hooks
-- 5-minute stale time
+- 5-minute stale time (data considered fresh)
+- 30-minute garbage collection time (cache retention)
 - Auto-refetch disabled on window focus
+- Auto-refetch disabled on mount (if data exists)
+- Single retry on failure (faster error handling)
 
 ### Client State (Context)
 - Auth state in `AuthContext`
@@ -293,3 +297,63 @@ const { hasPermission } = useAuth();
   <AppButton onClick={handleEdit}>Edit</AppButton>
 )}
 ```
+
+## Performance Optimizations
+
+### Navigation Performance
+- **Route Prefetching**: Routes are prefetched on hover (`prefetchRoute` in NavigationContext)
+- **React Query Caching**: 5-minute stale time prevents unnecessary refetches during navigation
+- **Skeleton Loaders**: Dashboard pages show skeleton UI during loading (`loading.tsx`)
+
+### Authentication Architecture (Industry Best Practice)
+
+Authentication follows the standard Next.js pattern with separation of concerns:
+
+**Middleware (Quick Guard)**
+- Cookie existence check only (no API calls)
+- Redirects unauthenticated users to `/login`
+- Redirects authenticated users away from `/login`, `/register`
+- No secrets, no validation logic - just routing
+
+**AuthContext (Full Validation)**
+- Calls `/api/me` to validate session with backend
+- Handles 401/403 responses by clearing session and redirecting
+- Manages user state, permissions, roles
+- React Query for caching (5-minute stale time)
+
+**Why this pattern?**
+- Middleware runs on Edge runtime with limitations
+- API calls in middleware cause latency on every navigation
+- AuthContext handles complex auth logic properly
+- Expired tokens are caught on first page load, not every navigation
+
+**Security:**
+- Backend is the ONLY source of truth for token validation
+- No JWT secret in frontend
+- HttpOnly cookies prevent XSS token theft
+- AuthContext redirects to login on any auth error
+
+### Loading States
+
+Loading.tsx files provide skeleton UI during navigation:
+
+| File | Coverage |
+|------|----------|
+| `src/app/loading.tsx` | Root level |
+| `src/app/(dashboard)/loading.tsx` | All dashboard routes |
+| `src/app/(dashboard)/organization/loading.tsx` | Organization routes |
+| `src/app/(dashboard)/store/[storeId]/loading.tsx` | Store routes |
+
+### Key Performance Files
+| File | Purpose |
+|------|---------|
+| `src/components/Providers/ReactQueryProvider.tsx` | Query caching config |
+| `src/middleware.ts` | Security-balanced auth |
+| `src/contexts/NavigationContext.tsx` | Route prefetching |
+
+### Performance Tips
+1. Keep `staleTime` at 5 minutes to prevent refetch on navigation
+2. Use `prefetchRoute` on hover for instant page loads
+3. Don't set `refetchOnMount: true` - causes unnecessary fetches
+4. Use skeleton loaders in `loading.tsx` for perceived performance
+5. Never remove backend validation - it catches revoked tokens

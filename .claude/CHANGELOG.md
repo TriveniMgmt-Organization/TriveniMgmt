@@ -7,6 +7,83 @@
 
 ## 2026-01-23
 
+### Backend: Fixed LazyInitializationException in Multiple Services
+
+**Issue:**
+- After Phase 4 EAGER→LAZY fetch optimization, multiple endpoints fail with:
+  `LazyInitializationException: failed to lazily initialize collection of role: User.organizationRoles`
+
+**Root Cause:**
+- Service methods accessing User entities without eagerly fetching `organizationRoles`
+- Mapper tries to access lazy-loaded collections after Hibernate session closes
+
+**Fixes Applied:**
+
+1. **AuthServiceImpl.validateToken()**
+   - Changed to use `findByEmailWithRolesAndPermissions()`
+   - Added `@Transactional(readOnly = true)`
+
+2. **UserServiceImpl.getUser() and getAllUsers()**
+   - Added new repository methods:
+     - `findByIdWithRolesAndPermissions(UUID id)`
+     - `findAllWithRolesAndPermissions()`
+   - Added `@Transactional(readOnly = true)` to both methods
+   - Use JOIN FETCH to eagerly load roles, permissions, organization, store
+
+**Files Modified:**
+- `src/main/java/com/store/mgmt/auth/service/AuthServiceImpl.java`
+- `src/main/java/com/store/mgmt/users/service/UserServiceImpl.java`
+- `src/main/java/com/store/mgmt/users/repository/UserRepository.java`
+
+**Pattern to follow for future:**
+- Any method accessing User and mapping to DTO must use eager-fetch query
+- Add `@Transactional(readOnly = true)` for read operations
+
+---
+
+### Frontend: Navigation Performance Optimizations (Security-Balanced)
+
+**React Query caching improved:**
+- Enabled `staleTime: 5 minutes` - prevents refetch on navigation
+- Enabled `gcTime: 30 minutes` - longer cache retention
+- Disabled `refetchOnWindowFocus` - no unnecessary refetches
+- Disabled `refetchOnMount` - uses cached data if fresh
+- Reduced `retry: 1` - faster error handling
+
+**Middleware simplified to industry best practice:**
+- Cookie existence check only (no API calls in middleware)
+- No JWT secret in frontend (security best practice)
+- Middleware just guards routes, AuthContext does full validation
+- AuthContext calls `/api/me` → backend validates → handles 401 errors
+- Faster navigation (no API calls on every route change)
+- Proper separation: Middleware=routing, AuthContext=authentication
+
+**Navigation prefetching added:**
+- Added `prefetchRoute()` to NavigationContext
+- Routes are prefetched on hover in DynamicNavigation
+- Faster perceived navigation speed
+
+**Loading states improved:**
+- Replaced "Loading..." text with skeleton loaders
+- Table-like skeleton structure matches actual content
+- Added `loading.tsx` to `/organization/` route segment
+- Added `loading.tsx` to `/store/[storeId]/` route segment
+- Each segment has appropriate skeleton layout
+
+**Files Modified (Frontend):**
+- `src/components/Providers/ReactQueryProvider.tsx`
+- `src/middleware.ts` - Security-balanced auth with JWT verification
+- `src/contexts/NavigationContext.tsx`
+- `src/components/navigation/DynamicNavigation.tsx`
+- `src/app/(dashboard)/loading.tsx`
+- `src/app/(dashboard)/organization/loading.tsx` (new)
+- `src/app/(dashboard)/store/[storeId]/loading.tsx` (new)
+
+**Documentation Updated:**
+- `.claude/docs/FRONTEND.md` - Added Performance Optimizations section
+
+---
+
 ### Frontend: Compatibility Updates for Backend Changes
 
 **Added 409 CONFLICT handling:**

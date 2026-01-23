@@ -26,6 +26,25 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     List<User> findAll();
 
     @Query("SELECT DISTINCT u FROM User u " +
+            "LEFT JOIN FETCH u.organizationRoles ur " +
+            "LEFT JOIN FETCH ur.role r " +
+            "LEFT JOIN FETCH r.permissions " +
+            "LEFT JOIN FETCH ur.organization " +
+            "LEFT JOIN FETCH ur.store " +
+            "WHERE u.deletedAt IS NULL " +
+            "ORDER BY u.createdAt DESC")
+    List<User> findAllWithRolesAndPermissions();
+
+    @Query("SELECT DISTINCT u FROM User u " +
+            "LEFT JOIN FETCH u.organizationRoles ur " +
+            "LEFT JOIN FETCH ur.role r " +
+            "LEFT JOIN FETCH r.permissions " +
+            "LEFT JOIN FETCH ur.organization " +
+            "LEFT JOIN FETCH ur.store " +
+            "WHERE u.id = :id AND u.deletedAt IS NULL")
+    Optional<User> findByIdWithRolesAndPermissions(@Param("id") UUID id);
+
+    @Query("SELECT DISTINCT u FROM User u " +
             "LEFT JOIN FETCH u.organizationRoles ur " +     // Eagerly fetch User's roles
             "LEFT JOIN FETCH ur.organization o " +         // Eagerly fetch Organization for each role
             "LEFT JOIN FETCH o.stores os " +                // Eagerly fetch Organization's stores to prevent lazy loading issues
