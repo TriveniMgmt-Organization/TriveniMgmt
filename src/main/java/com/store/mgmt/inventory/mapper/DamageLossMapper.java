@@ -32,7 +32,6 @@ public interface DamageLossMapper {
     @Mapping(target = "deletedBy", ignore = true)
     @Mapping(target = "organization", ignore = true)
     @Mapping(target = "store", ignore = true)
-    @Mapping(target = "productTemplate", ignore = true)
     @Mapping(target = "location", ignore = true)
     @Mapping(target = "dateRecorded", ignore = true)
     @Mapping(target = "notes", ignore = true)

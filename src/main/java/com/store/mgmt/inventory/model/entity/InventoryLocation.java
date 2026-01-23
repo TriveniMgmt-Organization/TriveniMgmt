@@ -45,11 +45,13 @@ public class InventoryLocation extends BaseEntity {
     private boolean isActive = true;
 
     // --- Relationships ---
-    @OneToMany(mappedBy = "location", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    // No cascade - InventoryItem manages its own lifecycle
+    @OneToMany(mappedBy = "location", orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
     private Set<InventoryItem> inventoryItems = new HashSet<>();
 
-    @OneToMany(mappedBy = "location", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+    // No cascade - DamageLoss manages its own lifecycle
+    @OneToMany(mappedBy = "location", orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
     private Set<DamageLoss> damageLosses = new HashSet<>();
 }

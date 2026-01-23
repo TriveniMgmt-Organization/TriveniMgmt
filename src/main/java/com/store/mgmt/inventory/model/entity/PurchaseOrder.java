@@ -52,6 +52,8 @@ public class PurchaseOrder extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id") // Nullable if the system can generate POs without a specific user
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private User user; // Who created/managed the PO
 
     // One-to-Many relationship with PurchaseOrderItem

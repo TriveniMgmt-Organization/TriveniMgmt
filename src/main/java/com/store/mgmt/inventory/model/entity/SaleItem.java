@@ -3,10 +3,7 @@ package com.store.mgmt.inventory.model.entity;
 import com.store.mgmt.common.model.BaseEntity;
 import com.store.mgmt.organization.model.entity.Store;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 import java.math.BigDecimal;
 
@@ -22,14 +19,20 @@ public class SaleItem extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "store_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Store store;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sale_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Sale sale;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_template_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private ProductTemplate productTemplate;
 
     @Column(name = "quantity", nullable = false)
@@ -41,8 +44,10 @@ public class SaleItem extends BaseEntity {
     @Column(name = "discount_amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal discountAmount = BigDecimal.ZERO;
 
-// Example: SaleItem
-@ManyToOne(fetch = FetchType.LAZY)
-@JoinColumn(name = "variant_id", nullable = false)
-private ProductVariant variant;
+    // Example: SaleItem
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "variant_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private ProductVariant variant;
 }

@@ -22,6 +22,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false, exclude = "inventoryItem")
+// @EqualsAndHashCode(callSuper = false)
 @ToString(exclude = "inventoryItem")
 public class StockLevel extends BaseEntity {
 

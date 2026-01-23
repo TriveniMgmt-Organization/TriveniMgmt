@@ -30,8 +30,8 @@ import com.store.mgmt.common.model.BaseEntity;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false, exclude = {"variant", "location", "batchLot", "stockLevel"})
-@ToString(exclude = {"variant", "location", "batchLot", "stockLevel"})
+@EqualsAndHashCode(callSuper = false, exclude = {"variant", "location", "batchLot"})
+@ToString(exclude = {"variant", "location", "batchLot"})
 public class InventoryItem extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)

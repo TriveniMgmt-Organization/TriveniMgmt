@@ -22,6 +22,8 @@ public class Sale extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Store store;
 
     @Column(name = "sale_timestamp", nullable = false)
@@ -42,6 +44,8 @@ public class Sale extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id") // Nullable if guest checkout
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private User user; // Cashier or user who processed the sale
 
     @Column(name = "notes", columnDefinition = "TEXT")

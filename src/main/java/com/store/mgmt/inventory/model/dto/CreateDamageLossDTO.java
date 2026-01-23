@@ -13,16 +13,16 @@ import java.util.UUID;
 public class CreateDamageLossDTO {
 
     @Schema(
-            description = "Unique identifier of the Product of id this product belongs to",
+            description = "Unique identifier of the Product Variant",
             example = "fedcba98-7654-3210-fedc-ba9876543210",
-            required = true // Assuming a product must always belong to a category
+            required = true
     )
-    private UUID productTemplateId;
+    private UUID variantId;
 
     @Schema(
-            description = "Unique identifier of the Product of id this product belongs to",
+            description = "Unique identifier of the Location where damage/loss occurred",
             example = "fedcba98-7654-3210-fedc-ba9876543210",
-            required = true // Assuming a product must always belong to a category
+            required = true
     )
     private UUID locationId;
 

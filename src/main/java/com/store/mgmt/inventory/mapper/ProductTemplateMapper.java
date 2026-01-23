@@ -15,12 +15,13 @@ import java.util.List;
 
 @Mapper(componentModel = "spring",
         config = BaseMapperConfig.class,
-        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
-        uses = {ProductVariantMapper.class})
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+        // Removed uses = {ProductVariantMapper.class} to prevent circular mapping
 public interface ProductTemplateMapper {
 
     @Mapping(target = "unitOfMeasure.description", ignore = true)
     @Mapping(target = "unitOfMeasure.conversionFactor", ignore = true)
+    @Mapping(target = "variants", ignore = true) // Ignore variants to prevent circular reference: ProductTemplate → variants → template → variants (loop)
     ProductDTO toDto(ProductTemplate product);
     List<ProductDTO> toDtoList(List<ProductTemplate> products);
 
@@ -32,6 +33,7 @@ public interface ProductTemplateMapper {
     @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "deletedBy", ignore = true)
+    @Mapping(target = "variants", ignore = true) // Variants are managed separately
     ProductTemplate toEntity(CreateProductDTO createDTO);
 
     @InheritConfiguration(name = "toEntity")

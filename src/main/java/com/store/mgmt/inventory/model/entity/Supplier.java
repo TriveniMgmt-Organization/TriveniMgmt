@@ -19,6 +19,8 @@ import java.util.Set;
 public class Supplier extends BaseEntity {
         @ManyToOne
         @JoinColumn(name = "organization_id", nullable = false)
+        @ToString.Exclude
+        @EqualsAndHashCode.Exclude
         private Organization organization;
 
         @Column(name = "name", unique = true, nullable = false, length = 255)
@@ -40,7 +42,8 @@ public class Supplier extends BaseEntity {
         private String accountNumber; // Supplier's account number with the store
 
         // One-to-Many relationship with PurchaseOrder
-        @OneToMany(mappedBy = "supplier", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+        // Removed CASCADE.ALL to prevent deep object graph traversal when saving related entities
+        @OneToMany(mappedBy = "supplier", orphanRemoval = true, fetch = FetchType.LAZY)
         @ToString.Exclude
         @EqualsAndHashCode.Exclude
         private Set<PurchaseOrder> purchaseOrders;

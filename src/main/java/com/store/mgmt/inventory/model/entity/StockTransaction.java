@@ -5,8 +5,7 @@ import com.store.mgmt.inventory.model.enums.TransactionType;
 import com.store.mgmt.inventory.model.enums.AdjustmentReason;
 import com.store.mgmt.users.model.entity.User;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -25,6 +24,8 @@ public class StockTransaction extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "inventory_item_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private InventoryItem inventoryItem;
 
     @Enumerated(EnumType.STRING)
@@ -44,10 +45,14 @@ public class StockTransaction extends BaseEntity {
     // --- For transfers ---
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "from_location_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private InventoryLocation fromLocation;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "to_location_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private InventoryLocation toLocation;
 
     // --- For adjustments ---
@@ -57,6 +62,8 @@ public class StockTransaction extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private User user;
 
     @PrePersist

@@ -13,7 +13,7 @@ import java.util.UUID;
 @Repository
 public interface DamageLossRepository extends JpaRepository<DamageLoss, UUID> {
     List<DamageLoss> findByDateRecordedBetween(LocalDateTime startDate, LocalDateTime endDate);
-    List<DamageLoss> findByProductTemplateId(UUID productTemplateId);
+    List<DamageLoss> findByVariantId(UUID variantId); // Changed from productTemplateId to variantId
     List<DamageLoss> findByLocationId(UUID locationId);
     List<DamageLoss> findByReason(DamageLossReason reason);
 

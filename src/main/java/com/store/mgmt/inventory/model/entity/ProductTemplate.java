@@ -3,9 +3,7 @@ package com.store.mgmt.inventory.model.entity;
 import com.store.mgmt.common.model.BaseEntity;
 import com.store.mgmt.organization.model.entity.Organization;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,8 +11,12 @@ import java.util.Set;
 
 @Entity
 @Table(name = "product_templates")
-@Data
-@EqualsAndHashCode(callSuper = false, exclude = "variants")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
+@ToString
 public class ProductTemplate extends BaseEntity {
 
     @ManyToOne
@@ -53,7 +55,10 @@ public class ProductTemplate extends BaseEntity {
     @Column(name = "attribute_type")
     private Map<String, String> attributes = new HashMap<>(); // e.g., "color" -> "select"
 
-    @OneToMany(mappedBy = "template", cascade = CascadeType.ALL, orphanRemoval = true)
+    // Removed CASCADE.ALL to prevent circular dependency when saving InventoryItem
+    // InventoryItem → ProductVariant → ProductTemplate → variants → InventoryItems (loop)
+    @OneToMany(mappedBy = "template", orphanRemoval = true)
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Set<ProductVariant> variants;
 }
