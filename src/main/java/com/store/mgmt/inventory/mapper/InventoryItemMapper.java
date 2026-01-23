@@ -13,16 +13,16 @@ import java.util.List;
 
 @Mapper(componentModel = "spring",
         config = BaseMapperConfig.class,
-        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
-        // uses = {StockLevelMapper.class}) // Use StockLevelMapper for nested mapping
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+        uses = {ProductVariantMapper.class, InventoryLocationMapper.class, BatchLotMapper.class, StockLevelMapper.class}
 )
 public interface InventoryItemMapper {
     @Mapping(source = "variant.id", target = "variantId")
     @Mapping(source = "location.id", target = "locationId")
     @Mapping(source = "batchLot.id", target = "batchLotId")
-    @Mapping(target = "variant", ignore = true) // Ignore variant to prevent deep mapping: variant → template → variants (circular)
-    @Mapping(target = "location", ignore = true) // Ignore location to prevent deep mapping
-    @Mapping(target = "batchLot", ignore = true) // Ignore batchLot to prevent deep mapping
+    @Mapping(source = "variant", target = "variant", qualifiedByName = "toVariantSummary")
+    @Mapping(source = "location", target = "location", qualifiedByName = "toLocationSummary")
+    @Mapping(source = "batchLot", target = "batchLot", qualifiedByName = "toBatchLotSummary")
     InventoryItemDTO toDto(InventoryItem entity);
 
     List<InventoryItemDTO> toDtoList(List<InventoryItem> entities);

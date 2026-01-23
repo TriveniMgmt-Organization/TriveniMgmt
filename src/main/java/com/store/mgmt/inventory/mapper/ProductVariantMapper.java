@@ -9,6 +9,7 @@ import org.mapstruct.InheritConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
 import java.util.List;
@@ -22,6 +23,15 @@ public interface ProductVariantMapper {
     @Mapping(target = "template", ignore = true) // Ignore to prevent circular reference
     ProductVariantDTO toDto(ProductVariant variant);
     List<ProductVariantDTO> toDtoList(List<ProductVariant> variants);
+
+    /**
+     * Summary mapping for use in inventory items - includes template name for display.
+     * Prevents deep nesting by not including full template details.
+     */
+    @Named("toVariantSummary")
+    @Mapping(source = "template.id", target = "templateId")
+    @Mapping(source = "template", target = "template")
+    ProductVariantDTO toVariantSummary(ProductVariant variant);
 
     // Base method with all BaseEntity ignores - other methods inherit from this
     @Mapping(target = "id", ignore = true)

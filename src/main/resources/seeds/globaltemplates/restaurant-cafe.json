@@ -1,0 +1,671 @@
+{
+  "template": {
+    "name": "Restaurant & Cafe Starter Pack",
+    "code": "RESTAURANT_PRO",
+    "type": "RESTAURANT",
+    "version": 1,
+    "description": "Complete setup for restaurants, cafes, and food service: ingredients, beverages, supplies, and kitchen equipment."
+  },
+  "items": [
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Sysco",
+        "description": "Food Service Supplies"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "US Foods",
+        "description": "Food & Restaurant Supplies"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Starbucks",
+        "description": "Coffee & Beverages"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Coca-Cola",
+        "description": "Soft Drinks"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Kraft Heinz",
+        "description": "Condiments & Sauces"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "To-Go Supplies",
+        "description": "Disposables & Packaging"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "House Brand",
+        "description": "In-House / Unbranded"
+      }
+    },
+
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "FOOD",
+        "name": "Food & Ingredients"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "PROTEINS",
+        "name": "Proteins",
+        "parentCode": "FOOD"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "PRODUCE",
+        "name": "Fresh Produce",
+        "parentCode": "FOOD"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "DAIRY",
+        "name": "Dairy & Eggs",
+        "parentCode": "FOOD"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "DRY_GOODS",
+        "name": "Dry Goods & Pantry",
+        "parentCode": "FOOD"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "FROZEN",
+        "name": "Frozen Foods",
+        "parentCode": "FOOD"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "CONDIMENTS",
+        "name": "Condiments & Sauces",
+        "parentCode": "FOOD"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "BEVERAGES",
+        "name": "Beverages"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "COFFEE",
+        "name": "Coffee & Tea",
+        "parentCode": "BEVERAGES"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "SOFT_DRINKS",
+        "name": "Soft Drinks & Juices",
+        "parentCode": "BEVERAGES"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "ALCOHOL",
+        "name": "Beer, Wine & Spirits",
+        "parentCode": "BEVERAGES"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "SUPPLIES",
+        "name": "Supplies & Disposables"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "TO_GO",
+        "name": "To-Go Containers",
+        "parentCode": "SUPPLIES"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "UTENSILS",
+        "name": "Utensils & Napkins",
+        "parentCode": "SUPPLIES"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "CLEANING",
+        "name": "Cleaning Supplies",
+        "parentCode": "SUPPLIES"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "EQUIPMENT",
+        "name": "Kitchen Equipment"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "SMALLWARES",
+        "name": "Smallwares & Tools",
+        "parentCode": "EQUIPMENT"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "LINENS",
+        "name": "Linens & Uniforms"
+      }
+    },
+
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "PC",
+        "name": "Piece"
+      }
+    },
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "LB",
+        "name": "Pound"
+      }
+    },
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "KG",
+        "name": "Kilogram"
+      }
+    },
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "GAL",
+        "name": "Gallon"
+      }
+    },
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "CASE",
+        "name": "Case"
+      }
+    },
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "BOX",
+        "name": "Box"
+      }
+    },
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "BAG",
+        "name": "Bag"
+      }
+    },
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "DOZ",
+        "name": "Dozen"
+      }
+    },
+
+    {
+      "entity_type": "TAX_RULE",
+      "data": {
+        "countryCode": "US",
+        "taxRate": 0.00,
+        "description": "Ingredients for Resale (Tax Exempt)"
+      }
+    },
+    {
+      "entity_type": "TAX_RULE",
+      "data": {
+        "countryCode": "US",
+        "taxRate": 8.25,
+        "description": "Prepared Food & Beverages"
+      }
+    },
+
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Chicken Breast Boneless (10lb Case)",
+        "categoryCode": "PROTEINS",
+        "brandName": "Sysco",
+        "uomCode": "CASE",
+        "costPrice": 28.00,
+        "retailPrice": 0.00,
+        "skuPrefix": "FOOD-CHKB10",
+        "requiresExpiry": true,
+        "reorderPoint": 5
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Ground Beef 80/20 (10lb Case)",
+        "categoryCode": "PROTEINS",
+        "brandName": "Sysco",
+        "uomCode": "CASE",
+        "costPrice": 45.00,
+        "retailPrice": 0.00,
+        "skuPrefix": "FOOD-GB80-10",
+        "requiresExpiry": true,
+        "reorderPoint": 4
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Romaine Lettuce (Case of 6)",
+        "categoryCode": "PRODUCE",
+        "brandName": "House Brand",
+        "uomCode": "CASE",
+        "costPrice": 18.00,
+        "retailPrice": 0.00,
+        "skuPrefix": "PROD-ROM6",
+        "requiresExpiry": true,
+        "reorderPoint": 3
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Tomatoes Roma (25lb Case)",
+        "categoryCode": "PRODUCE",
+        "brandName": "House Brand",
+        "uomCode": "CASE",
+        "costPrice": 22.00,
+        "retailPrice": 0.00,
+        "skuPrefix": "PROD-TOM25",
+        "requiresExpiry": true,
+        "reorderPoint": 3
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Shredded Mozzarella (5lb Bag)",
+        "categoryCode": "DAIRY",
+        "brandName": "Sysco",
+        "uomCode": "BAG",
+        "costPrice": 16.00,
+        "retailPrice": 0.00,
+        "skuPrefix": "DAIRY-MOZ5",
+        "requiresExpiry": true,
+        "reorderPoint": 6
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Large Eggs (Case of 15 dozen)",
+        "categoryCode": "DAIRY",
+        "brandName": "House Brand",
+        "uomCode": "CASE",
+        "costPrice": 35.00,
+        "retailPrice": 0.00,
+        "skuPrefix": "DAIRY-EGGS15",
+        "requiresExpiry": true,
+        "reorderPoint": 2
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "All-Purpose Flour (50lb Bag)",
+        "categoryCode": "DRY_GOODS",
+        "brandName": "Sysco",
+        "uomCode": "BAG",
+        "costPrice": 18.00,
+        "retailPrice": 0.00,
+        "skuPrefix": "DRY-FLOUR50",
+        "requiresExpiry": true,
+        "reorderPoint": 2
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Coffee Beans Medium Roast (5lb Bag)",
+        "categoryCode": "COFFEE",
+        "brandName": "Starbucks",
+        "uomCode": "BAG",
+        "costPrice": 45.00,
+        "retailPrice": 0.00,
+        "skuPrefix": "BEV-COFFEE5",
+        "requiresExpiry": true,
+        "reorderPoint": 4
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Coca-Cola Syrup (5 Gallon BIB)",
+        "categoryCode": "SOFT_DRINKS",
+        "brandName": "Coca-Cola",
+        "uomCode": "GAL",
+        "costPrice": 85.00,
+        "retailPrice": 0.00,
+        "skuPrefix": "BEV-COKE5G",
+        "requiresExpiry": true,
+        "reorderPoint": 2
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Heinz Ketchup (6/#10 Cans)",
+        "categoryCode": "CONDIMENTS",
+        "brandName": "Kraft Heinz",
+        "uomCode": "CASE",
+        "costPrice": 28.00,
+        "retailPrice": 0.00,
+        "skuPrefix": "COND-KETCH6",
+        "requiresExpiry": true,
+        "reorderPoint": 2
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "To-Go Container 9x9 (200ct)",
+        "categoryCode": "TO_GO",
+        "brandName": "To-Go Supplies",
+        "uomCode": "CASE",
+        "costPrice": 45.00,
+        "retailPrice": 0.00,
+        "skuPrefix": "SUP-CONT9",
+        "requiresExpiry": false,
+        "reorderPoint": 3
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Napkins Dinner (1000ct)",
+        "categoryCode": "UTENSILS",
+        "brandName": "To-Go Supplies",
+        "uomCode": "CASE",
+        "costPrice": 18.00,
+        "retailPrice": 0.00,
+        "skuPrefix": "SUP-NAP1K",
+        "requiresExpiry": false,
+        "reorderPoint": 4
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Degreaser Heavy Duty (Gallon)",
+        "categoryCode": "CLEANING",
+        "brandName": "Sysco",
+        "uomCode": "GAL",
+        "costPrice": 15.00,
+        "retailPrice": 0.00,
+        "skuPrefix": "CLN-DEGREASE",
+        "requiresExpiry": false,
+        "reorderPoint": 4
+      }
+    },
+
+    {
+      "entity_type": "SUPPLIER",
+      "data": {
+        "name": "Sysco Food Services",
+        "contactPerson": "Mike Chen",
+        "email": "orders@sysco.com",
+        "phone": "+1-800-123-4567"
+      }
+    },
+    {
+      "entity_type": "SUPPLIER",
+      "data": {
+        "name": "US Foods",
+        "contactPerson": "Sarah Johnson",
+        "email": "orders@usfoods.com",
+        "phone": "+1-800-234-5678"
+      }
+    },
+    {
+      "entity_type": "SUPPLIER",
+      "data": {
+        "name": "Local Produce Distributor",
+        "contactPerson": "Tom Green",
+        "email": "orders@localproduce.com",
+        "phone": "+1-555-987-6543"
+      }
+    },
+    {
+      "entity_type": "SUPPLIER",
+      "data": {
+        "name": "Coca-Cola Bottling",
+        "contactPerson": "James Wilson",
+        "email": "orders@cokebottling.com",
+        "phone": "+1-800-345-6789"
+      }
+    },
+
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Main Kitchen",
+        "type": "KITCHEN"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Prep Kitchen",
+        "type": "KITCHEN"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Walk-In Cooler",
+        "type": "WALKIN"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Walk-In Freezer",
+        "type": "WALKIN"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Reach-In Cooler (Line)",
+        "type": "COOLER"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Dry Storage",
+        "type": "STORAGE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Bar",
+        "type": "BAR"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Bar Cooler",
+        "type": "COOLER"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Espresso Station",
+        "type": "STATION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Soda Fountain",
+        "type": "STATION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Expo Window",
+        "type": "STATION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Host Stand",
+        "type": "DESK"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "POS Stations",
+        "type": "COUNTER"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Dining Room",
+        "type": "FLOOR"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Patio",
+        "type": "OUTDOOR"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "To-Go Pickup Area",
+        "type": "COUNTER"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Receiving Dock",
+        "type": "DOCK"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Manager Office",
+        "type": "OFFICE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Employee Break Room",
+        "type": "BREAK_ROOM"
+      }
+    },
+
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Expired/Spoiled",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Prep Waste",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Kitchen Mistake",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Customer Return/Comp",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Employee Meal",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Theft/Shrinkage",
+        "isActive": true
+      }
+    }
+  ]
+}

@@ -21,6 +21,8 @@ import com.store.mgmt.inventory.repository.ProductTemplateRepository;
 import com.store.mgmt.inventory.repository.ProductVariantRepository;
 import com.store.mgmt.inventory.repository.TaxRuleRepository;
 import com.store.mgmt.inventory.repository.InventoryLocationRepository;
+import com.store.mgmt.inventory.model.entity.Supplier;
+import com.store.mgmt.inventory.repository.SupplierRepository;
 import com.store.mgmt.organization.model.entity.Store;
 import com.store.mgmt.organization.model.entity.Organization;
 import com.store.mgmt.organization.repository.OrganizationRepository;
@@ -53,6 +55,7 @@ public class TemplateCopyService {
     private final ProductVariantRepository productVariantRepository;
     private final TaxRuleRepository taxRuleRepository;
     private final InventoryLocationRepository inventoryLocationRepository;
+    private final SupplierRepository supplierRepository;
     private final ObjectMapper objectMapper;
     private final EntityManager entityManager;
     private static final int BATCH_SIZE = 50;
@@ -104,6 +107,7 @@ public class TemplateCopyService {
                     case "ProductTemplate" -> copyProductTemplate(org, data, codeToId);
                     case "TaxRule" -> copyTaxRule(org, data);
                     case "InventoryLocation", "LOCATION" -> copyLocation(org, data);
+                    case "Supplier" -> copySupplier(org, data);
                     default -> {
                         log.debug("Skipping unsupported entity type: {}", normalizedType);
                         skipped++;
@@ -361,6 +365,28 @@ public class TemplateCopyService {
         log.info("Created TaxRule: {}% for {}", taxRate, countryCode);
     }
 
+    private void copySupplier(Organization org, JsonNode data) {
+        String name = getRequiredText(data, "name", "Supplier");
+        if (name == null) return;
+
+        if (supplierRepository.findByNameAndOrganizationId(name, org.getId()).isPresent()) {
+            log.debug("Supplier '{}' exists in org, skipping", name);
+            return;
+        }
+
+        Supplier supplier = new Supplier();
+        supplier.setOrganization(org);
+        supplier.setName(name);
+        setIfPresent(data, "contactPerson", supplier::setContactPerson);
+        setIfPresent(data, "email", supplier::setEmail);
+        setIfPresent(data, "phone", supplier::setPhone);
+        setIfPresent(data, "address", supplier::setAddress);
+        setIfPresent(data, "accountNumber", supplier::setAccountNumber);
+
+        supplierRepository.save(supplier);
+        log.info("Created Supplier: {}", name);
+    }
+
     // ========================================================================
     // UTILITIES
     // ========================================================================
@@ -400,6 +426,7 @@ public class TemplateCopyService {
             case "BRAND" -> "Brand";
             case "CATEGORY" -> "Category";
             case "LOCATION", "INVENTORYLOCATION", "INVENTORY_LOCATION" -> "InventoryLocation";
+            case "SUPPLIER" -> "Supplier";
             default -> upper.substring(0, 1) + upper.substring(1).toLowerCase();
         };
     }

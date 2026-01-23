@@ -6,6 +6,7 @@ import com.store.mgmt.inventory.model.dto.CreateBatchLotDTO;
 import com.store.mgmt.inventory.model.entity.BatchLot;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
 import java.util.List;
@@ -20,6 +21,14 @@ public interface BatchLotMapper {
     @Mapping(target = "supplier.phoneNumber", ignore = true) // Not mapped
     BatchLotDTO toDto(BatchLot batchLot);
     List<BatchLotDTO> toDtoList(List<BatchLot> batchLots);
+
+    /**
+     * Summary mapping for use in inventory items - includes only essential batch info.
+     */
+    @Named("toBatchLotSummary")
+    @Mapping(source = "supplier.id", target = "supplierId")
+    @Mapping(target = "supplier", ignore = true) // Don't include full supplier in summary
+    BatchLotDTO toBatchLotSummary(BatchLot batchLot);
 
     // Base method with all BaseEntity ignores
     @Mapping(target = "id", ignore = true)

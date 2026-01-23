@@ -12,6 +12,40 @@
 | Database | PostgreSQL 16 | 5432 |
 | Auth | JWT (HttpOnly cookies) | - |
 
+## Business Context
+
+**TriveniMgmt** is a multi-tenant SaaS Inventory Management System targeting SMBs with 2-20 stores who have outgrown spreadsheets but don't need ERP complexity.
+
+### Target Market
+- Retail chains (fashion, electronics, general merchandise)
+- Food & beverage distributors (with batch/expiry tracking)
+- Wholesale businesses with multiple warehouses
+
+### Value Proposition
+- **Template-based product catalog**: Organizations define master products, stores instantiate with local pricing
+- **Multi-location tracking**: Stores, warehouses, and zones within locations
+- **Batch/lot tracking**: Built-in support for expiry dates and FEFO (First Expired, First Out)
+- **Role-based access**: Granular permissions at organization and store levels
+
+### Feature Scope by Level
+
+**Organization Level (ORG_ADMIN)**:
+- Store management (create, configure, deactivate stores)
+- User management (invite users, assign roles)
+- Product Catalog (templates, categories, brands, UoM)
+- Supplier management
+- Discount rules and pricing policies
+- Cross-store reporting and analytics
+- Billing and subscription management
+
+**Store Level (STORE_MANAGER)**:
+- Products (instantiate from templates with store pricing)
+- Inventory management (stock levels, locations)
+- Purchase orders (create, receive goods)
+- Sales/POS operations
+- Stock adjustments and transfers
+- Low stock alerts and expiry warnings
+
 ## Project Overview
 
 Multi-tenant SaaS Inventory Management System where:

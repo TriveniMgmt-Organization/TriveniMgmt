@@ -3,29 +3,29 @@
     "name": "Pharmacy Starter Pack",
     "code": "PHARMACY_PRO",
     "type": "PHARMACY",
-    "version": 1,
-    "description": "For retail pharmacies: OTC meds, prescriptions, health & beauty."
+    "version": 2,
+    "description": "Complete setup for retail pharmacies: prescriptions, OTC medications, vitamins, health & beauty, and medical supplies."
   },
   "items": [
     {
       "entity_type": "BRAND",
       "data": {
         "name": "Tylenol",
-        "description": "Pain Relief"
+        "description": "Pain Relief (Johnson & Johnson)"
       }
     },
     {
       "entity_type": "BRAND",
       "data": {
         "name": "Advil",
-        "description": "Ibuprofen"
+        "description": "Ibuprofen (Pfizer)"
       }
     },
     {
       "entity_type": "BRAND",
       "data": {
         "name": "Band-Aid",
-        "description": "Bandages"
+        "description": "Bandages & First Aid"
       }
     },
     {
@@ -38,8 +38,29 @@
     {
       "entity_type": "BRAND",
       "data": {
-        "name": "CVS Health",
-        "description": "Store Brand"
+        "name": "Centrum",
+        "description": "Vitamins & Supplements"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "NyQuil",
+        "description": "Cold & Flu Relief"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Neutrogena",
+        "description": "Skincare"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Store Brand",
+        "description": "Private Label / Generic"
       }
     },
 
@@ -61,8 +82,24 @@
     {
       "entity_type": "CATEGORY",
       "data": {
-        "code": "COLD",
+        "code": "COLD_FLU",
         "name": "Cold & Flu",
+        "parentCode": "OTC"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "ALLERGY",
+        "name": "Allergy & Sinus",
+        "parentCode": "OTC"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "DIGESTIVE",
+        "name": "Digestive Health",
         "parentCode": "OTC"
       }
     },
@@ -76,6 +113,45 @@
     {
       "entity_type": "CATEGORY",
       "data": {
+        "code": "MULTIVITAMINS",
+        "name": "Multivitamins",
+        "parentCode": "VITAMINS"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "MINERALS",
+        "name": "Minerals",
+        "parentCode": "VITAMINS"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "FIRST_AID",
+        "name": "First Aid"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "BANDAGES",
+        "name": "Bandages & Wraps",
+        "parentCode": "FIRST_AID"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "ANTISEPTICS",
+        "name": "Antiseptics & Ointments",
+        "parentCode": "FIRST_AID"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
         "code": "BEAUTY",
         "name": "Beauty & Personal Care"
       }
@@ -83,23 +159,114 @@
     {
       "entity_type": "CATEGORY",
       "data": {
+        "code": "SKINCARE",
+        "name": "Skincare",
+        "parentCode": "BEAUTY"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "HAIRCARE",
+        "name": "Hair Care",
+        "parentCode": "BEAUTY"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "ORAL_CARE",
+        "name": "Oral Care",
+        "parentCode": "BEAUTY"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "BABY",
+        "name": "Baby Care"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "BABY_FOOD",
+        "name": "Baby Food & Formula",
+        "parentCode": "BABY"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "DIAPERS",
+        "name": "Diapers & Wipes",
+        "parentCode": "BABY"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "MEDICAL_DEVICES",
+        "name": "Medical Devices & Equipment"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "DIABETES",
+        "name": "Diabetes Care",
+        "parentCode": "MEDICAL_DEVICES"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "BP_MONITORS",
+        "name": "Blood Pressure Monitors",
+        "parentCode": "MEDICAL_DEVICES"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
         "code": "RX",
-        "name": "Prescription (Backend)"
+        "name": "Prescription (Backend Only)"
       }
     },
 
     {
-      "entity_type": "UNIT_OF_MEASURE",
+      "entity_type": "UOM",
+      "data": {
+        "code": "PC",
+        "name": "Piece"
+      }
+    },
+    {
+      "entity_type": "UOM",
       "data": {
         "code": "BOX",
         "name": "Box"
       }
     },
     {
-      "entity_type": "UNIT_OF_MEASURE",
+      "entity_type": "UOM",
       "data": {
         "code": "BTL",
         "name": "Bottle"
+      }
+    },
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "TUBE",
+        "name": "Tube"
+      }
+    },
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "PACK",
+        "name": "Pack"
       }
     },
 
@@ -123,7 +290,7 @@
     {
       "entity_type": "PRODUCT_TEMPLATE",
       "data": {
-        "name": "Tylenol 500mg 100ct",
+        "name": "Tylenol Extra Strength 500mg 100ct",
         "categoryCode": "PAIN",
         "brandName": "Tylenol",
         "uomCode": "BTL",
@@ -137,10 +304,10 @@
     {
       "entity_type": "PRODUCT_TEMPLATE",
       "data": {
-        "name": "Advil 200mg 24ct",
+        "name": "Advil Ibuprofen 200mg 50ct",
         "categoryCode": "PAIN",
         "brandName": "Advil",
-        "uomCode": "BOX",
+        "uomCode": "BTL",
         "costPrice": 4.20,
         "retailPrice": 8.99,
         "skuPrefix": "OTC-ADV200",
@@ -151,8 +318,36 @@
     {
       "entity_type": "PRODUCT_TEMPLATE",
       "data": {
-        "name": "Band-Aid Flexible 100ct",
-        "categoryCode": "FIRST_AID",
+        "name": "NyQuil Cold & Flu 12oz",
+        "categoryCode": "COLD_FLU",
+        "brandName": "NyQuil",
+        "uomCode": "BTL",
+        "costPrice": 7.50,
+        "retailPrice": 13.99,
+        "skuPrefix": "OTC-NYQ12",
+        "requiresExpiry": true,
+        "reorderPoint": 18
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Centrum Adult Multivitamin 200ct",
+        "categoryCode": "MULTIVITAMINS",
+        "brandName": "Centrum",
+        "uomCode": "BTL",
+        "costPrice": 12.00,
+        "retailPrice": 22.99,
+        "skuPrefix": "VIT-CENT200",
+        "requiresExpiry": true,
+        "reorderPoint": 15
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Band-Aid Flexible Fabric 100ct",
+        "categoryCode": "BANDAGES",
         "brandName": "Band-Aid",
         "uomCode": "BOX",
         "costPrice": 3.80,
@@ -160,6 +355,48 @@
         "skuPrefix": "FA-BAND100",
         "requiresExpiry": false,
         "reorderPoint": 25
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Neosporin Original Ointment 1oz",
+        "categoryCode": "ANTISEPTICS",
+        "brandName": "Store Brand",
+        "uomCode": "TUBE",
+        "costPrice": 4.50,
+        "retailPrice": 8.99,
+        "skuPrefix": "FA-NEO1",
+        "requiresExpiry": true,
+        "reorderPoint": 20
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Colgate Total Toothpaste 6oz",
+        "categoryCode": "ORAL_CARE",
+        "brandName": "Colgate",
+        "uomCode": "TUBE",
+        "costPrice": 2.50,
+        "retailPrice": 4.99,
+        "skuPrefix": "OC-COLG6",
+        "requiresExpiry": true,
+        "reorderPoint": 30
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Neutrogena Daily Moisturizer SPF15 4oz",
+        "categoryCode": "SKINCARE",
+        "brandName": "Neutrogena",
+        "uomCode": "BTL",
+        "costPrice": 8.00,
+        "retailPrice": 14.99,
+        "skuPrefix": "SKIN-NEUT4",
+        "requiresExpiry": true,
+        "reorderPoint": 12
       }
     },
 
@@ -179,6 +416,15 @@
         "contactPerson": "Tom Med",
         "email": "supply@cardinal.com",
         "phone": "+1-800-555-5678"
+      }
+    },
+    {
+      "entity_type": "SUPPLIER",
+      "data": {
+        "name": "AmerisourceBergen",
+        "contactPerson": "Rachel Smith",
+        "email": "orders@amerisource.com",
+        "phone": "+1-800-555-9012"
       }
     },
 
@@ -206,7 +452,7 @@
     {
       "entity_type": "LOCATION",
       "data": {
-        "name": "Narcotics Safe",
+        "name": "Narcotics Safe (CII)",
         "type": "SAFE"
       }
     },
@@ -220,15 +466,22 @@
     {
       "entity_type": "LOCATION",
       "data": {
-        "name": "OTC Aisle 1-2",
+        "name": "OTC Aisle 1 (Pain/Cold)",
         "type": "AISLE"
       }
     },
     {
       "entity_type": "LOCATION",
       "data": {
-        "name": "OTC Aisle 3-4",
+        "name": "OTC Aisle 2 (Vitamins)",
         "type": "AISLE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "First Aid Section",
+        "type": "SECTION"
       }
     },
     {
@@ -241,15 +494,8 @@
     {
       "entity_type": "LOCATION",
       "data": {
-        "name": "Vitamins & Supplements",
-        "type": "SECTION"
-      }
-    },
-    {
-      "entity_type": "LOCATION",
-      "data": {
-        "name": "First Aid Section",
-        "type": "SECTION"
+        "name": "Skincare Aisle",
+        "type": "AISLE"
       }
     },
     {
@@ -322,11 +568,40 @@
         "type": "ROOM"
       }
     },
+
     {
-      "entity_type": "LOCATION",
+      "entity_type": "DAMAGE_LOSS_REASON",
       "data": {
-        "name": "Restrooms",
-        "type": "RESTROOM"
+        "name": "Expired Medication",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Temperature Excursion",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Damaged Packaging",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Recalled Product",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Theft/Shrinkage",
+        "isActive": true
       }
     }
   ]

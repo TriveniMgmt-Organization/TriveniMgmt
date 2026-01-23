@@ -59,4 +59,31 @@ public interface InventoryItemRepository extends JpaRepository<InventoryItem, UU
     // Find all inventory items for a store (via location.store)
     @Query("SELECT i FROM InventoryItem i WHERE i.location.store.id = :storeId AND i.deletedAt IS NULL ORDER BY i.createdAt DESC")
     List<InventoryItem> findByStoreId(@Param("storeId") UUID storeId);
+
+    // Optimized query with JOIN FETCH to prevent N+1 when loading related entities
+    @Query("""
+        SELECT DISTINCT i FROM InventoryItem i
+        LEFT JOIN FETCH i.variant v
+        LEFT JOIN FETCH v.template t
+        LEFT JOIN FETCH i.location l
+        LEFT JOIN FETCH i.batchLot bl
+        LEFT JOIN FETCH i.stockLevel sl
+        WHERE i.location.store.id = :storeId
+        AND i.deletedAt IS NULL
+        ORDER BY i.createdAt DESC
+        """)
+    List<InventoryItem> findByStoreIdWithDetails(@Param("storeId") UUID storeId);
+
+    // Find single item with all related entities eagerly loaded
+    @Query("""
+        SELECT i FROM InventoryItem i
+        LEFT JOIN FETCH i.variant v
+        LEFT JOIN FETCH v.template t
+        LEFT JOIN FETCH i.location l
+        LEFT JOIN FETCH i.batchLot bl
+        LEFT JOIN FETCH i.stockLevel sl
+        WHERE i.id = :id
+        AND i.deletedAt IS NULL
+        """)
+    Optional<InventoryItem> findByIdWithDetails(@Param("id") UUID id);
 }

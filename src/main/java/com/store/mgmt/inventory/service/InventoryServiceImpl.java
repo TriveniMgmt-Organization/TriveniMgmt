@@ -468,12 +468,15 @@ public class InventoryServiceImpl implements InventoryService {
         }
 
         // Create StockLevel in same transaction - if this fails, entire transaction rolls back
+        int initialQty = createDTO.getInitialQuantity() != null ? createDTO.getInitialQuantity() : 0;
+        int threshold = createDTO.getLowStockThreshold() != null ? createDTO.getLowStockThreshold() : 10;
+
         StockLevel stockLevel = new StockLevel();
         stockLevel.setInventoryItem(savedItem);
-        stockLevel.setOnHand(0);
+        stockLevel.setOnHand(initialQty);
         stockLevel.setCommitted(0);
-        stockLevel.setAvailable(0);
-        stockLevel.setLowStockThreshold(10);
+        stockLevel.setAvailable(initialQty); // available = onHand - committed
+        stockLevel.setLowStockThreshold(threshold);
 
         try {
             stockLevelRepository.save(stockLevel);
@@ -527,7 +530,9 @@ public class InventoryServiceImpl implements InventoryService {
     @Transactional(readOnly = true)
     public InventoryItemDTO getInventoryItemById(UUID inventoryItemId) {
         log.debug("Fetching inventory item with ID: {} for store ID: {}", inventoryItemId, TenantContext.getCurrentStoreId());
-        InventoryItem item = findInventoryItemOrThrow(inventoryItemId);
+        // Use optimized query with JOIN FETCH to prevent N+1 queries
+        InventoryItem item = inventoryItemRepository.findByIdWithDetails(inventoryItemId)
+                .orElseThrow(() -> new ResourceNotFoundException("Inventory item not found with ID: " + inventoryItemId));
         return inventoryItemMapper.toDto(item);
     }
 
@@ -539,7 +544,8 @@ public class InventoryServiceImpl implements InventoryService {
         if (storeId == null) {
             throw new IllegalStateException("Store context is not set. Cannot fetch inventory items without a store context.");
         }
-        List<InventoryItem> items = inventoryItemRepository.findByStoreId(storeId);
+        // Use optimized query with JOIN FETCH to prevent N+1 queries
+        List<InventoryItem> items = inventoryItemRepository.findByStoreIdWithDetails(storeId);
         return inventoryItemMapper.toDtoList(items);
     }
 

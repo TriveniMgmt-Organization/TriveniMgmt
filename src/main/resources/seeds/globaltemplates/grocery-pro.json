@@ -3,36 +3,36 @@
     "name": "Grocery Store Starter Pack",
     "code": "GROCERY_PRO",
     "type": "GROCERY",
-    "version": 1,
-    "description": "Complete setup for supermarkets: fresh, frozen, bakery, dairy, and household."
+    "version": 2,
+    "description": "Complete setup for supermarkets: fresh produce, dairy, frozen, bakery, meat, and household items."
   },
   "items": [
     {
       "entity_type": "BRAND",
       "data": {
         "name": "Kraft",
-        "description": "Cheese & Dairy"
+        "description": "Cheese & Dairy Products"
       }
     },
     {
       "entity_type": "BRAND",
       "data": {
         "name": "Tropicana",
-        "description": "Orange Juice"
+        "description": "Orange Juice & Beverages"
       }
     },
     {
       "entity_type": "BRAND",
       "data": {
         "name": "Heinz",
-        "description": "Ketchup & Sauces"
+        "description": "Ketchup & Condiments"
       }
     },
     {
       "entity_type": "BRAND",
       "data": {
         "name": "Charmin",
-        "description": "Toilet Paper"
+        "description": "Toilet Paper & Bath Tissue"
       }
     },
     {
@@ -40,6 +40,27 @@
       "data": {
         "name": "Nestlé",
         "description": "Chocolate & Coffee"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Kellogg's",
+        "description": "Cereals & Breakfast Foods"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Tide",
+        "description": "Laundry Detergent"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Generic",
+        "description": "Store Brand"
       }
     },
 
@@ -92,8 +113,70 @@
     {
       "entity_type": "CATEGORY",
       "data": {
+        "code": "EGGS",
+        "name": "Eggs",
+        "parentCode": "DAIRY"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "MEAT",
+        "name": "Meat & Poultry"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "BEEF",
+        "name": "Beef",
+        "parentCode": "MEAT"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "CHICKEN",
+        "name": "Chicken",
+        "parentCode": "MEAT"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "PORK",
+        "name": "Pork",
+        "parentCode": "MEAT"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "SEAFOOD",
+        "name": "Seafood"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
         "code": "FROZEN",
         "name": "Frozen Foods"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "FROZEN_MEALS",
+        "name": "Frozen Meals",
+        "parentCode": "FROZEN"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "ICE_CREAM",
+        "name": "Ice Cream",
+        "parentCode": "FROZEN"
       }
     },
     {
@@ -106,8 +189,110 @@
     {
       "entity_type": "CATEGORY",
       "data": {
+        "code": "BREAD",
+        "name": "Bread",
+        "parentCode": "BAKERY"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "PASTRIES",
+        "name": "Pastries & Cakes",
+        "parentCode": "BAKERY"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
         "code": "BEVERAGES",
         "name": "Beverages"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "SOFT_DRINKS",
+        "name": "Soft Drinks",
+        "parentCode": "BEVERAGES"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "JUICE",
+        "name": "Juice",
+        "parentCode": "BEVERAGES"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "WATER",
+        "name": "Water",
+        "parentCode": "BEVERAGES"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "PANTRY",
+        "name": "Pantry & Dry Goods"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "CEREALS",
+        "name": "Cereals",
+        "parentCode": "PANTRY"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "PASTA",
+        "name": "Pasta & Rice",
+        "parentCode": "PANTRY"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "CONDIMENTS",
+        "name": "Condiments & Sauces",
+        "parentCode": "PANTRY"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "CANNED",
+        "name": "Canned Goods",
+        "parentCode": "PANTRY"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "SNACKS",
+        "name": "Snacks"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "CHIPS",
+        "name": "Chips",
+        "parentCode": "SNACKS"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "COOKIES",
+        "name": "Cookies & Crackers",
+        "parentCode": "SNACKS"
       }
     },
     {
@@ -117,33 +302,92 @@
         "name": "Household & Cleaning"
       }
     },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "LAUNDRY",
+        "name": "Laundry",
+        "parentCode": "HOUSEHOLD"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "PAPER",
+        "name": "Paper Products",
+        "parentCode": "HOUSEHOLD"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "CLEANING",
+        "name": "Cleaning Supplies",
+        "parentCode": "HOUSEHOLD"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "DELI",
+        "name": "Deli & Prepared Foods"
+      }
+    },
 
     {
-      "entity_type": "UNIT_OF_MEASURE",
+      "entity_type": "UOM",
+      "data": {
+        "code": "PC",
+        "name": "Piece"
+      }
+    },
+    {
+      "entity_type": "UOM",
       "data": {
         "code": "LB",
         "name": "Pound"
       }
     },
     {
-      "entity_type": "UNIT_OF_MEASURE",
+      "entity_type": "UOM",
       "data": {
         "code": "KG",
         "name": "Kilogram"
       }
     },
     {
-      "entity_type": "UNIT_OF_MEASURE",
+      "entity_type": "UOM",
+      "data": {
+        "code": "OZ",
+        "name": "Ounce"
+      }
+    },
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "GAL",
+        "name": "Gallon"
+      }
+    },
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "L",
+        "name": "Liter"
+      }
+    },
+    {
+      "entity_type": "UOM",
       "data": {
         "code": "DOZ",
         "name": "Dozen"
       }
     },
     {
-      "entity_type": "UNIT_OF_MEASURE",
+      "entity_type": "UOM",
       "data": {
-        "code": "L",
-        "name": "Liter"
+        "code": "PACK",
+        "name": "Pack"
       }
     },
 
@@ -181,9 +425,37 @@
     {
       "entity_type": "PRODUCT_TEMPLATE",
       "data": {
+        "name": "Red Apples (per lb)",
+        "categoryCode": "FRUITS",
+        "brandName": "Generic",
+        "uomCode": "LB",
+        "costPrice": 0.99,
+        "retailPrice": 1.79,
+        "skuPrefix": "PROD-APL",
+        "requiresExpiry": true,
+        "reorderPoint": 30
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Iceberg Lettuce",
+        "categoryCode": "VEGETABLES",
+        "brandName": "Generic",
+        "uomCode": "PC",
+        "costPrice": 0.89,
+        "retailPrice": 1.49,
+        "skuPrefix": "PROD-LET",
+        "requiresExpiry": true,
+        "reorderPoint": 24
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
         "name": "2% Milk Gallon",
         "categoryCode": "MILK",
-        "brandName": "Kraft",
+        "brandName": "Generic",
         "uomCode": "GAL",
         "costPrice": 2.50,
         "retailPrice": 3.99,
@@ -195,13 +467,27 @@
     {
       "entity_type": "PRODUCT_TEMPLATE",
       "data": {
-        "name": "Heinz Ketchup 32oz",
-        "categoryCode": "CONDIMENTS",
-        "brandName": "Heinz",
-        "uomCode": "PC",
+        "name": "Kraft American Cheese Singles 16ct",
+        "categoryCode": "CHEESE",
+        "brandName": "Kraft",
+        "uomCode": "PACK",
+        "costPrice": 2.80,
+        "retailPrice": 4.49,
+        "skuPrefix": "DAIRY-KRAFT16",
+        "requiresExpiry": true,
+        "reorderPoint": 20
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Large Eggs (Dozen)",
+        "categoryCode": "EGGS",
+        "brandName": "Generic",
+        "uomCode": "DOZ",
         "costPrice": 2.10,
-        "retailPrice": 3.99,
-        "skuPrefix": "COND-KETCH",
+        "retailPrice": 3.49,
+        "skuPrefix": "DAIRY-EGGS12",
         "requiresExpiry": true,
         "reorderPoint": 36
       }
@@ -209,15 +495,113 @@
     {
       "entity_type": "PRODUCT_TEMPLATE",
       "data": {
+        "name": "Ground Beef 80/20 (per lb)",
+        "categoryCode": "BEEF",
+        "brandName": "Generic",
+        "uomCode": "LB",
+        "costPrice": 3.99,
+        "retailPrice": 5.99,
+        "skuPrefix": "MEAT-GB80",
+        "requiresExpiry": true,
+        "reorderPoint": 20
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Chicken Breast (per lb)",
+        "categoryCode": "CHICKEN",
+        "brandName": "Generic",
+        "uomCode": "LB",
+        "costPrice": 2.99,
+        "retailPrice": 4.99,
+        "skuPrefix": "MEAT-CHKB",
+        "requiresExpiry": true,
+        "reorderPoint": 25
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Tropicana Orange Juice 52oz",
+        "categoryCode": "JUICE",
+        "brandName": "Tropicana",
+        "uomCode": "PC",
+        "costPrice": 2.50,
+        "retailPrice": 4.29,
+        "skuPrefix": "BEV-TROP52",
+        "requiresExpiry": true,
+        "reorderPoint": 18
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Heinz Ketchup 32oz",
+        "categoryCode": "CONDIMENTS",
+        "brandName": "Heinz",
+        "uomCode": "PC",
+        "costPrice": 2.10,
+        "retailPrice": 3.99,
+        "skuPrefix": "COND-KETCH32",
+        "requiresExpiry": true,
+        "reorderPoint": 36
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Kellogg's Corn Flakes 18oz",
+        "categoryCode": "CEREALS",
+        "brandName": "Kellogg's",
+        "uomCode": "PC",
+        "costPrice": 2.80,
+        "retailPrice": 4.49,
+        "skuPrefix": "CEREAL-KFLK",
+        "requiresExpiry": true,
+        "reorderPoint": 24
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Wonder Bread White 20oz",
+        "categoryCode": "BREAD",
+        "brandName": "Generic",
+        "uomCode": "PC",
+        "costPrice": 1.50,
+        "retailPrice": 2.79,
+        "skuPrefix": "BAKERY-WBR20",
+        "requiresExpiry": true,
+        "reorderPoint": 30
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
         "name": "Charmin Ultra Soft 12-roll",
-        "categoryCode": "HOUSEHOLD",
+        "categoryCode": "PAPER",
         "brandName": "Charmin",
         "uomCode": "PACK",
         "costPrice": 8.50,
         "retailPrice": 12.99,
-        "skuPrefix": "HH-CHARMIN12",
+        "skuPrefix": "HH-CHAR12",
         "requiresExpiry": false,
         "reorderPoint": 20
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Tide Original Detergent 92oz",
+        "categoryCode": "LAUNDRY",
+        "brandName": "Tide",
+        "uomCode": "PC",
+        "costPrice": 10.50,
+        "retailPrice": 15.99,
+        "skuPrefix": "HH-TIDE92",
+        "requiresExpiry": false,
+        "reorderPoint": 15
       }
     },
 
@@ -236,7 +620,16 @@
         "name": "Local Farm Co-op",
         "contactPerson": "Sarah Green",
         "email": "produce@localfarm.coop",
-        "phone": "+1-555-9876"
+        "phone": "+1-555-987-6543"
+      }
+    },
+    {
+      "entity_type": "SUPPLIER",
+      "data": {
+        "name": "US Foods",
+        "contactPerson": "James Wilson",
+        "email": "orders@usfoods.com",
+        "phone": "+1-800-234-5678"
       }
     },
 
@@ -264,8 +657,22 @@
     {
       "entity_type": "LOCATION",
       "data": {
+        "name": "Meat Walk-In Cooler",
+        "type": "WALKIN"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
         "name": "Meat Case",
-        "type": "MEAT_CASE"
+        "type": "DISPLAY"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Seafood Counter",
+        "type": "COUNTER"
       }
     },
     {
@@ -300,7 +707,7 @@
       "entity_type": "LOCATION",
       "data": {
         "name": "Dairy Case",
-        "type": "DAIRY_CASE"
+        "type": "DISPLAY"
       }
     },
     {
@@ -362,6 +769,13 @@
     {
       "entity_type": "LOCATION",
       "data": {
+        "name": "Self-Checkout Area",
+        "type": "COUNTER"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
         "name": "Customer Service Desk",
         "type": "DESK"
       }
@@ -404,22 +818,44 @@
     {
       "entity_type": "LOCATION",
       "data": {
-        "name": "Employee Lounge",
+        "name": "Employee Break Room",
         "type": "BREAK_ROOM"
       }
     },
+
     {
-      "entity_type": "LOCATION",
+      "entity_type": "DAMAGE_LOSS_REASON",
       "data": {
-        "name": "Restrooms",
-        "type": "RESTROOM"
+        "name": "Expired Product",
+        "isActive": true
       }
     },
     {
-      "entity_type": "LOCATION",
+      "entity_type": "DAMAGE_LOSS_REASON",
       "data": {
-        "name": "Parking Lot",
-        "type": "OUTDOOR"
+        "name": "Damaged in Transit",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Customer Return (Spoiled)",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Temperature Abuse",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Theft/Shrinkage",
+        "isActive": true
       }
     }
   ]

@@ -1,46 +1,83 @@
 {
   "template": {
-    "name": "Retail Starter",
+    "name": "Basic Retail Starter",
     "code": "RETAIL_BASIC",
     "type": "RETAIL",
-    "version": 1,
-    "isActive": true
+    "version": 2,
+    "description": "Minimal template for small retail shops. Use RETAIL_PRO for comprehensive retail setup."
   },
   "items": [
     {
-      "entityType": "CATEGORY",
-      "sortOrder": 0,
-      "code": "ELECT",
-      "name": "Electronics",
-      "description": "Electronic devices and gadgets"
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Generic",
+        "description": "Store Brand / Unbranded"
+      }
+    },
+
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "GENERAL",
+        "name": "General Merchandise"
+      }
     },
     {
-      "entityType": "CATEGORY",
-      "sortOrder": 1,
-      "code": "CLOTH",
-      "name": "Clothing",
-      "description": "Apparel and accessories"
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "ELECTRONICS",
+        "name": "Electronics",
+        "parentCode": "GENERAL"
+      }
     },
     {
-      "entityType": "BRAND",
-      "sortOrder": 2,
-      "name": "Generic Brand",
-      "description": "Default brand for retail stores"
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "CLOTHING",
+        "name": "Clothing",
+        "parentCode": "GENERAL"
+      }
     },
     {
-      "entityType": "UOM",
-      "sortOrder": 3,
-      "code": "pc",
-      "name": "Piece",
-      "description": "Standard unit for counting items"
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "HOME",
+        "name": "Home & Kitchen",
+        "parentCode": "GENERAL"
+      }
+    },
+
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "PC",
+        "name": "Piece"
+      }
     },
     {
-      "entityType": "UOM",
-      "sortOrder": 4,
-      "code": "kg",
-      "name": "Kilogram",
-      "description": "Standard unit for weight"
+      "entity_type": "UOM",
+      "data": {
+        "code": "KG",
+        "name": "Kilogram"
+      }
     },
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "SET",
+        "name": "Set"
+      }
+    },
+
+    {
+      "entity_type": "TAX_RULE",
+      "data": {
+        "countryCode": "US",
+        "taxRate": 8.25,
+        "description": "Standard Sales Tax"
+      }
+    },
+
     {
       "entity_type": "LOCATION",
       "data": {
@@ -68,7 +105,28 @@
         "name": "Manager Office",
         "type": "OFFICE"
       }
+    },
+
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Damaged in Transit",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Customer Return (Defective)",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Theft/Shrinkage",
+        "isActive": true
+      }
     }
   ]
 }
-

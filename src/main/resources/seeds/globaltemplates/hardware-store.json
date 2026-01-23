@@ -1,0 +1,735 @@
+{
+  "template": {
+    "name": "Hardware Store Starter Pack",
+    "code": "HARDWARE_PRO",
+    "type": "HARDWARE",
+    "version": 1,
+    "description": "Complete setup for hardware and home improvement stores: tools, lumber, plumbing, electrical, and paint."
+  },
+  "items": [
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "DeWalt",
+        "description": "Power Tools"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Milwaukee",
+        "description": "Power Tools & Accessories"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Stanley",
+        "description": "Hand Tools"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "3M",
+        "description": "Adhesives & Safety"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Behr",
+        "description": "Paint & Stain"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Moen",
+        "description": "Plumbing Fixtures"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Leviton",
+        "description": "Electrical"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Gorilla",
+        "description": "Adhesives & Tapes"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Generic",
+        "description": "Store Brand"
+      }
+    },
+
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "TOOLS",
+        "name": "Tools"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "POWER_TOOLS",
+        "name": "Power Tools",
+        "parentCode": "TOOLS"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "HAND_TOOLS",
+        "name": "Hand Tools",
+        "parentCode": "TOOLS"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "TOOL_STORAGE",
+        "name": "Tool Storage",
+        "parentCode": "TOOLS"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "HARDWARE",
+        "name": "Hardware & Fasteners"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "SCREWS",
+        "name": "Screws & Nails",
+        "parentCode": "HARDWARE"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "BOLTS",
+        "name": "Bolts & Nuts",
+        "parentCode": "HARDWARE"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "LOCKS",
+        "name": "Locks & Security",
+        "parentCode": "HARDWARE"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "LUMBER",
+        "name": "Lumber & Building Materials"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "DIMENSIONAL",
+        "name": "Dimensional Lumber",
+        "parentCode": "LUMBER"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "PLYWOOD",
+        "name": "Plywood & Sheets",
+        "parentCode": "LUMBER"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "PLUMBING",
+        "name": "Plumbing"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "PIPES",
+        "name": "Pipes & Fittings",
+        "parentCode": "PLUMBING"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "FAUCETS",
+        "name": "Faucets & Fixtures",
+        "parentCode": "PLUMBING"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "ELECTRICAL",
+        "name": "Electrical"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "WIRE",
+        "name": "Wire & Cable",
+        "parentCode": "ELECTRICAL"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "SWITCHES",
+        "name": "Switches & Outlets",
+        "parentCode": "ELECTRICAL"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "LIGHTING",
+        "name": "Lighting",
+        "parentCode": "ELECTRICAL"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "PAINT",
+        "name": "Paint & Stain"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "INTERIOR_PAINT",
+        "name": "Interior Paint",
+        "parentCode": "PAINT"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "EXTERIOR_PAINT",
+        "name": "Exterior Paint",
+        "parentCode": "PAINT"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "PAINT_SUPPLIES",
+        "name": "Paint Supplies",
+        "parentCode": "PAINT"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "LAWN_GARDEN",
+        "name": "Lawn & Garden"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "GARDEN_TOOLS",
+        "name": "Garden Tools",
+        "parentCode": "LAWN_GARDEN"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "SAFETY",
+        "name": "Safety & Workwear"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "ADHESIVES",
+        "name": "Adhesives & Tape"
+      }
+    },
+
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "PC",
+        "name": "Piece"
+      }
+    },
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "BOX",
+        "name": "Box"
+      }
+    },
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "LB",
+        "name": "Pound"
+      }
+    },
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "FT",
+        "name": "Linear Foot"
+      }
+    },
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "SQFT",
+        "name": "Square Foot"
+      }
+    },
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "GAL",
+        "name": "Gallon"
+      }
+    },
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "SET",
+        "name": "Set"
+      }
+    },
+
+    {
+      "entity_type": "TAX_RULE",
+      "data": {
+        "countryCode": "US",
+        "taxRate": 8.25,
+        "description": "Standard Sales Tax"
+      }
+    },
+
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "DeWalt 20V Cordless Drill Kit",
+        "categoryCode": "POWER_TOOLS",
+        "brandName": "DeWalt",
+        "uomCode": "SET",
+        "costPrice": 89.00,
+        "retailPrice": 149.00,
+        "skuPrefix": "TOOL-DWDRL20",
+        "requiresExpiry": false,
+        "reorderPoint": 6
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Milwaukee M18 Impact Driver",
+        "categoryCode": "POWER_TOOLS",
+        "brandName": "Milwaukee",
+        "uomCode": "PC",
+        "costPrice": 119.00,
+        "retailPrice": 179.00,
+        "skuPrefix": "TOOL-MILIMP",
+        "requiresExpiry": false,
+        "reorderPoint": 5
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Stanley 25ft Tape Measure",
+        "categoryCode": "HAND_TOOLS",
+        "brandName": "Stanley",
+        "uomCode": "PC",
+        "costPrice": 12.00,
+        "retailPrice": 24.99,
+        "skuPrefix": "TOOL-STNTAPE",
+        "requiresExpiry": false,
+        "reorderPoint": 20
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Stanley 10-Piece Screwdriver Set",
+        "categoryCode": "HAND_TOOLS",
+        "brandName": "Stanley",
+        "uomCode": "SET",
+        "costPrice": 15.00,
+        "retailPrice": 29.99,
+        "skuPrefix": "TOOL-STNSCR10",
+        "requiresExpiry": false,
+        "reorderPoint": 15
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Deck Screws #8 x 2.5\" (1lb Box)",
+        "categoryCode": "SCREWS",
+        "brandName": "Generic",
+        "uomCode": "BOX",
+        "costPrice": 6.00,
+        "retailPrice": 12.99,
+        "skuPrefix": "HW-DECK825",
+        "requiresExpiry": false,
+        "reorderPoint": 30
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "2x4x8 Dimensional Lumber",
+        "categoryCode": "DIMENSIONAL",
+        "brandName": "Generic",
+        "uomCode": "PC",
+        "costPrice": 3.50,
+        "retailPrice": 6.99,
+        "skuPrefix": "LUM-2X4X8",
+        "requiresExpiry": false,
+        "reorderPoint": 50
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "4x8 3/4\" Plywood Sheet",
+        "categoryCode": "PLYWOOD",
+        "brandName": "Generic",
+        "uomCode": "PC",
+        "costPrice": 35.00,
+        "retailPrice": 59.99,
+        "skuPrefix": "LUM-PLY34",
+        "requiresExpiry": false,
+        "reorderPoint": 20
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Moen Kitchen Faucet Chrome",
+        "categoryCode": "FAUCETS",
+        "brandName": "Moen",
+        "uomCode": "PC",
+        "costPrice": 89.00,
+        "retailPrice": 149.00,
+        "skuPrefix": "PLB-MOENFK",
+        "requiresExpiry": false,
+        "reorderPoint": 4
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "3/4\" PVC Pipe 10ft",
+        "categoryCode": "PIPES",
+        "brandName": "Generic",
+        "uomCode": "PC",
+        "costPrice": 2.50,
+        "retailPrice": 5.99,
+        "skuPrefix": "PLB-PVC34",
+        "requiresExpiry": false,
+        "reorderPoint": 40
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Leviton 15A Outlet White",
+        "categoryCode": "SWITCHES",
+        "brandName": "Leviton",
+        "uomCode": "PC",
+        "costPrice": 1.50,
+        "retailPrice": 3.99,
+        "skuPrefix": "ELEC-OUT15W",
+        "requiresExpiry": false,
+        "reorderPoint": 50
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Romex 14/2 Wire 50ft",
+        "categoryCode": "WIRE",
+        "brandName": "Generic",
+        "uomCode": "PC",
+        "costPrice": 35.00,
+        "retailPrice": 59.99,
+        "skuPrefix": "ELEC-ROM1450",
+        "requiresExpiry": false,
+        "reorderPoint": 15
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Behr Premium Plus Interior Paint (Gallon)",
+        "categoryCode": "INTERIOR_PAINT",
+        "brandName": "Behr",
+        "uomCode": "GAL",
+        "costPrice": 25.00,
+        "retailPrice": 42.99,
+        "skuPrefix": "PAINT-BEHRINT",
+        "requiresExpiry": false,
+        "reorderPoint": 12
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Gorilla Glue Original 4oz",
+        "categoryCode": "ADHESIVES",
+        "brandName": "Gorilla",
+        "uomCode": "PC",
+        "costPrice": 4.50,
+        "retailPrice": 8.99,
+        "skuPrefix": "ADH-GOR4",
+        "requiresExpiry": true,
+        "reorderPoint": 20
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "3M N95 Respirator Mask (10-pack)",
+        "categoryCode": "SAFETY",
+        "brandName": "3M",
+        "uomCode": "PACK",
+        "costPrice": 12.00,
+        "retailPrice": 24.99,
+        "skuPrefix": "SAF-3MN9510",
+        "requiresExpiry": true,
+        "reorderPoint": 15
+      }
+    },
+
+    {
+      "entity_type": "SUPPLIER",
+      "data": {
+        "name": "True Value Distribution",
+        "contactPerson": "Mike Builder",
+        "email": "orders@truevalue.com",
+        "phone": "+1-800-555-TRUE"
+      }
+    },
+    {
+      "entity_type": "SUPPLIER",
+      "data": {
+        "name": "Ace Hardware Distribution",
+        "contactPerson": "Lisa Hardware",
+        "email": "supply@acehardware.com",
+        "phone": "+1-800-555-ACE1"
+      }
+    },
+    {
+      "entity_type": "SUPPLIER",
+      "data": {
+        "name": "Lumber Liquidators",
+        "contactPerson": "Tom Wood",
+        "email": "orders@lumberliquidators.com",
+        "phone": "+1-800-555-WOOD"
+      }
+    },
+
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Tools Section",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Power Tools Aisle",
+        "type": "AISLE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Hand Tools Aisle",
+        "type": "AISLE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Hardware Aisle (Fasteners)",
+        "type": "AISLE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Lumber Yard",
+        "type": "YARD"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Lumber Rack - Dimensional",
+        "type": "RACK"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Lumber Rack - Plywood",
+        "type": "RACK"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Plumbing Aisle",
+        "type": "AISLE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Electrical Aisle",
+        "type": "AISLE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Paint Department",
+        "type": "DEPARTMENT"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Paint Mixing Station",
+        "type": "STATION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Garden Center",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Outdoor Nursery",
+        "type": "OUTDOOR"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Checkout Counter",
+        "type": "COUNTER"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Pro Desk",
+        "type": "DESK"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Tool Rental Counter",
+        "type": "COUNTER"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Will Call / Order Pickup",
+        "type": "COUNTER"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Overhead Storage",
+        "type": "STORAGE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Receiving Dock",
+        "type": "DOCK"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Manager Office",
+        "type": "OFFICE"
+      }
+    },
+
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Damaged in Transit",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Weather Damage (Outdoor)",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Customer Return (Defective)",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Forklift Damage",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Theft/Shrinkage",
+        "isActive": true
+      }
+    }
+  ]
+}

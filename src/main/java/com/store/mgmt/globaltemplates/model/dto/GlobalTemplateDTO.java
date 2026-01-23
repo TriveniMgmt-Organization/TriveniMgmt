@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Data
@@ -22,16 +23,19 @@ public class GlobalTemplateDTO {
     
     @Schema(description = "Type of the template", example = "RETAIL")
     private String type;
-    
-    @Schema(description = "Version of the template", example = "1")
-    private Integer version;
+
+    @Schema(description = "Description of the template", example = "Complete setup for retail stores")
+    private String description;
     
     @Schema(description = "Whether the template is active", example = "true")
     private Boolean isActive;
     
     @Schema(description = "Items in the template")
     private List<GlobalTemplateItemDTO> items;
-    
+
+    @Schema(description = "Count of items by entity type", example = "{\"BRAND\": 5, \"CATEGORY\": 10}")
+    private Map<String, Integer> itemCounts;
+
     @Schema(description = "Creation timestamp")
     private LocalDateTime createdAt;
     

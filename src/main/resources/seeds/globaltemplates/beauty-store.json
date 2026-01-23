@@ -1,0 +1,651 @@
+{
+  "template": {
+    "name": "Beauty & Cosmetics Store Starter Pack",
+    "code": "BEAUTY_PRO",
+    "type": "BEAUTY",
+    "version": 1,
+    "description": "Complete setup for beauty and cosmetics retailers: skincare, makeup, haircare, fragrances, and salon supplies."
+  },
+  "items": [
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "MAC",
+        "description": "Professional Makeup"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Urban Decay",
+        "description": "Makeup & Cosmetics"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Clinique",
+        "description": "Skincare & Makeup"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Estée Lauder",
+        "description": "Premium Skincare & Cosmetics"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "L'Oréal",
+        "description": "Hair & Skincare"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "OPI",
+        "description": "Nail Products"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Olaplex",
+        "description": "Hair Treatment"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Fenty Beauty",
+        "description": "Makeup"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "The Ordinary",
+        "description": "Skincare (Affordable)"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Store Brand",
+        "description": "Private Label"
+      }
+    },
+
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "MAKEUP",
+        "name": "Makeup"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "FACE",
+        "name": "Face (Foundation, Concealer)",
+        "parentCode": "MAKEUP"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "EYES",
+        "name": "Eyes (Shadow, Liner, Mascara)",
+        "parentCode": "MAKEUP"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "LIPS",
+        "name": "Lips (Lipstick, Gloss)",
+        "parentCode": "MAKEUP"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "BRUSHES",
+        "name": "Brushes & Tools",
+        "parentCode": "MAKEUP"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "SKINCARE",
+        "name": "Skincare"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "CLEANSERS",
+        "name": "Cleansers & Toners",
+        "parentCode": "SKINCARE"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "MOISTURIZERS",
+        "name": "Moisturizers",
+        "parentCode": "SKINCARE"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "SERUMS",
+        "name": "Serums & Treatments",
+        "parentCode": "SKINCARE"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "SUNSCREEN",
+        "name": "Sun Care",
+        "parentCode": "SKINCARE"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "MASKS",
+        "name": "Masks & Peels",
+        "parentCode": "SKINCARE"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "HAIRCARE",
+        "name": "Hair Care"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "SHAMPOO",
+        "name": "Shampoo & Conditioner",
+        "parentCode": "HAIRCARE"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "STYLING",
+        "name": "Styling Products",
+        "parentCode": "HAIRCARE"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "TREATMENT",
+        "name": "Hair Treatments",
+        "parentCode": "HAIRCARE"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "HAIR_TOOLS",
+        "name": "Hair Tools (Dryers, Irons)",
+        "parentCode": "HAIRCARE"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "NAILS",
+        "name": "Nails"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "POLISH",
+        "name": "Nail Polish",
+        "parentCode": "NAILS"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "NAIL_CARE",
+        "name": "Nail Care & Tools",
+        "parentCode": "NAILS"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "FRAGRANCE",
+        "name": "Fragrance"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "WOMENS_FRAG",
+        "name": "Women's Fragrance",
+        "parentCode": "FRAGRANCE"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "MENS_FRAG",
+        "name": "Men's Fragrance",
+        "parentCode": "FRAGRANCE"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "BATH_BODY",
+        "name": "Bath & Body"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "MENS",
+        "name": "Men's Grooming"
+      }
+    },
+
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "PC",
+        "name": "Piece"
+      }
+    },
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "SET",
+        "name": "Set"
+      }
+    },
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "ML",
+        "name": "Milliliter"
+      }
+    },
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "OZ",
+        "name": "Fluid Ounce"
+      }
+    },
+
+    {
+      "entity_type": "TAX_RULE",
+      "data": {
+        "countryCode": "US",
+        "taxRate": 8.25,
+        "description": "Standard Sales Tax"
+      }
+    },
+
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "MAC Studio Fix Fluid Foundation",
+        "categoryCode": "FACE",
+        "brandName": "MAC",
+        "uomCode": "PC",
+        "costPrice": 22.00,
+        "retailPrice": 42.00,
+        "skuPrefix": "MKP-MACSF",
+        "requiresExpiry": true,
+        "reorderPoint": 8
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Urban Decay Naked Eyeshadow Palette",
+        "categoryCode": "EYES",
+        "brandName": "Urban Decay",
+        "uomCode": "PC",
+        "costPrice": 32.00,
+        "retailPrice": 59.00,
+        "skuPrefix": "MKP-UDNAK",
+        "requiresExpiry": true,
+        "reorderPoint": 5
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Fenty Beauty Gloss Bomb",
+        "categoryCode": "LIPS",
+        "brandName": "Fenty Beauty",
+        "uomCode": "PC",
+        "costPrice": 12.00,
+        "retailPrice": 22.00,
+        "skuPrefix": "MKP-FENTGLOSS",
+        "requiresExpiry": true,
+        "reorderPoint": 12
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Clinique Dramatically Different Moisturizer 4.2oz",
+        "categoryCode": "MOISTURIZERS",
+        "brandName": "Clinique",
+        "uomCode": "PC",
+        "costPrice": 18.00,
+        "retailPrice": 34.00,
+        "skuPrefix": "SKIN-CLINDM",
+        "requiresExpiry": true,
+        "reorderPoint": 10
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "The Ordinary Niacinamide 10% + Zinc 1% 30ml",
+        "categoryCode": "SERUMS",
+        "brandName": "The Ordinary",
+        "uomCode": "PC",
+        "costPrice": 4.00,
+        "retailPrice": 7.90,
+        "skuPrefix": "SKIN-TONIA",
+        "requiresExpiry": true,
+        "reorderPoint": 20
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Estée Lauder Advanced Night Repair Serum 1.7oz",
+        "categoryCode": "SERUMS",
+        "brandName": "Estée Lauder",
+        "uomCode": "PC",
+        "costPrice": 55.00,
+        "retailPrice": 105.00,
+        "skuPrefix": "SKIN-ELANR",
+        "requiresExpiry": true,
+        "reorderPoint": 4
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Olaplex No.3 Hair Perfector 3.3oz",
+        "categoryCode": "TREATMENT",
+        "brandName": "Olaplex",
+        "uomCode": "PC",
+        "costPrice": 18.00,
+        "retailPrice": 30.00,
+        "skuPrefix": "HAIR-OLAP3",
+        "requiresExpiry": true,
+        "reorderPoint": 10
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "L'Oréal Elvive Shampoo 12.6oz",
+        "categoryCode": "SHAMPOO",
+        "brandName": "L'Oréal",
+        "uomCode": "PC",
+        "costPrice": 4.00,
+        "retailPrice": 7.99,
+        "skuPrefix": "HAIR-LORELV",
+        "requiresExpiry": true,
+        "reorderPoint": 15
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "OPI Nail Lacquer 0.5oz",
+        "categoryCode": "POLISH",
+        "brandName": "OPI",
+        "uomCode": "PC",
+        "costPrice": 6.00,
+        "retailPrice": 11.50,
+        "skuPrefix": "NAIL-OPILAC",
+        "requiresExpiry": true,
+        "reorderPoint": 20
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Real Techniques Brush Set (5pc)",
+        "categoryCode": "BRUSHES",
+        "brandName": "Store Brand",
+        "uomCode": "SET",
+        "costPrice": 12.00,
+        "retailPrice": 24.99,
+        "skuPrefix": "MKP-RTBRUSH5",
+        "requiresExpiry": false,
+        "reorderPoint": 8
+      }
+    },
+
+    {
+      "entity_type": "SUPPLIER",
+      "data": {
+        "name": "Ulta Beauty Distribution",
+        "contactPerson": "Jessica Beauty",
+        "email": "orders@ulta.com",
+        "phone": "+1-800-555-ULTA"
+      }
+    },
+    {
+      "entity_type": "SUPPLIER",
+      "data": {
+        "name": "L'Oréal Distribution",
+        "contactPerson": "Marie Paris",
+        "email": "wholesale@loreal.com",
+        "phone": "+1-800-555-LORE"
+      }
+    },
+    {
+      "entity_type": "SUPPLIER",
+      "data": {
+        "name": "Estée Lauder Companies",
+        "contactPerson": "Emily Lauder",
+        "email": "wholesale@elcompanies.com",
+        "phone": "+1-800-555-ELCO"
+      }
+    },
+
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Makeup Section",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Foundation & Face Wall",
+        "type": "WALL"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Eye Makeup Display",
+        "type": "DISPLAY"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Lip Products Display",
+        "type": "DISPLAY"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Skincare Section",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Prestige Skincare Wall",
+        "type": "WALL"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Hair Care Aisle",
+        "type": "AISLE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Hair Tools & Appliances",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Nail Bar",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Fragrance Counter",
+        "type": "COUNTER"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Men's Grooming Section",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Tester Station",
+        "type": "STATION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Makeover Station",
+        "type": "STATION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Checkout Counter",
+        "type": "COUNTER"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "GWP (Gift with Purchase) Display",
+        "type": "DISPLAY"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "High-Value Locked Case",
+        "type": "CAGE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Back Stock Room",
+        "type": "STORAGE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Receiving Dock",
+        "type": "DOCK"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Manager Office",
+        "type": "OFFICE"
+      }
+    },
+
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Tester Damage",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Expired Product",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Damaged Packaging",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Customer Return (Used)",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Theft/Shrinkage",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Promotional Sample",
+        "isActive": true
+      }
+    }
+  ]
+}

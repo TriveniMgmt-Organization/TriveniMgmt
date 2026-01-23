@@ -16,12 +16,13 @@ import java.util.List;
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
         uses = GlobalTemplateItemMapper.class)
 public interface GlobalTemplateMapper {
-    
+
     @Mapping(target = "items", expression = "java(mapItems(template.getItems()))")
+    @Mapping(target = "itemCounts", expression = "java(mapItemCounts(template.getItems()))")
     GlobalTemplateDTO toDto(GlobalTemplate template);
-    
+
     List<GlobalTemplateDTO> toDtoList(List<GlobalTemplate> templates);
-    
+
     default java.util.List<com.store.mgmt.globaltemplates.model.dto.GlobalTemplateItemDTO> mapItems(java.util.Set<com.store.mgmt.globaltemplates.model.entity.GlobalTemplateItem> items) {
         if (items == null || items.isEmpty()) {
             return java.util.Collections.emptyList();
@@ -30,6 +31,18 @@ public interface GlobalTemplateMapper {
         java.util.List<com.store.mgmt.globaltemplates.model.entity.GlobalTemplateItem> itemList = new java.util.LinkedList<>();
         itemList.addAll(items);
         return itemMapper.toDtoList(itemList);
+    }
+
+    default java.util.Map<String, Integer> mapItemCounts(java.util.Set<com.store.mgmt.globaltemplates.model.entity.GlobalTemplateItem> items) {
+        if (items == null || items.isEmpty()) {
+            return java.util.Collections.emptyMap();
+        }
+        java.util.Map<String, Integer> counts = new java.util.LinkedHashMap<>();
+        for (com.store.mgmt.globaltemplates.model.entity.GlobalTemplateItem item : items) {
+            String type = item.getEntityType();
+            counts.merge(type, 1, Integer::sum);
+        }
+        return counts;
     }
 
     @Mapping(target = "id", ignore = true)

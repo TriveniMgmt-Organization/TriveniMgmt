@@ -1,0 +1,705 @@
+{
+  "template": {
+    "name": "Electronics Store Starter Pack",
+    "code": "ELECTRONICS_PRO",
+    "type": "ELECTRONICS",
+    "version": 1,
+    "description": "Complete setup for electronics retailers: computers, phones, TVs, audio, gaming, and accessories."
+  },
+  "items": [
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Apple",
+        "description": "iPhones, MacBooks, iPads"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Samsung",
+        "description": "TVs, Phones, Appliances"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Sony",
+        "description": "PlayStation, TVs, Audio"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "LG",
+        "description": "TVs, Monitors, Appliances"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "HP",
+        "description": "Computers & Printers"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Dell",
+        "description": "Computers & Monitors"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Microsoft",
+        "description": "Xbox, Surface, Software"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Bose",
+        "description": "Premium Audio"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Logitech",
+        "description": "PC Accessories"
+      }
+    },
+    {
+      "entity_type": "BRAND",
+      "data": {
+        "name": "Generic",
+        "description": "Store Brand / Third Party"
+      }
+    },
+
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "COMPUTERS",
+        "name": "Computers"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "LAPTOPS",
+        "name": "Laptops",
+        "parentCode": "COMPUTERS"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "DESKTOPS",
+        "name": "Desktop PCs",
+        "parentCode": "COMPUTERS"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "TABLETS",
+        "name": "Tablets",
+        "parentCode": "COMPUTERS"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "PHONES",
+        "name": "Mobile Phones"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "SMARTPHONES",
+        "name": "Smartphones",
+        "parentCode": "PHONES"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "PHONE_CASES",
+        "name": "Cases & Covers",
+        "parentCode": "PHONES"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "TVS",
+        "name": "Televisions"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "LED_TV",
+        "name": "LED/OLED TVs",
+        "parentCode": "TVS"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "TV_MOUNTS",
+        "name": "TV Mounts & Stands",
+        "parentCode": "TVS"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "AUDIO",
+        "name": "Audio"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "HEADPHONES",
+        "name": "Headphones & Earbuds",
+        "parentCode": "AUDIO"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "SPEAKERS",
+        "name": "Speakers & Soundbars",
+        "parentCode": "AUDIO"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "GAMING",
+        "name": "Gaming"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "CONSOLES",
+        "name": "Gaming Consoles",
+        "parentCode": "GAMING"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "GAMES",
+        "name": "Video Games",
+        "parentCode": "GAMING"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "GAMING_ACC",
+        "name": "Gaming Accessories",
+        "parentCode": "GAMING"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "ACCESSORIES",
+        "name": "Accessories"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "CABLES",
+        "name": "Cables & Chargers",
+        "parentCode": "ACCESSORIES"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "KEYBOARDS",
+        "name": "Keyboards & Mice",
+        "parentCode": "ACCESSORIES"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "STORAGE",
+        "name": "Storage & Memory",
+        "parentCode": "ACCESSORIES"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "CAMERAS",
+        "name": "Cameras & Drones"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "SMART_HOME",
+        "name": "Smart Home"
+      }
+    },
+    {
+      "entity_type": "CATEGORY",
+      "data": {
+        "code": "APPLIANCES",
+        "name": "Small Appliances"
+      }
+    },
+
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "PC",
+        "name": "Piece"
+      }
+    },
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "SET",
+        "name": "Set"
+      }
+    },
+    {
+      "entity_type": "UOM",
+      "data": {
+        "code": "PACK",
+        "name": "Pack"
+      }
+    },
+
+    {
+      "entity_type": "TAX_RULE",
+      "data": {
+        "countryCode": "US",
+        "taxRate": 8.25,
+        "description": "Standard Sales Tax"
+      }
+    },
+
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Apple iPhone 15 Pro 256GB",
+        "categoryCode": "SMARTPHONES",
+        "brandName": "Apple",
+        "uomCode": "PC",
+        "costPrice": 899.00,
+        "retailPrice": 1099.00,
+        "skuPrefix": "PHN-IP15P",
+        "requiresExpiry": false,
+        "reorderPoint": 5
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Samsung Galaxy S24 Ultra 256GB",
+        "categoryCode": "SMARTPHONES",
+        "brandName": "Samsung",
+        "uomCode": "PC",
+        "costPrice": 799.00,
+        "retailPrice": 999.00,
+        "skuPrefix": "PHN-SGS24U",
+        "requiresExpiry": false,
+        "reorderPoint": 5
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Apple MacBook Air M3 13\" 256GB",
+        "categoryCode": "LAPTOPS",
+        "brandName": "Apple",
+        "uomCode": "PC",
+        "costPrice": 899.00,
+        "retailPrice": 1099.00,
+        "skuPrefix": "LAP-MBAM3",
+        "requiresExpiry": false,
+        "reorderPoint": 3
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Dell XPS 15 Laptop",
+        "categoryCode": "LAPTOPS",
+        "brandName": "Dell",
+        "uomCode": "PC",
+        "costPrice": 1099.00,
+        "retailPrice": 1399.00,
+        "skuPrefix": "LAP-DXPS15",
+        "requiresExpiry": false,
+        "reorderPoint": 3
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Apple iPad Pro 11\" 256GB",
+        "categoryCode": "TABLETS",
+        "brandName": "Apple",
+        "uomCode": "PC",
+        "costPrice": 699.00,
+        "retailPrice": 899.00,
+        "skuPrefix": "TAB-IPADP11",
+        "requiresExpiry": false,
+        "reorderPoint": 4
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Samsung 65\" OLED 4K Smart TV",
+        "categoryCode": "LED_TV",
+        "brandName": "Samsung",
+        "uomCode": "PC",
+        "costPrice": 1299.00,
+        "retailPrice": 1799.00,
+        "skuPrefix": "TV-SAM65OLED",
+        "requiresExpiry": false,
+        "reorderPoint": 2
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "LG 55\" OLED C3 Series",
+        "categoryCode": "LED_TV",
+        "brandName": "LG",
+        "uomCode": "PC",
+        "costPrice": 999.00,
+        "retailPrice": 1299.00,
+        "skuPrefix": "TV-LG55C3",
+        "requiresExpiry": false,
+        "reorderPoint": 2
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Sony PlayStation 5 Console",
+        "categoryCode": "CONSOLES",
+        "brandName": "Sony",
+        "uomCode": "PC",
+        "costPrice": 399.00,
+        "retailPrice": 499.00,
+        "skuPrefix": "GAM-PS5",
+        "requiresExpiry": false,
+        "reorderPoint": 5
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Microsoft Xbox Series X",
+        "categoryCode": "CONSOLES",
+        "brandName": "Microsoft",
+        "uomCode": "PC",
+        "costPrice": 399.00,
+        "retailPrice": 499.00,
+        "skuPrefix": "GAM-XBSX",
+        "requiresExpiry": false,
+        "reorderPoint": 5
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Apple AirPods Pro (2nd Gen)",
+        "categoryCode": "HEADPHONES",
+        "brandName": "Apple",
+        "uomCode": "PC",
+        "costPrice": 179.00,
+        "retailPrice": 249.00,
+        "skuPrefix": "AUD-AIRPP2",
+        "requiresExpiry": false,
+        "reorderPoint": 10
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Bose QuietComfort Headphones",
+        "categoryCode": "HEADPHONES",
+        "brandName": "Bose",
+        "uomCode": "PC",
+        "costPrice": 249.00,
+        "retailPrice": 349.00,
+        "skuPrefix": "AUD-BOSEQC",
+        "requiresExpiry": false,
+        "reorderPoint": 6
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Logitech MX Master 3S Mouse",
+        "categoryCode": "KEYBOARDS",
+        "brandName": "Logitech",
+        "uomCode": "PC",
+        "costPrice": 69.00,
+        "retailPrice": 99.00,
+        "skuPrefix": "ACC-LOGMX3",
+        "requiresExpiry": false,
+        "reorderPoint": 12
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "USB-C to Lightning Cable 2m",
+        "categoryCode": "CABLES",
+        "brandName": "Generic",
+        "uomCode": "PC",
+        "costPrice": 8.00,
+        "retailPrice": 19.99,
+        "skuPrefix": "ACC-USBC2M",
+        "requiresExpiry": false,
+        "reorderPoint": 50
+      }
+    },
+    {
+      "entity_type": "PRODUCT_TEMPLATE",
+      "data": {
+        "name": "Samsung 1TB Portable SSD",
+        "categoryCode": "STORAGE",
+        "brandName": "Samsung",
+        "uomCode": "PC",
+        "costPrice": 79.00,
+        "retailPrice": 119.00,
+        "skuPrefix": "ACC-SAMSSD1",
+        "requiresExpiry": false,
+        "reorderPoint": 15
+      }
+    },
+
+    {
+      "entity_type": "SUPPLIER",
+      "data": {
+        "name": "Tech Data / TD Synnex",
+        "contactPerson": "John Tech",
+        "email": "orders@tdsynnex.com",
+        "phone": "+1-800-555-8324"
+      }
+    },
+    {
+      "entity_type": "SUPPLIER",
+      "data": {
+        "name": "Ingram Micro",
+        "contactPerson": "Sarah Chen",
+        "email": "orders@ingrammicro.com",
+        "phone": "+1-800-555-4567"
+      }
+    },
+    {
+      "entity_type": "SUPPLIER",
+      "data": {
+        "name": "D&H Distributing",
+        "contactPerson": "Mike Davis",
+        "email": "sales@dandh.com",
+        "phone": "+1-800-555-7890"
+      }
+    },
+
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Computers Section",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Laptop Display Wall",
+        "type": "DISPLAY"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Mobile Phones Section",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Apple Experience Zone",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "TV & Home Theater",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "TV Display Wall",
+        "type": "DISPLAY"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Gaming Section",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Gaming Demo Stations",
+        "type": "DISPLAY"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Audio Section",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Headphones Listening Bar",
+        "type": "DISPLAY"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Accessories Aisle",
+        "type": "AISLE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Cables & Adapters Rack",
+        "type": "RACK"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Smart Home Section",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Camera Section",
+        "type": "SECTION"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Checkout Counter",
+        "type": "COUNTER"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Customer Service / Returns",
+        "type": "DESK"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Geek Squad / Tech Support",
+        "type": "DESK"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "High-Value Cage",
+        "type": "CAGE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Back Warehouse",
+        "type": "STORAGE"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Receiving Dock",
+        "type": "DOCK"
+      }
+    },
+    {
+      "entity_type": "LOCATION",
+      "data": {
+        "name": "Manager Office",
+        "type": "OFFICE"
+      }
+    },
+
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Customer Return (Defective)",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Display/Demo Damage",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Damaged in Transit",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Theft/Shrinkage",
+        "isActive": true
+      }
+    },
+    {
+      "entity_type": "DAMAGE_LOSS_REASON",
+      "data": {
+        "name": "Open Box / Missing Parts",
+        "isActive": true
+      }
+    }
+  ]
+}

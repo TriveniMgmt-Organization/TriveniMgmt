@@ -5,6 +5,234 @@
 
 ---
 
+## 2026-01-23 (Session 2)
+
+### Inventory Creation Flow: Performance & Production Improvements
+
+**Backend Improvements:**
+
+1. **N+1 Query Prevention** - Added optimized repository queries:
+   - `findByStoreIdWithDetails()` - Uses JOIN FETCH for variant, template, location, batchLot, stockLevel
+   - `findByIdWithDetails()` - Single item with all relations eagerly loaded
+   - Updated `getAllInventoryItems()` and `getInventoryItemById()` to use optimized queries
+
+2. **DTO Validation** - Added validation annotations to `CreateInventoryItemDTO`:
+   - `@NotNull` on variantId and locationId
+   - `@Size(max=100)` on customBatchNumber
+   - `@Min(0)` on initialQuantity and lowStockThreshold
+
+3. **New Features** - Added optional fields to inventory item creation:
+   - `initialQuantity` - Set initial stock when creating (defaults to 0)
+   - `lowStockThreshold` - Set alert threshold (defaults to 10)
+
+4. **Mapper Improvements** - Added named mapping methods for nested DTOs:
+   - `ProductVariantMapper.toVariantSummary()` - Includes template info
+   - `InventoryLocationMapper.toLocationSummary()` - Essential location info
+   - `BatchLotMapper.toBatchLotSummary()` - Essential batch info
+   - Updated `InventoryItemMapper` to use these for complete DTO population
+
+**Frontend Improvements:**
+
+1. **New Form Fields:**
+   - Initial Quantity field with validation
+   - Low Stock Threshold field with validation
+
+2. **Better Error Handling:**
+   - Replaced `any` types with proper TypeScript typing
+   - Fixed floating promise warnings with `void` operator
+
+3. **UX Improvements:**
+   - Added redirect to items list after successful creation
+   - Fixed loading state bug (was showing error display during load)
+   - Proper cache invalidation after mutations
+
+4. **Form Schema Updates:**
+   - Added yup validation for initialQuantity and lowStockThreshold
+   - Number transform to handle empty strings
+
+**Files Modified:**
+
+Backend:
+- `inventory/model/dto/CreateInventoryItemDTO.java` - Added validation, new fields
+- `inventory/repository/InventoryItemRepository.java` - Added JOIN FETCH queries
+- `inventory/service/InventoryServiceImpl.java` - Use optimized queries, handle new fields
+- `inventory/mapper/InventoryItemMapper.java` - Use named mapping methods
+- `inventory/mapper/ProductVariantMapper.java` - Added toVariantSummary
+- `inventory/mapper/InventoryLocationMapper.java` - Added toLocationSummary
+- `inventory/mapper/BatchLotMapper.java` - Added toBatchLotSummary
+
+Frontend:
+- `store/[storeId]/inventory/apiSchema.ts` - Added new field validations
+- `store/[storeId]/inventory/items/add/page.tsx` - New fields, fixed errors
+- `store/[storeId]/inventory/items/page.tsx` - Fixed loading state, error types
+- `components/forms/inventory-item/InventoryItemForm.tsx` - Added new fields
+
+---
+
+### Template Selection UI: Complete Redesign
+
+**Improved Organization Settings page with card-based template selection:**
+
+**Backend Changes:**
+- Added `description` field to `GlobalTemplateDTO` (was missing, entity had it)
+- Added `itemCounts` field to `GlobalTemplateDTO` - maps entity type to count
+- Removed orphaned `version` field from DTO (entity doesn't have it)
+- Updated `GlobalTemplateMapper` to populate `itemCounts` from template items
+
+**Frontend Changes:**
+- Replaced dropdown with **template cards** showing:
+  - Template name and type badge
+  - Description text
+  - Item counts by entity type (Brands, Categories, UOMs, Products, etc.)
+  - "Apply Template" button per card
+- Added **confirmation dialog** before applying (critical for one-time operation)
+  - Shows template name and description
+  - Lists all items that will be created
+  - Warning about irreversible operation
+- Added **loading skeleton** cards while templates load
+- Added **applied template display** after application:
+  - Success state with green styling
+  - Shows what was created (entity counts with icons)
+  - Info message about customization
+- Removed confusing "Custom (No Template)" option
+- Added entity type icons and labels for better visual understanding
+- Fixed TypeScript lint errors
+
+**Files Modified:**
+- `backend/.../globaltemplates/model/dto/GlobalTemplateDTO.java`
+- `backend/.../globaltemplates/mapper/GlobalTemplateMapper.java`
+- `frontend/src/app/(dashboard)/organization/settings/page.tsx`
+- `frontend/src/api/generated/models/globalTemplate.ts` (regenerated)
+
+---
+
+### TemplateCopyService: Added Supplier Support
+
+**Added Supplier entity support to TemplateCopyService:**
+- Templates can now copy Supplier entities to organizations
+- Suppliers are organization-scoped (each org gets its own copy)
+- Supports fields: name (required), contactPerson, email, phone, address, accountNumber
+- Skips duplicates by checking name + organizationId
+
+**Supported entity types now:**
+| Entity Type | Scope | Notes |
+|-------------|-------|-------|
+| Brand | Global | Shared across all organizations |
+| Category | Organization | Hierarchical with parentCode |
+| UnitOfMeasure | Organization | Code + Name |
+| ProductTemplate | Organization | Creates ProductVariant automatically |
+| TaxRule | Organization | Country code + rate |
+| InventoryLocation | Store | Assigned to first store |
+| Supplier | Organization | **NEW** |
+
+**Unsupported (intentionally skipped):**
+- DAMAGE_LOSS_REASON: Uses enum `DamageLossReason`, not a database entity
+- PAYMENT_METHOD: Not yet implemented as entity
+
+**Files Modified:**
+- `src/main/java/com/store/mgmt/globaltemplates/service/TemplateCopyService.java`
+
+---
+
+### Global Templates: Industry-Ready 10 Store Types
+
+**Created comprehensive global templates for 10 common store types:**
+
+| Code | Type | Description |
+|------|------|-------------|
+| RETAIL_PRO | General Retail | Apparel, gifts, home goods |
+| GROCERY_PRO | Grocery/Supermarket | Fresh produce, dairy, frozen, bakery, meat |
+| PHARMACY_PRO | Pharmacy | OTC, prescriptions, vitamins, health & beauty |
+| GAS_STATION_PRO | Gas Station | Fuel, convenience store, tobacco |
+| LIQUOR_PRO | Liquor Store | Wine, beer, spirits |
+| ELECTRONICS_PRO | Electronics | Computers, phones, TVs, gaming, audio |
+| HARDWARE_PRO | Hardware/Home Improvement | Tools, lumber, plumbing, electrical, paint |
+| RESTAURANT_PRO | Restaurant/Cafe | Food service ingredients, beverages, supplies |
+| BEAUTY_PRO | Beauty/Cosmetics | Skincare, makeup, haircare, fragrance |
+| RETAIL_BASIC | Basic Retail | Minimal template for small shops |
+
+**Each template includes:**
+- 5-10 common brands for that industry
+- Hierarchical category structure (parent/child)
+- Appropriate units of measure (UOM)
+- Tax rules by country
+- 8-15 common product templates with realistic pricing
+- 2-3 supplier contacts
+- 15-25 store locations (sections, aisles, storage)
+- Damage/loss reason codes
+
+**Fixed issues in existing templates:**
+- GROCERY_PRO: Added missing `GAL` UOM and `CONDIMENTS` category
+- PHARMACY_PRO: Added missing `FIRST_AID` category
+- RETAIL_BASIC: Fixed inconsistent JSON format (missing `data` wrapper)
+- Standardized field naming (consistent snake_case in JSON)
+
+**Files Created:**
+- `seeds/globaltemplates/electronics-store.json`
+- `seeds/globaltemplates/hardware-store.json`
+- `seeds/globaltemplates/restaurant-cafe.json`
+- `seeds/globaltemplates/beauty-store.json`
+
+**Files Updated:**
+- `seeds/globaltemplates/grocery-pro.json` (v2)
+- `seeds/globaltemplates/pharmecy_starter.json` (v2)
+- `seeds/globaltemplates/retail-basic.json` (v2)
+
+---
+
+### Documentation: Added Business Context
+
+**Updated CONTEXT.md with business context section:**
+- Target market: SMBs with 2-20 stores (retail chains, F&B distributors, wholesale)
+- Value proposition: Template-based catalog, multi-location tracking, batch/lot support
+- Feature scope by level (Organization vs Store)
+- Positioning against competitors (Zoho Inventory, Cin7, inFlow)
+
+**Recommendations documented for future implementation:**
+- Low stock alerts and notifications
+- Stock transfers between stores/locations
+- Inventory adjustments with audit trail
+- Demand forecasting and analytics
+- GRN (Goods Received Notes) for partial PO receiving
+- Multi-currency support
+- Tax configuration per store/product
+
+### Frontend: Authentication & UI Fixes
+
+**Fixed cookie name mismatch causing login redirect failures:**
+- `/api/me/route.ts` used `session-token` but middleware uses `session_token`
+- Changed to consistent `session_token` (with underscore)
+
+**Improved AuthContext error detection:**
+- Enhanced `isAuthError()` to check both `error.status` and `error.response?.status`
+- Added `isRedirecting` ref to prevent multiple concurrent redirects
+- Proper redirect to login on 401/403 errors
+
+**Removed misleading notification from NavigationContext:**
+- Auth errors now handled centrally by AuthContext
+- NavigationContext no longer shows "Error fetching stores" for auth failures
+
+**Made empty state UI consistent:**
+- Updated Templates page to match Categories empty state pattern
+- Added Alert component with "Create First Template" button
+
+### Backend: Reduced Logging Verbosity
+
+**Updated application-dev.properties:**
+- Changed `org.hibernate.SQL` to WARN (was DEBUG)
+- Changed `org.hibernate.type.descriptor.sql.BasicBinder` to WARN
+- Added comments for easy re-enabling during debugging
+
+**Files Modified:**
+- `backend/.claude/CONTEXT.md`
+- `backend/src/main/resources/application-dev.properties`
+- `frontend/src/contexts/AuthContext.tsx`
+- `frontend/src/contexts/NavigationContext.tsx`
+- `frontend/src/app/api/me/route.ts`
+- `frontend/src/app/(dashboard)/organization/product-catalog/templates/page.tsx`
+
+---
+
 ## 2026-01-23
 
 ### Backend: Fixed LazyInitializationException in Multiple Services

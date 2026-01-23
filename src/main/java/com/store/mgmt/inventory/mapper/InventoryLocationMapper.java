@@ -8,6 +8,7 @@ import org.mapstruct.InheritConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
 import java.util.List;
@@ -20,6 +21,14 @@ public interface InventoryLocationMapper {
     @Mapping(target = "contactNumber", ignore = true) // Not in entity
     InventoryLocationDTO toDto(InventoryLocation location);
     List<InventoryLocationDTO> toDtoList(List<InventoryLocation> inventoryLocations);
+
+    /**
+     * Summary mapping for use in inventory items - includes only essential location info.
+     */
+    @Named("toLocationSummary")
+    @Mapping(target = "description", ignore = true)
+    @Mapping(target = "contactNumber", ignore = true)
+    InventoryLocationDTO toLocationSummary(InventoryLocation location);
     
     // Base method with all BaseEntity ignores - other methods inherit from this
     @Mapping(target = "id", ignore = true)
