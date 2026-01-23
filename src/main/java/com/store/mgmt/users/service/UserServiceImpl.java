@@ -1,5 +1,6 @@
 package com.store.mgmt.users.service;
 
+import com.store.mgmt.common.service.AuthorizationService;
 import com.store.mgmt.organization.mapper.OrganizationMapper;
 import com.store.mgmt.organization.mapper.StoreMapper;
 import com.store.mgmt.organization.model.dto.*;
@@ -45,6 +46,7 @@ public class UserServiceImpl implements UserService {
     private final EmailService emailService;
     private final AuditLogService auditLogService;
     private final UserMapper userMapper;
+    private final AuthorizationService authorizationService;
 
     public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository,
                            OrganizationRepository organizationRepository, StoreRepository storeRepository,
@@ -52,7 +54,8 @@ public class UserServiceImpl implements UserService {
                            OrganizationMapper organizationMapper, StoreMapper storeMapper,
                            EmailService emailService, AuditLogService auditLogService,
                            InvitationRepository invitationRepository,
-                           UserMapper userMapper) {
+                           UserMapper userMapper,
+                           AuthorizationService authorizationService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.organizationRepository = organizationRepository;
@@ -64,19 +67,18 @@ public class UserServiceImpl implements UserService {
         this.emailService = emailService;
         this.auditLogService = auditLogService;
         this.invitationRepository = invitationRepository;
+        this.authorizationService = authorizationService;
     }
 
     @Override
     @Transactional
     public UserDTO createUser(CreateUserDTO dto) {
-        if (dto.getUsername() == null || dto.getEmail() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username and email are required");
-        }
-        if (userRepository.findByUsername(dto.getUsername()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username already exists");
+        // Check for existing username/email (business logic validation)
+        if (dto.getUsername() != null && userRepository.findByUsername(dto.getUsername()).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
         }
         if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
         }
 
         User user = new User();
@@ -159,16 +161,6 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDto(updated);
     }
 
-    private boolean hasRoleInOrganization(User user, String roleName, UUID organizationId) {
-        return userOrganizationRoleRepository.findByUserIdAndOrganizationId(user.getId(), organizationId)
-                .stream()
-                .anyMatch(uor -> uor.getRole().getName().equals(roleName));
-    }
-
-    private boolean hasRole(User user, String roleName) {
-        return user.getOrganizationRoles().stream()
-                .anyMatch(uor -> uor.getRole().getName().equals(roleName));
-    }
     @Transactional
 //    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ORG_ADMIN')")
     public void inviteUser(InviteUserDTO inviteDTO) {
@@ -238,10 +230,9 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("User already assigned to this organization.");
         }
 
-// Check if current user is authorized assign users to organization. SUPER_ADMIN are only allowed
-        if(!hasRole(currentUser, RoleType.SUPER_ADMIN.toString())) {
-            throw new SecurityException("User not authorized to assign users in this organization.");
-        }
+        // Check if current user is authorized to assign users to organization. SUPER_ADMIN only
+        authorizationService.requireRole(currentUser, RoleType.SUPER_ADMIN.toString(),
+                "assign users to this organization");
 
         User assignee = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -265,9 +256,10 @@ public class UserServiceImpl implements UserService {
         Store store = storeRepository.findById(dto.getStoreId())
                 .orElseThrow(() -> new IllegalArgumentException("Store not found"));
 
-        // Check if current user is authorized for the organization
-        if (!hasRoleInOrganization(currentUser, RoleType.ORG_ADMIN.toString(), store.getOrganization().getId()) &&
-                !hasRole(currentUser, RoleType.SUPER_ADMIN.toString())) {
+        // Check if current user is authorized for the organization (ORG_ADMIN or SUPER_ADMIN)
+        boolean isOrgAdmin = authorizationService.hasRoleInOrganization(currentUser, RoleType.ORG_ADMIN.toString(), store.getOrganization().getId());
+        boolean isSuperAdmin = authorizationService.hasRole(currentUser, RoleType.SUPER_ADMIN.toString());
+        if (!isOrgAdmin && !isSuperAdmin) {
             throw new SecurityException("User not authorized to assign users in this organization.");
         }
 
@@ -331,15 +323,14 @@ public class UserServiceImpl implements UserService {
 
     private void logAuditEntry(String action, UUID entityId, String message) {
         try {
-            System.out.println("Audit entry logged successfully: " + log);
             auditLogService.builder()
                     .action(action)
-//                    .entityType("Store")
                     .entityId(entityId)
                     .message(message)
                     .log();
+            log.debug("Audit entry logged: action={}, entityId={}", action, entityId);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to log audit entry", e);
+            log.error("Failed to log audit entry: action={}, entityId={}", action, entityId, e);
         }
     }
 }

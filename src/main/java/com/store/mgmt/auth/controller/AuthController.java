@@ -71,9 +71,7 @@ public class AuthController {
         try {
             AuthResponse authResponse = authService.authenticateUser(request);
             setAuthCookies(authResponse, response);
-            System.out.println("Controller: Response cookies set: " +
-                    "Access Token Cookie: " + authResponse.getAccessToken() +
-                    ", Refresh Token Cookie: " + authResponse.getRefreshToken());
+            logger.debug("Authentication cookies set for user: {}", request.getUsername());
 
             // Don't expose tokens in response body for security
             AuthResponse sanitizedResponse = new AuthResponse(

@@ -4,12 +4,9 @@ import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.store.mgmt.auth.service.JWTService;
-import com.store.mgmt.organization.repository.OrganizationRepository;
-import com.store.mgmt.organization.repository.StoreRepository;
 import com.store.mgmt.users.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.catalina.util.RateLimiter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,7 +44,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -56,15 +52,10 @@ import java.util.Properties;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
-//@Profile({"dev", "test", "prod"}) // Adjust profiles as needed
 public class SecurityConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
-    private final CustomUserDetailsService userService;
-    private final JWTService jwtService;
-    private final UserRepository userRepository;
-    private final OrganizationRepository organizationRepository;
-    private final StoreRepository storeRepository;
+
     private static final String[] SWAGGER_WHITELIST = {
             "/v3/api-docs/**",
             "/swagger-ui/**",
@@ -73,23 +64,58 @@ public class SecurityConfig {
             "/webjars/**"
     };
 
-    @Value("${FRONTEND_URL:http://localhost:3000}")
-    private String frontendUrl;
+    private final CustomUserDetailsService userService;
+    private final JWTService jwtService;
+    private final UserRepository userRepository;
 
+    // JWT Configuration
     @Value("${jwt.secret}")
     private String jwtSecret;
 
     @Value("${jwt.issuer}")
     private String jwtIssuer;
+
+    // CORS Configuration
+    @Value("${FRONTEND_URL:http://localhost:3000}")
+    private String frontendUrl;
+
+    // Mail Configuration - loaded from environment variables
+    @Value("${MAIL_HOST:smtp.gmail.com}")
+    private String mailHost;
+
+    @Value("${MAIL_PORT:587}")
+    private int mailPort;
+
+    @Value("${MAIL_USERNAME:}")
+    private String mailUsername;
+
+    @Value("${MAIL_PASSWORD:}")
+    private String mailPassword;
+
+    private SecretKey signingKey;
+
     public SecurityConfig(CustomUserDetailsService userService, JWTService jwtService,
-                          UserRepository userRepository, OrganizationRepository organizationRepository,
-                          StoreRepository storeRepository
-    ) {
+                          UserRepository userRepository) {
         this.userService = userService;
         this.jwtService = jwtService;
         this.userRepository = userRepository;
-        this.organizationRepository = organizationRepository;
-        this.storeRepository = storeRepository;
+    }
+
+    @PostConstruct
+    public void init() {
+        validateConfiguration();
+        this.signingKey = new SecretKeySpec(jwtSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+        logger.info("SecurityConfig initialized successfully");
+    }
+
+    private void validateConfiguration() {
+        if (jwtSecret == null || jwtSecret.isEmpty()) {
+            throw new IllegalStateException("JWT secret is not configured. Set JWT_SECRET environment variable.");
+        }
+        if (jwtSecret.length() < 32) {
+            logger.warn("JWT secret is shorter than recommended 32 characters");
+        }
+        logger.debug("Configuration validated: frontendUrl={}", frontendUrl);
     }
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -102,7 +128,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/v1/auth/**").permitAll()
                                 .requestMatchers(SWAGGER_WHITELIST).permitAll()
                                 .requestMatchers("/error").permitAll()
-                                .requestMatchers("/actuator/health").permitAll()
+                                .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info").permitAll()
                                 .requestMatchers("/api/v1/global-templates/**").hasAnyAuthority("ROLE_SUPER_ADMIN")
                                 .requestMatchers("/api/v1/organizations/**").hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ORG_ADMIN")
                                 .requestMatchers("/api/v1/stores/**").hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ORG_ADMIN", "ROLE_STORE_MANAGER")
@@ -132,18 +158,14 @@ public class SecurityConfig {
                 )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
-                            logger.warn("Unauthorized access attempt: {}", authException.getMessage());
-                            authException.printStackTrace();
+                            logger.warn("Unauthorized access attempt to {}: {}",
+                                    request.getRequestURI(), authException.getMessage());
                             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
                         })
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            logger.warn("Access denied: {}", accessDeniedException.getMessage());
-                            if (accessDeniedException.getMessage().contains("No resources available")) {
-                                response.sendError(HttpServletResponse.SC_NOT_FOUND, "No resources available");
-                            } else {
-                                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied");
-                            }
-                            accessDeniedException.printStackTrace();
+                            logger.warn("Access denied to {} for user: {}",
+                                    request.getRequestURI(), accessDeniedException.getMessage());
+                            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied");
                         })
                 );
 
@@ -153,17 +175,19 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         if (frontendUrl == null || frontendUrl.trim().isEmpty()) {
-            logger.error("FRONTEND_URL is not configured properly");
-            throw new IllegalStateException("FRONTEND_URL is not configured");
+            throw new IllegalStateException("FRONTEND_URL is not configured. Set FRONTEND_URL environment variable.");
         }
 
-        System.out.println("Configuring CORS with frontend URL: " + frontendUrl);
+        logger.info("Configuring CORS with allowed origin: {}", frontendUrl);
+
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(frontendUrl));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With", "X-Store-Id", "X-Organization-Id"));
-//        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setExposedHeaders(List.of("Set-Cookie")); // Important for cookies
+        configuration.setAllowedHeaders(Arrays.asList(
+                "Authorization", "Content-Type", "Accept",
+                "X-Requested-With", "X-Store-Id", "X-Organization-Id", "X-Correlation-ID"
+        ));
+        configuration.setExposedHeaders(Arrays.asList("Set-Cookie", "X-Correlation-ID"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
@@ -174,32 +198,22 @@ public class SecurityConfig {
 
     @Bean
     public JwtDecoder jwtDecoder() {
-        if (jwtSecret == null || jwtSecret.isEmpty()) {
-            logger.error("JWT secret key is not configured");
-            throw new IllegalStateException("JWT secret key is not configured!");
-        }
-        System.out.println("Decoding.....................");
-        SecretKey key = new SecretKeySpec(jwtSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-        NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withSecretKey(key).build();
+        NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withSecretKey(signingKey).build();
         jwtDecoder.setJwtValidator(JwtValidators.createDefaultWithIssuer(jwtIssuer));
+        logger.debug("JWT Decoder configured with issuer: {}", jwtIssuer);
         return jwtDecoder;
-
-//        return NimbusJwtDecoder.withSecretKey(key).build();
     }
+
     @Bean
     public JwtEncoder jwtEncoder() {
-        if (jwtSecret == null || jwtSecret.isEmpty()) {
-            logger.error("JWT secret key is not configured");
-            throw new IllegalStateException("JWT secret key is not configured!");
-        }
-        System.out.println("Configuring JWT Encoder with secret: " + jwtSecret);
-        SecretKey key = new SecretKeySpec(jwtSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-        JWKSource<SecurityContext> jwkSource = new ImmutableSecret<>(key);
+        JWKSource<SecurityContext> jwkSource = new ImmutableSecret<>(signingKey);
+        logger.debug("JWT Encoder configured");
         return new NimbusJwtEncoder(jwkSource);
     }
 
-    private SecretKey getSigningKey() {
-        return new SecretKeySpec(jwtSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+    @Bean
+    public SecretKey jwtSigningKey() {
+        return signingKey;
     }
 
     @Bean
@@ -230,7 +244,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // todo Optional: Audit logging for authentication events
     @Bean
     public ApplicationListener<AbstractAuthenticationEvent> authenticationEventListener() {
         return event -> {
@@ -252,28 +265,29 @@ public class SecurityConfig {
     public void configureSecurityContext() {
         SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
     }
+
     @Bean
     public JavaMailSender mailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost("smtp.gmail.com"); // Replace with your SMTP host
-        mailSender.setPort(587); // Replace with your SMTP port
-        mailSender.setUsername("prasubd@gmail.com"); // Replace with your email
-        mailSender.setPassword("prasubd@123"); // Replace with your email password
+        mailSender.setHost(mailHost);
+        mailSender.setPort(mailPort);
 
-        Properties props = mailSender.getJavaMailProperties();
-        props.put("mail.transport.protocol", "smtp");
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.debug", "true");
+        // Only configure authentication if credentials are provided
+        if (mailUsername != null && !mailUsername.isEmpty()) {
+            mailSender.setUsername(mailUsername);
+            mailSender.setPassword(mailPassword);
+
+            Properties props = mailSender.getJavaMailProperties();
+            props.put("mail.transport.protocol", "smtp");
+            props.put("mail.smtp.auth", "true");
+            props.put("mail.smtp.starttls.enable", "true");
+            props.put("mail.debug", "false"); // Disable debug in production
+
+            logger.info("Mail sender configured with host: {}, port: {}", mailHost, mailPort);
+        } else {
+            logger.warn("Mail credentials not configured. Email functionality will be disabled.");
+        }
 
         return mailSender;
     }
-
-//    @Bean
-//    public RateLimiter rateLimiter() {
-//        return RateLimiter.of("auth", RateLimiterConfig.custom()
-//                .limitForPeriod(10)
-//                .timeoutDuration(Duration.ofSeconds(1))
-//                .build());
-//    }
 }

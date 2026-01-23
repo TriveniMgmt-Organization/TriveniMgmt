@@ -13,11 +13,6 @@ import java.util.UUID;
 
 @Repository
 public interface OrganizationRepository extends JpaRepository<Organization, UUID> {
-//    @Query("SELECT u FROM User u WHERE u.email = :email AND u.deletedAt IS NULL")
-//    Optional<User> findByEmail(String email);
-//    @Query("SELECT u FROM User u WHERE u.username = :username AND u.deletedAt IS NULL")
-//    Optional<User> findByUsername(String username);
-
     Optional<Organization> findByName(@NonNull String name);
     @Query("SELECT u FROM Organization u WHERE u.id = :id AND u.deletedAt IS NULL")
     @NonNull

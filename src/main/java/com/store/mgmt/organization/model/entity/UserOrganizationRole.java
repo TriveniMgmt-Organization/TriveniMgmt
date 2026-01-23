@@ -5,13 +5,17 @@ import com.store.mgmt.users.model.entity.Role;
 import com.store.mgmt.users.model.entity.User;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.ToString;
 import lombok.EqualsAndHashCode;
-
-import java.util.Objects;
+import lombok.ToString;
 
 @Entity
-@Table(name = "user_organization_roles")
+@Table(name = "user_organization_roles", indexes = {
+        @Index(name = "idx_uor_user", columnList = "user_id"),
+        @Index(name = "idx_uor_organization", columnList = "organization_id"),
+        @Index(name = "idx_uor_store", columnList = "store_id"),
+        @Index(name = "idx_uor_role", columnList = "role_id"),
+        @Index(name = "idx_uor_user_org", columnList = "user_id, organization_id")
+})
 @Data
 @ToString(exclude = {"user", "organization", "role", "store"})
 @EqualsAndHashCode(callSuper = true, exclude = {"user", "organization", "role", "store"})
@@ -40,17 +44,4 @@ public class UserOrganizationRole extends BaseEntity {
             throw new IllegalStateException("Either organization or store must be set for UserOrganizationRole.");
         }
     }
-
-    // @Override
-    // public boolean equals(Object o) {
-    //     if (this == o) return true;
-    //     if (!(o instanceof UserOrganizationRole)) return false;
-    //     UserOrganizationRole that = (UserOrganizationRole) o;
-    //     return Objects.equals(getId(), that.getId());
-    // }
-
-    // @Override
-    // public int hashCode() {
-    //     return Objects.hash(getId());
-    // }
 }

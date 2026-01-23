@@ -16,6 +16,7 @@ import com.store.mgmt.users.model.entity.User;
 import com.store.mgmt.users.repository.RoleRepository;
 import com.store.mgmt.users.repository.UserRepository;
 import com.store.mgmt.users.service.AuditLogService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class OrganizationServiceImpl implements OrganizationService {
     private final OrganizationRepository organizationRepository;
 
@@ -55,11 +57,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Transactional
     public OrganizationDTO createOrganization(CreateOrganizationDTO dto) {
-        if (dto.getName() == null || dto.getName().trim().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Organization Name is required");
-        }
+        // Check for existing organization name (business logic validation)
         if (organizationRepository.findByName(dto.getName()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Organization with name '" + dto.getName() + "' already exists"); // Use CONFLICT for existing resource
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Organization with name '" + dto.getName() + "' already exists");
         }
 
         String currentUserName = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -102,19 +102,18 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     @Transactional
     public OrganizationDTO updateOrganization(UUID id, UpdateOrganizationDTO dto) {
-        System.out.println("Updateing Organization for id: " + id  );
-        System.out.println("Request to update Organization: " + dto.getName() + "///"+ dto.getDescription());
+        log.info("Updating organization with ID: {}", id);
+        log.debug("Update request - name: {}, description: {}", dto.getName(), dto.getDescription());
+
         Organization organization = organizationRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Organization not found"));
 
-        System.out.println("Found Organization: " + organization.getName() + " for id: " + id);
-         organizationMapper.updateEntityFromDto(dto, organization);
-
-        System.out.println("Updating Organization: " + organization.getName() + " with new details: " + dto);
+        log.debug("Found organization: {} for ID: {}", organization.getName(), id);
+        organizationMapper.updateEntityFromDto(dto, organization);
 
         Organization updatedOrganization = organizationRepository.save(organization);
 
-        System.out.println("Updated Organization: " + updatedOrganization.getName() + " with id: " + updatedOrganization.getId());
+        log.info("Organization updated successfully: {} (ID: {})", updatedOrganization.getName(), updatedOrganization.getId());
 
         logAuditEntry("UPDATE_ORGANIZATION", updatedOrganization.getId(), "Updated organization: " + updatedOrganization.getName());
         return organizationMapper.toDto(updatedOrganization);
@@ -176,12 +175,13 @@ public class OrganizationServiceImpl implements OrganizationService {
         try {
             auditLogService.builder()
                     .action(action)
-//                    .entityType("Store")
                     .entityId(entityId)
                     .message(message)
                     .log();
+            log.debug("Audit entry logged: action={}, entityId={}", action, entityId);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to log audit entry", e);
+            // Log the error but don't fail the main operation
+            log.error("Failed to log audit entry: action={}, entityId={}, error={}", action, entityId, e.getMessage());
         }
     }
 }

@@ -207,6 +207,27 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handle security exceptions (custom authorization failures from services)
+     */
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<ErrorResponse> handleSecurityException(
+            SecurityException ex,
+            HttpServletRequest request) {
+        logger.warn("Security exception: {} - Path: {}", ex.getMessage(), request.getRequestURI());
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .status(HttpStatus.FORBIDDEN.value())
+                .error("Forbidden")
+                .message(ex.getMessage() != null && !ex.getMessage().isEmpty()
+                        ? ex.getMessage()
+                        : "You are not authorized to perform this action.")
+                .path(request.getRequestURI())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+    }
+
+    /**
      * Handle illegal argument exceptions
      */
     @ExceptionHandler(IllegalArgumentException.class)
@@ -225,6 +246,25 @@ public class GlobalExceptionHandler {
                 .build();
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handle illegal state exceptions (internal application state errors)
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalStateException(
+            IllegalStateException ex,
+            HttpServletRequest request) {
+        logger.error("Illegal state: {} - Path: {}", ex.getMessage(), request.getRequestURI());
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .error("Internal Server Error")
+                .message("An internal error occurred. Please try again later.")
+                .path(request.getRequestURI())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /**

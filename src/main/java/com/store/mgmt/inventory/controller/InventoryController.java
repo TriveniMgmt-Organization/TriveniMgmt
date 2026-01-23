@@ -11,6 +11,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,13 +22,11 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import jakarta.validation.Valid;
-
-import org.springframework.format.annotation.DateTimeFormat;
 
 @RestController
-@RequestMapping("/api/v1/inventory") // Base path for all inventory related operations
+@RequestMapping("/api/v1/inventory")
 @Tag(name = "InventoryController", description = "Comprehensive API for managing product inventory, sales, purchases, and related master data.")
+@Slf4j
 public class InventoryController {
     private final InventoryService inventoryService;
 

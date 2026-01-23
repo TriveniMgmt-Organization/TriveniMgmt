@@ -5,9 +5,11 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Slf4j
@@ -15,10 +17,10 @@ import org.springframework.stereotype.Service;
 public class EmailService {
     private final JavaMailSender mailSender;
 
-    @Value("${FRONTEND_URL")
+    @Value("${FRONTEND_URL}")
     private String frontendUrl;
 
-    @Value("${spring.mail.from}")
+    @Value("${spring.mail.from:noreply@example.com}")
     private String fromEmail;
 
     public void sendInvitationEmail(String toEmail, String token, String organizationName, String roleName) {
@@ -42,7 +44,8 @@ public class EmailService {
             log.info("Sent invitation email to: {}", toEmail);
         } catch (MessagingException e) {
             log.error("Failed to send invitation email to {}: {}", toEmail, e.getMessage());
-            throw new RuntimeException("Failed to send invitation email", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Failed to send invitation email. Please try again later.");
         }
     }
 }

@@ -146,7 +146,21 @@ public class JWTService {
         }
     }
 
-    public String refreshAccessToken(String refreshToken, UserDetails userDetails, User user) {
+    /**
+     * Refresh access token using a valid refresh token.
+     * Requires the caller to provide the active organization ID and authorities.
+     *
+     * @param refreshToken The refresh token
+     * @param userDetails User details
+     * @param user The user entity
+     * @param activeOrganizationId The organization to generate token for
+     * @param activeStoreId Optional store ID
+     * @param authorities The authorities for the active organization
+     * @return New access token
+     */
+    public String refreshAccessToken(String refreshToken, UserDetails userDetails, User user,
+                                     UUID activeOrganizationId, UUID activeStoreId,
+                                     List<GrantedAuthority> authorities) {
         try {
             SignedJWT signedJWT = SignedJWT.parse(refreshToken);
             if (!signedJWT.verify(new MACVerifier(signingKey))) {
@@ -163,7 +177,16 @@ public class JWTService {
                 log.warn("Refresh token expired for user: {}", username);
                 throw new JwtException("Refresh token expired");
             }
-            return generateAccessToken(user, null, null, Collections.emptyList() );
+
+            if (activeOrganizationId == null) {
+                log.error("Cannot refresh token without active organization ID for user: {}", username);
+                throw new JwtException("Active organization ID required for token refresh");
+            }
+
+            log.info("Refreshing access token for user: {} with organization: {}", username, activeOrganizationId);
+            return generateAccessToken(user, activeOrganizationId, activeStoreId, authorities);
+        } catch (JwtException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Failed to refresh access token: {}", e.getMessage(), e);
             throw new JwtException("Failed to refresh access token", e);

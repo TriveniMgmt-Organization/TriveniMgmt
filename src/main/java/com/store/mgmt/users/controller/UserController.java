@@ -5,6 +5,8 @@ import com.store.mgmt.users.model.dto.CreateUserDTO;
 import com.store.mgmt.users.model.dto.UpdateUserDTO;
 import com.store.mgmt.users.model.dto.UserDTO;
 import com.store.mgmt.users.service.UserService;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +24,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/users")
 @Tag(name = "UserController", description = "Operations related to user management and roles")
+@Slf4j
 public class UserController {
     private final UserService userService;
 
@@ -59,7 +62,7 @@ public class UserController {
     )
     public ResponseEntity<UserDTO> createUser(
             @Parameter(description = "User details to be created", required = true)
-            @RequestBody CreateUserDTO dto) {
+            @Valid @RequestBody CreateUserDTO dto) {
         UserDTO user = userService.createUser(dto);
         return ResponseEntity.ok(user);
     }
@@ -151,7 +154,7 @@ public class UserController {
             @Parameter(description = "Unique ID of the user to update", required = true)
             @PathVariable UUID id,
             @Parameter(description = "Updated user details", required = true)
-            @RequestBody UpdateUserDTO dto) {
+            @Valid @RequestBody UpdateUserDTO dto) {
         UserDTO user = userService.updateUser(id, dto);
         return ResponseEntity.ok(user);
     }
@@ -275,7 +278,7 @@ public class UserController {
                     )
             }
     )
-    public void inviteUser(@RequestBody InviteUserDTO inviteDTO) {
+    public void inviteUser(@Valid @RequestBody InviteUserDTO inviteDTO) {
         userService.inviteUser(inviteDTO);
     }
 
@@ -302,7 +305,7 @@ public class UserController {
                     )
             }
     )
-    public void assignUserToOrganization(@RequestBody CreateUserAssignmentDTO dto) {
+    public void assignUserToOrganization(@Valid @RequestBody CreateUserAssignmentDTO dto) {
         userService.assignUserToOrganization(dto);
     }
 
@@ -330,7 +333,7 @@ public class UserController {
                     )
             }
     )
-    public void assignUserToStore(@RequestBody CreateUserAssignmentDTO dto) {
+    public void assignUserToStore(@Valid @RequestBody CreateUserAssignmentDTO dto) {
         userService.assignUserToStore(dto);
     }
 
@@ -357,7 +360,7 @@ public class UserController {
                 )
         }
 )
-    public void removeUserFromOrganization(@RequestBody RemoveUserAssignmentDTO dto) {
+    public void removeUserFromOrganization(@Valid @RequestBody RemoveUserAssignmentDTO dto) {
         userService.removeUserFromOrganization(dto);
     }
 
@@ -384,7 +387,7 @@ public class UserController {
                     )
             }
     )
-    public void removeUserFromStore(@RequestBody RemoveUserAssignmentDTO dto) {
+    public void removeUserFromStore(@Valid @RequestBody RemoveUserAssignmentDTO dto) {
         userService.removeUserFromStore(dto);
     }
 }

@@ -10,19 +10,20 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import jakarta.servlet.http.HttpServletRequest;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/organizations")
+@Tag(name = "Organizations", description = "Organization management endpoints")
+@Slf4j
 public class OrganizationController {
     private final OrganizationServiceImpl organizationService;
     public OrganizationController(OrganizationServiceImpl organizationService) {
@@ -41,8 +42,8 @@ public class OrganizationController {
     }
     )
     public ResponseEntity<OrganizationDTO> createOrganization(
-            @Parameter(description = "User details to be created", required = true)
-            @RequestBody CreateOrganizationDTO request) {
+            @Parameter(description = "Organization details to be created", required = true)
+            @Valid @RequestBody CreateOrganizationDTO request) {
         return ResponseEntity.ok(organizationService.createOrganization(request));
     }
 
@@ -61,11 +62,8 @@ public class OrganizationController {
             @Parameter(description = "Unique ID of the organization to update", required = true)
             @PathVariable UUID id,
             @Parameter(description = "Organization details to be updated", required = true)
-            @RequestBody UpdateOrganizationDTO dto, HttpServletRequest httpRequest) throws IOException {
-        String rawRequestBody = new BufferedReader(new InputStreamReader(httpRequest.getInputStream()))
-                .lines().collect(Collectors.joining("\n"));
-        System.out.println("Raw Request Body: " + rawRequestBody); // Check this output
-
+            @Valid @RequestBody UpdateOrganizationDTO dto) {
+        log.info("Updating organization with ID: {}", id);
         OrganizationDTO updatedOrganization = organizationService.updateOrganization(id, dto);
         return ResponseEntity.ok(updatedOrganization);
     }

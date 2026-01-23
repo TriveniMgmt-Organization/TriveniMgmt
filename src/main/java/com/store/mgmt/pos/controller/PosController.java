@@ -13,12 +13,15 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/pos")
 @Tag(name = "PosController", description = "Operations related to Point-of-Sale transactions")
+@Slf4j
 public class PosController {
 //    private final PosService posService;
 //

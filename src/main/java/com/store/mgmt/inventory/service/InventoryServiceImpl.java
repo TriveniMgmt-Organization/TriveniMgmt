@@ -1738,15 +1738,14 @@ public class InventoryServiceImpl implements InventoryService {
 
     private void logAuditEntry(String action, UUID entityId, String message) {
         try {
-            System.out.println("Audit entry logged successfully: " + log);
             auditLogService.builder()
                     .action(action)
-//                    .entityType("Store")
                     .entityId(entityId)
                     .message(message)
                     .log();
+            log.debug("Audit entry logged: action={}, entityId={}", action, entityId);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to log audit entry", e);
+            log.error("Failed to log audit entry: action={}, entityId={}", action, entityId, e);
         }
     }
 }

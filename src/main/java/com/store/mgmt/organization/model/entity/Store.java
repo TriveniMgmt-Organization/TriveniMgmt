@@ -8,7 +8,10 @@ import lombok.ToString;
 import lombok.EqualsAndHashCode;
 
 @Entity
-@Table(name = "stores")
+@Table(name = "stores", indexes = {
+        @Index(name = "idx_store_organization", columnList = "organization_id"),
+        @Index(name = "idx_store_status", columnList = "status")
+})
 @Data
 @EqualsAndHashCode(callSuper = false, exclude = "organization")
 @ToString(exclude = "organization")

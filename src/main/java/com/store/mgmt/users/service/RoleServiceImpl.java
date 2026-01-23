@@ -6,6 +6,7 @@ import com.store.mgmt.users.model.entity.Permission;
 import com.store.mgmt.users.model.entity.Role;
 import com.store.mgmt.users.repository.PermissionRepository;
 import com.store.mgmt.users.repository.RoleRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class RoleServiceImpl implements RoleService {
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
@@ -28,11 +30,10 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public RoleDTO createRole(RoleDTO request) {
-        if (request.getName() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Role name is required");
-        }
+        log.info("Creating role: {}", request.getName());
+
         if (roleRepository.findByName(request.getName()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Role name already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Role name already exists");
         }
 
         Role role = new Role();
@@ -62,7 +63,7 @@ public class RoleServiceImpl implements RoleService {
 
         if (request.getName() != null && !request.getName().equals(role.getName()) &&
                 roleRepository.findByName(request.getName()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Role name already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Role name already exists");
         }
 
         if (request.getName() != null) role.setName(request.getName());

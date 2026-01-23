@@ -9,62 +9,45 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import jakarta.servlet.http.HttpServletRequest;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/stores")
+@Tag(name = "Stores", description = "Store management endpoints")
+@Slf4j
 public class StoreController {
+
     private final StoreService storeService;
 
-    public  StoreController(StoreService storeService) {
+    public StoreController(StoreService storeService) {
         this.storeService = storeService;
     }
 
     @PostMapping
     @Operation(
-            summary = "Create a new user",
-            description = "Creates a new user account with the provided details.",
+            summary = "Create a new store",
+            description = "Creates a new store within an organization.",
             responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "User created successfully",
-                            content = @Content(schema = @Schema(implementation = StoreDTO.class))
-                    ),
-                    @ApiResponse(
-                            responseCode = "400",
-                            description = "Invalid input or missing required fields",
-                            content = @Content
-                    ),
-                    @ApiResponse(
-                            responseCode = "403",
-                            description = "Forbidden: User does not have 'CREATE_USER' authority",
-                            content = @Content
-                    ),
-                    @ApiResponse(
-                            responseCode = "409",
-                            description = "Conflict: User with provided email/username already exists",
-                            content = @Content
-                    )
+                    @ApiResponse(responseCode = "201", description = "Store created successfully",
+                            content = @Content(schema = @Schema(implementation = StoreDTO.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid input"),
+                    @ApiResponse(responseCode = "403", description = "Forbidden"),
+                    @ApiResponse(responseCode = "409", description = "Store already exists")
             }
     )
     public ResponseEntity<StoreDTO> createStore(
-            @Parameter(description = "User details to be created", required = true)
-            @Valid @RequestBody CreateStoreDTO dto, HttpServletRequest httpRequest) throws Exception {
-
-        String rawRequestBody = new BufferedReader(new InputStreamReader(httpRequest.getInputStream()))
-                .lines().collect(Collectors.joining("\n"));
-        System.out.println("Raw Request Body: " + rawRequestBody); // Check this output
+            @Parameter(description = "Store details", required = true)
+            @Valid @RequestBody CreateStoreDTO dto) {
+        log.info("Creating store: {}", dto.getName());
         StoreDTO store = storeService.createStore(dto);
-        System.out.println("Store created: " + store); // Log the created store details
-        return ResponseEntity.ok(store);
+        return ResponseEntity.status(HttpStatus.CREATED).body(store);
     }
 
     @GetMapping("/{id}")
@@ -72,57 +55,37 @@ public class StoreController {
             summary = "Get store by ID",
             description = "Retrieves the details of a store by its unique ID.",
             responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Store retrieved successfully",
-                            content = @Content(schema = @Schema(implementation = StoreDTO.class))
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Not Found: Store with provided ID does not exist",
-                            content = @Content
-                    )
+                    @ApiResponse(responseCode = "200", description = "Store retrieved successfully",
+                            content = @Content(schema = @Schema(implementation = StoreDTO.class))),
+                    @ApiResponse(responseCode = "404", description = "Store not found")
             }
     )
     public ResponseEntity<StoreDTO> getStoreById(
-            @Parameter(description = "Unique ID of the store to retrieve", required = true)
+            @Parameter(description = "Store ID", required = true)
             @PathVariable UUID id) {
+        log.debug("Fetching store with ID: {}", id);
         StoreDTO store = storeService.getStoreById(id);
         return ResponseEntity.ok(store);
     }
 
     @PutMapping("/{id}")
     @Operation(
-            summary = "Update an existing store",
+            summary = "Update a store",
             description = "Updates the details of an existing store.",
             responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Store updated successfully",
-                            content = @Content(schema = @Schema(implementation = StoreDTO.class))
-                    ),
-                    @ApiResponse(
-                            responseCode = "400",
-                            description = "Invalid input or missing required fields",
-                            content = @Content
-                    ),
-                    @ApiResponse(
-                            responseCode = "403",
-                            description = "Forbidden: User does not have 'UPDATE_STORE' authority",
-                            content = @Content
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Not Found: Store with provided ID does not exist",
-                            content = @Content
-                    )
+                    @ApiResponse(responseCode = "200", description = "Store updated successfully",
+                            content = @Content(schema = @Schema(implementation = StoreDTO.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid input"),
+                    @ApiResponse(responseCode = "403", description = "Forbidden"),
+                    @ApiResponse(responseCode = "404", description = "Store not found")
             }
     )
     public ResponseEntity<StoreDTO> updateStore(
-            @Parameter(description = "Unique ID of the store to update", required = true)
+            @Parameter(description = "Store ID", required = true)
             @PathVariable UUID id,
-            @Parameter(description = "User details to be updated", required = true)
-            @RequestBody UpdateStoreDTO dto) {
+            @Parameter(description = "Updated store details", required = true)
+            @Valid @RequestBody UpdateStoreDTO dto) {
+        log.info("Updating store with ID: {}", id);
         StoreDTO store = storeService.updateStore(id, dto);
         return ResponseEntity.ok(store);
     }
@@ -132,20 +95,14 @@ public class StoreController {
             summary = "Delete a store",
             description = "Deletes a store by its unique ID.",
             responses = {
-                    @ApiResponse(
-                            responseCode = "204",
-                            description = "Store deleted successfully"
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Not Found: Store with provided ID does not exist",
-                            content = @Content
-                    )
+                    @ApiResponse(responseCode = "204", description = "Store deleted successfully"),
+                    @ApiResponse(responseCode = "404", description = "Store not found")
             }
     )
     public ResponseEntity<Void> deleteStore(
-            @Parameter(description = "Unique ID of the store to delete", required = true)
+            @Parameter(description = "Store ID", required = true)
             @PathVariable UUID id) {
+        log.info("Deleting store with ID: {}", id);
         storeService.deleteStore(id);
         return ResponseEntity.noContent().build();
     }

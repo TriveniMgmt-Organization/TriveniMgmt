@@ -68,7 +68,7 @@ public class JWTCookieAuthenticationFilter  extends OncePerRequestFilter{
                     authentication.setDetails(claims);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                    System.out.println("Organization ID: " + orgId + ", Store ID: " + storeId);
+                    logger.debug("Set authentication context - Organization ID: {}, Store ID: {}", orgId, storeId);
                     // Set TenantContext
 //                    if (orgId != null) {
 //                        Organization organization = organizationRepository.findById(orgId)

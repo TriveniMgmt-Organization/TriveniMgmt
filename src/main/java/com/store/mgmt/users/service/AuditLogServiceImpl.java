@@ -35,25 +35,26 @@ public class AuditLogServiceImpl implements AuditLogService{
     @Transactional()
     public void _persistAuditLog(String action, UUID entityId, Map<String, Object> detailsData) {
         try {
-            System.out.println("Logging audit entry: action=" + action + ", entityId=" + entityId + ", details=" + detailsData);
+            logger.debug("Creating audit entry: action={}, entityId={}", action, entityId);
+
             AuditLog log = new AuditLog();
             log.setAction(action);
-            log.setEntityType(entityId.getClass().getSimpleName());
+            log.setEntityType(entityId != null ? entityId.getClass().getSimpleName() : "Unknown");
             log.setEntityId(entityId);
+
             Map<String, Object> finalDetails = new HashMap<>(detailsData);
-//            finalDetails.put("ipAddress", TenantContext.getCurrentIpAddress()); // Assuming you have this in TenantContext
-            finalDetails.put("correlationId", MDC.get("correlationId")); // From MDC
+            finalDetails.put("correlationId", MDC.get("correlationId"));
 
             log.setDetails(objectMapper.writeValueAsString(finalDetails));
-            System.out.println("Current Organization: " + TenantContext.getCurrentOrganizationId());
             log.setOrganization(TenantContext.getCurrentOrganization());
             log.setStore(TenantContext.getCurrentStore());
             log.setUser(TenantContext.getCurrentUser());
-            System.out.println("Logging audit entry: " + log);
+
             auditLogRepository.save(log);
-            System.out.println("Audit entry logged successfully");
+            logger.debug("Audit entry persisted: action={}, entityId={}", action, entityId);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to log audit entry", e);
+            // Log the error but don't fail - audit logging should be non-blocking
+            logger.error("Failed to persist audit entry: action={}, entityId={}", action, entityId, e);
         }
     }
 

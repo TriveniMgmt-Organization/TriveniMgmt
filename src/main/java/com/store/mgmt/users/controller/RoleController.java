@@ -3,6 +3,8 @@ package com.store.mgmt.users.controller;
 import com.store.mgmt.users.model.dto.RoleDTO;
 import com.store.mgmt.users.service.RoleService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +15,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/roles")
 @Tag(name = "RoleController", description = "Operations related to roles")
+@Slf4j
 public class RoleController {
     private final RoleService roleService;
 
@@ -22,7 +25,7 @@ public class RoleController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('ROLE_WRITE')")
-    public ResponseEntity<RoleDTO> createRole(@RequestBody RoleDTO request) {
+    public ResponseEntity<RoleDTO> createRole(@Valid @RequestBody RoleDTO request) {
         RoleDTO role = roleService.createRole(request);
         return ResponseEntity.ok(role);
     }
@@ -43,7 +46,7 @@ public class RoleController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_WRITE')")
-    public ResponseEntity<RoleDTO> updateRole(@PathVariable UUID id, @RequestBody RoleDTO request) {
+    public ResponseEntity<RoleDTO> updateRole(@PathVariable UUID id, @Valid @RequestBody RoleDTO request) {
         RoleDTO role = roleService.updateRole(id, request);
         return ResponseEntity.ok(role);
     }

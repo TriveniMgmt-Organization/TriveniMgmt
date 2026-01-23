@@ -415,14 +415,14 @@ private final UserOrganizationRoleRepository userOrganizationRoleRepository;
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDTO validateToken(String token) {
         JWTService.JwtData jwtData = jwtService.extractJwtData(token);
         String email = jwtData.username;
-        UUID orgId = jwtData.organizationId;
-        UUID storeId = jwtData.storeId;
         log.info("Validating token for user: {}", email);
 
-        User user = userRepository.findByEmail(email)
+        // Use query that eagerly fetches roles to avoid LazyInitializationException
+        User user = userRepository.findByEmailWithRolesAndPermissions(email)
                 .orElseThrow(() -> new IllegalStateException("User not found"));
 
         if (jwtService.validateToken(token, user)) {
@@ -569,15 +569,15 @@ private final UserOrganizationRoleRepository userOrganizationRoleRepository;
 
     private void logAuditEntry(String action, UUID entityId, String message) {
         try {
-            log.info("Logging audit entry: action={}, entityId={}, message={}", action, entityId, message);
             auditLogService.builder()
                     .action(action)
-//                    .entityType("Store")
                     .entityId(entityId)
                     .message(message)
                     .log();
+            log.debug("Audit entry logged: action={}, entityId={}", action, entityId);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to log audit entry", e);
+            // Log the error but don't fail the main operation
+            log.error("Failed to log audit entry: action={}, entityId={}, error={}", action, entityId, e.getMessage());
         }
     }
 }
