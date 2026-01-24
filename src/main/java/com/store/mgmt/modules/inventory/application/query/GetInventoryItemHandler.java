@@ -1,15 +1,18 @@
 package com.store.mgmt.modules.inventory.application.query;
 
+import com.store.mgmt.shared.domain.exception.ResourceNotFoundException;
 import com.store.mgmt.modules.inventory.application.dto.InventoryItemDTO;
-import com.store.mgmt.modules.inventory.domain.model.*;
+import com.store.mgmt.modules.inventory.domain.model.InventoryItem;
+import com.store.mgmt.modules.inventory.domain.model.StockLevel;
 import com.store.mgmt.modules.inventory.domain.repository.InventoryItemRepository;
 import com.store.mgmt.shared.application.query.QueryHandler;
-import com.store.mgmt.shared.domain.exception.EntityNotFoundException;
 import com.store.mgmt.shared.infrastructure.security.TenantContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
 
 /**
  * Handler for GetInventoryItemQuery.
@@ -33,28 +36,31 @@ public class GetInventoryItemHandler implements QueryHandler<GetInventoryItemQue
         TenantContext tenant = TenantContext.current();
         tenant.requireStore(query.storeId());
 
-        InventoryItem item = inventoryRepo.findByIdAndStoreId(
-                InventoryItemId.of(query.itemId()),
-                StoreId.of(query.storeId())
-        ).orElseThrow(() -> new EntityNotFoundException("InventoryItem", query.itemId()));
+        InventoryItem item = inventoryRepo.findByIdAndStoreId(query.itemId(), query.storeId())
+                .orElseThrow(() -> new ResourceNotFoundException("InventoryItem not found: " + query.itemId()));
 
         return toDTO(item);
     }
 
     private InventoryItemDTO toDTO(InventoryItem item) {
+        StockLevel stockLevel = item.getStockLevel();
+        boolean isLowStock = stockLevel != null && stockLevel.getAvailable() <= stockLevel.getLowStockThreshold();
+        boolean isExpiringSoon = item.getExpiryDate() != null &&
+                item.getExpiryDate().isBefore(LocalDate.now().plusDays(30));
+
         return InventoryItemDTO.builder()
-                .id(item.getId().getValue())
-                .variantId(item.getVariantId().getValue())
-                .locationId(item.getLocationId().getValue())
-                .storeId(item.getStoreId().getValue())
-                .onHand(item.getStockLevel().onHand())
-                .reserved(item.getStockLevel().reserved())
-                .available(item.getStockLevel().available())
-                .reorderPoint(item.getStockLevel().reorderPoint())
-                .isLowStock(item.isLowStock())
-                .batchNumber(item.getBatchNumber())
+                .id(item.getId())
+                .variantId(item.getVariant() != null ? item.getVariant().getId() : null)
+                .locationId(item.getLocation() != null ? item.getLocation().getId() : null)
+                .storeId(item.getLocation() != null ? item.getLocation().getStoreId() : null)
+                .onHand(stockLevel != null ? stockLevel.getOnHand() : 0)
+                .reserved(stockLevel != null ? stockLevel.getCommitted() : 0)
+                .available(stockLevel != null ? stockLevel.getAvailable() : 0)
+                .reorderPoint(stockLevel != null ? stockLevel.getLowStockThreshold() : 0)
+                .isLowStock(isLowStock)
+                .batchNumber(item.getBatchLot() != null ? item.getBatchLot().getBatchNumber() : null)
                 .expiryDate(item.getExpiryDate())
-                .isExpiringSoon(item.isExpiringSoon(30))
+                .isExpiringSoon(isExpiringSoon)
                 .createdAt(item.getCreatedAt())
                 .updatedAt(item.getUpdatedAt())
                 .build();

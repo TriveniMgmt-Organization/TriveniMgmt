@@ -1,7 +1,6 @@
 package com.store.mgmt.modules.organization.application.query;
 
 import com.store.mgmt.modules.organization.application.dto.StoreDTO;
-import com.store.mgmt.modules.organization.domain.model.OrganizationId;
 import com.store.mgmt.modules.organization.domain.model.Store;
 import com.store.mgmt.modules.organization.domain.repository.StoreRepository;
 import com.store.mgmt.shared.application.query.QueryHandler;
@@ -32,7 +31,7 @@ public class GetStoresHandler implements QueryHandler<GetStoresQuery, List<Store
     public List<StoreDTO> handle(GetStoresQuery query) {
         log.debug("Getting stores for organization: {}", query.organizationId());
 
-        List<Store> stores = storeRepo.findByOrganizationId(OrganizationId.of(query.organizationId()));
+        List<Store> stores = storeRepo.findByOrganizationId(query.organizationId());
 
         // Simple pagination
         int start = query.page() * query.size();
@@ -49,12 +48,12 @@ public class GetStoresHandler implements QueryHandler<GetStoresQuery, List<Store
 
     private StoreDTO toDTO(Store store) {
         return StoreDTO.builder()
-                .id(store.getId().getValue())
-                .organizationId(store.getOrganizationId().getValue())
+                .id(store.getId())
+                .organizationId(store.getOrganization().getId())
                 .name(store.getName())
                 .location(store.getLocation())
                 .countryCode(store.getCountryCode())
-                .contactInfo(store.getContactInfo() != null ? store.getContactInfo().getValue() : null)
+                .contactInfo(store.getContactInfo())
                 .status(store.getStatus().name())
                 .createdAt(store.getCreatedAt())
                 .updatedAt(store.getUpdatedAt())

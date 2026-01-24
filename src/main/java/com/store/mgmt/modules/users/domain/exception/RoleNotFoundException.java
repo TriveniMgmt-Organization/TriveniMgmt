@@ -1,20 +1,20 @@
 package com.store.mgmt.modules.users.domain.exception;
 
-import com.store.mgmt.modules.users.domain.model.RoleId;
+import java.util.UUID;
 
 /**
  * Exception thrown when a role is not found.
  */
 public class RoleNotFoundException extends RuntimeException {
 
-    private final RoleId roleId;
+    private final UUID roleId;
 
-    public RoleNotFoundException(RoleId roleId) {
-        super("Role not found: " + roleId.getValue());
+    public RoleNotFoundException(UUID roleId) {
+        super("Role not found: " + roleId);
         this.roleId = roleId;
     }
 
-    public RoleId getRoleId() {
+    public UUID getRoleId() {
         return roleId;
     }
 }

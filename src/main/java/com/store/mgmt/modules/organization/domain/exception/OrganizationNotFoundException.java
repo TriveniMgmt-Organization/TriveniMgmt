@@ -1,15 +1,16 @@
 package com.store.mgmt.modules.organization.domain.exception;
 
-import com.store.mgmt.modules.organization.domain.model.OrganizationId;
 import com.store.mgmt.shared.domain.exception.DomainException;
+
+import java.util.UUID;
 
 /**
  * Exception thrown when an organization is not found.
  */
 public class OrganizationNotFoundException extends DomainException {
 
-    public OrganizationNotFoundException(OrganizationId id) {
-        super("Organization not found: " + id.getValue());
+    public OrganizationNotFoundException(UUID id) {
+        super("Organization not found: " + id);
     }
 
     public OrganizationNotFoundException(String message) {

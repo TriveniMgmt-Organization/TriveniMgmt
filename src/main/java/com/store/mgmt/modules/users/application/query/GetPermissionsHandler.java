@@ -31,24 +31,16 @@ public class GetPermissionsHandler implements QueryHandler<GetPermissionsQuery, 
     public List<PermissionDTO> handle(GetPermissionsQuery query) {
         log.debug("Getting permissions (page={}, size={})", query.page(), query.size());
 
-        List<Permission> permissions = permissionRepo.findAll();
+        List<Permission> permissions = permissionRepo.findAll(query.page(), query.size()).getContent();
 
-        // Simple pagination
-        int start = query.page() * query.size();
-        int end = Math.min(start + query.size(), permissions.size());
-
-        if (start >= permissions.size()) {
-            return List.of();
-        }
-
-        return permissions.subList(start, end).stream()
+        return permissions.stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
     private PermissionDTO toDTO(Permission permission) {
         return PermissionDTO.builder()
-                .id(permission.getId().getValue())
+                .id(permission.getId())
                 .name(permission.getName())
                 .description(permission.getDescription())
                 .createdAt(permission.getCreatedAt())

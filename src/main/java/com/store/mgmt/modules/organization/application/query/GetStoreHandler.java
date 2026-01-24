@@ -3,7 +3,6 @@ package com.store.mgmt.modules.organization.application.query;
 import com.store.mgmt.modules.organization.application.dto.StoreDTO;
 import com.store.mgmt.modules.organization.domain.exception.StoreNotFoundException;
 import com.store.mgmt.modules.organization.domain.model.Store;
-import com.store.mgmt.modules.organization.domain.model.StoreId;
 import com.store.mgmt.modules.organization.domain.repository.StoreRepository;
 import com.store.mgmt.shared.application.query.QueryHandler;
 import org.slf4j.Logger;
@@ -30,20 +29,20 @@ public class GetStoreHandler implements QueryHandler<GetStoreQuery, StoreDTO> {
     public StoreDTO handle(GetStoreQuery query) {
         log.debug("Getting store: {}", query.storeId());
 
-        Store store = storeRepo.findById(StoreId.of(query.storeId()))
-                .orElseThrow(() -> new StoreNotFoundException(StoreId.of(query.storeId())));
+        Store store = storeRepo.findById(query.storeId())
+                .orElseThrow(() -> new StoreNotFoundException(query.storeId()));
 
         return toDTO(store);
     }
 
     private StoreDTO toDTO(Store store) {
         return StoreDTO.builder()
-                .id(store.getId().getValue())
-                .organizationId(store.getOrganizationId().getValue())
+                .id(store.getId())
+                .organizationId(store.getOrganization().getId())
                 .name(store.getName())
                 .location(store.getLocation())
                 .countryCode(store.getCountryCode())
-                .contactInfo(store.getContactInfo() != null ? store.getContactInfo().getValue() : null)
+                .contactInfo(store.getContactInfo())
                 .status(store.getStatus().name())
                 .createdAt(store.getCreatedAt())
                 .updatedAt(store.getUpdatedAt())

@@ -1,20 +1,20 @@
 package com.store.mgmt.modules.users.domain.exception;
 
-import com.store.mgmt.modules.users.domain.model.UserId;
+import java.util.UUID;
 
 /**
  * Exception thrown when a user is not found.
  */
 public class UserNotFoundException extends RuntimeException {
 
-    private final UserId userId;
+    private final UUID userId;
 
-    public UserNotFoundException(UserId userId) {
-        super("User not found: " + userId.getValue());
+    public UserNotFoundException(UUID userId) {
+        super("User not found: " + userId);
         this.userId = userId;
     }
 
-    public UserId getUserId() {
+    public UUID getUserId() {
         return userId;
     }
 }

@@ -2,7 +2,6 @@ package com.store.mgmt.modules.organization.application.query;
 
 import com.store.mgmt.modules.organization.application.dto.OrganizationDTO;
 import com.store.mgmt.modules.organization.domain.model.Organization;
-import com.store.mgmt.modules.organization.domain.model.UserId;
 import com.store.mgmt.modules.organization.domain.repository.OrganizationRepository;
 import com.store.mgmt.shared.application.query.QueryHandler;
 import com.store.mgmt.shared.infrastructure.security.TenantContext;
@@ -34,9 +33,8 @@ public class GetOrganizationsHandler implements QueryHandler<GetOrganizationsQue
         log.debug("Getting organizations for current user");
 
         TenantContext tenant = TenantContext.current();
-        UserId userId = UserId.of(tenant.userId());
 
-        List<Organization> orgs = orgRepo.findAllByUserId(userId);
+        List<Organization> orgs = orgRepo.findAllByUserId(tenant.userId());
 
         // Simple pagination
         int start = query.page() * query.size();
@@ -53,10 +51,10 @@ public class GetOrganizationsHandler implements QueryHandler<GetOrganizationsQue
 
     private OrganizationDTO toDTO(Organization org) {
         return OrganizationDTO.builder()
-                .id(org.getId().getValue())
+                .id(org.getId())
                 .name(org.getName())
                 .description(org.getDescription())
-                .contactInfo(org.getContactInfo() != null ? org.getContactInfo().getValue() : null)
+                .contactInfo(org.getContactInfo())
                 .appliedTemplateCode(org.getAppliedTemplateCode())
                 .createdAt(org.getCreatedAt())
                 .updatedAt(org.getUpdatedAt())

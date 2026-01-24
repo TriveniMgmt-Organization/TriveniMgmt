@@ -31,24 +31,16 @@ public class GetRolesHandler implements QueryHandler<GetRolesQuery, List<RoleDTO
     public List<RoleDTO> handle(GetRolesQuery query) {
         log.debug("Getting roles (page={}, size={})", query.page(), query.size());
 
-        List<Role> roles = roleRepo.findAll();
+        List<Role> roles = roleRepo.findAll(query.page(), query.size()).getContent();
 
-        // Simple pagination
-        int start = query.page() * query.size();
-        int end = Math.min(start + query.size(), roles.size());
-
-        if (start >= roles.size()) {
-            return List.of();
-        }
-
-        return roles.subList(start, end).stream()
+        return roles.stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
     private RoleDTO toDTO(Role role) {
         return RoleDTO.builder()
-                .id(role.getId().getValue())
+                .id(role.getId())
                 .name(role.getName())
                 .description(role.getDescription())
                 .permissions(List.of())

@@ -48,11 +48,11 @@ public class GetUsersHandler implements QueryHandler<GetUsersQuery, List<UserDTO
 
     private UserDTO toDTO(User user) {
         return UserDTO.builder()
-                .id(user.getId().getValue())
-                .username(user.getUsername().value())
-                .email(user.getEmail().value())
-                .firstName(user.getName() != null ? user.getName().firstName() : null)
-                .lastName(user.getName() != null ? user.getName().lastName() : null)
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
                 .imageUrl(user.getImageUrl())
                 .active(user.isActive())
                 .roles(List.of())

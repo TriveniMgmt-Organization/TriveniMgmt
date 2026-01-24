@@ -1,12 +1,7 @@
 package com.store.mgmt.modules.organization.domain.model;
 
-/**
- * Status of a store.
- */
 public enum StoreStatus {
-    ACTIVE,
-    INACTIVE,
-    CLOSED;
+    ACTIVE, INACTIVE, CLOSED;
 
     public boolean isOperational() {
         return this == ACTIVE;

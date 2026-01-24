@@ -6,8 +6,8 @@ import com.store.mgmt.modules.auth.application.service.AuthContextService.Active
 import com.store.mgmt.modules.auth.application.service.AuthContextService.TokenPair;
 import com.store.mgmt.modules.auth.infrastructure.service.AuthCookieService;
 import com.store.mgmt.shared.application.command.CommandHandler;
-import com.store.mgmt.users.model.entity.User;
-import com.store.mgmt.users.repository.UserRepository;
+import com.store.mgmt.modules.users.domain.model.User;
+import com.store.mgmt.modules.users.domain.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;

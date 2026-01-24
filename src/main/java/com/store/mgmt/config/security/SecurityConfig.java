@@ -3,10 +3,10 @@ package com.store.mgmt.config.security;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import com.store.mgmt.auth.service.JWTService;
-import com.store.mgmt.organization.repository.OrganizationRepository;
-import com.store.mgmt.organization.repository.StoreRepository;
-import com.store.mgmt.users.repository.UserRepository;
+import com.store.mgmt.shared.infrastructure.security.JWTService;
+import com.store.mgmt.modules.organization.domain.repository.OrganizationRepository;
+import com.store.mgmt.modules.organization.domain.repository.StoreRepository;
+import com.store.mgmt.modules.users.domain.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -133,6 +133,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                                 // Public endpoints
                                 .requestMatchers("/api/v1/auth/**").permitAll()
+                                .requestMatchers("/api/v2/auth/login", "/api/v2/auth/register", "/api/v2/auth/refresh").permitAll()
                                 .requestMatchers(SWAGGER_WHITELIST).permitAll()
                                 .requestMatchers("/error").permitAll()
                                 .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info").permitAll()

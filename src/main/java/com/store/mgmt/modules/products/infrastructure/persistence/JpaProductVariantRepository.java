@@ -24,8 +24,8 @@ public class JpaProductVariantRepository implements ProductVariantRepository {
 
     @Override
     public Optional<ProductVariant> findById(ProductVariantId id) {
-        com.store.mgmt.inventory.model.entity.ProductVariant entity =
-                em.find(com.store.mgmt.inventory.model.entity.ProductVariant.class, id.getValue());
+        com.store.mgmt.modules.inventory.domain.model.ProductVariant entity =
+                em.find(com.store.mgmt.modules.inventory.domain.model.ProductVariant.class, id.getValue());
         if (entity == null || entity.getDeletedAt() != null) {
             return Optional.empty();
         }
@@ -35,13 +35,13 @@ public class JpaProductVariantRepository implements ProductVariantRepository {
     @Override
     public Optional<ProductVariant> findByIdAndOrganizationId(ProductVariantId id, OrganizationId organizationId) {
         try {
-            TypedQuery<com.store.mgmt.inventory.model.entity.ProductVariant> query = em.createQuery("""
+            TypedQuery<com.store.mgmt.modules.inventory.domain.model.ProductVariant> query = em.createQuery("""
                 SELECT pv FROM ProductVariant pv
                 LEFT JOIN FETCH pv.template
                 WHERE pv.id = :id
-                AND pv.organization.id = :orgId
+                AND pv.organizationId = :orgId
                 AND pv.deletedAt IS NULL
-                """, com.store.mgmt.inventory.model.entity.ProductVariant.class);
+                """, com.store.mgmt.modules.inventory.domain.model.ProductVariant.class);
             query.setParameter("id", id.getValue());
             query.setParameter("orgId", organizationId.getValue());
 
@@ -54,13 +54,13 @@ public class JpaProductVariantRepository implements ProductVariantRepository {
     @Override
     public Optional<ProductVariant> findBySkuAndOrganizationId(Sku sku, OrganizationId organizationId) {
         try {
-            TypedQuery<com.store.mgmt.inventory.model.entity.ProductVariant> query = em.createQuery("""
+            TypedQuery<com.store.mgmt.modules.inventory.domain.model.ProductVariant> query = em.createQuery("""
                 SELECT pv FROM ProductVariant pv
                 LEFT JOIN FETCH pv.template
                 WHERE pv.sku = :sku
-                AND pv.organization.id = :orgId
+                AND pv.organizationId = :orgId
                 AND pv.deletedAt IS NULL
-                """, com.store.mgmt.inventory.model.entity.ProductVariant.class);
+                """, com.store.mgmt.modules.inventory.domain.model.ProductVariant.class);
             query.setParameter("sku", sku.getValue());
             query.setParameter("orgId", organizationId.getValue());
 
@@ -76,13 +76,13 @@ public class JpaProductVariantRepository implements ProductVariantRepository {
             return Optional.empty();
         }
         try {
-            TypedQuery<com.store.mgmt.inventory.model.entity.ProductVariant> query = em.createQuery("""
+            TypedQuery<com.store.mgmt.modules.inventory.domain.model.ProductVariant> query = em.createQuery("""
                 SELECT pv FROM ProductVariant pv
                 LEFT JOIN FETCH pv.template
                 WHERE pv.barcode = :barcode
-                AND pv.organization.id = :orgId
+                AND pv.organizationId = :orgId
                 AND pv.deletedAt IS NULL
-                """, com.store.mgmt.inventory.model.entity.ProductVariant.class);
+                """, com.store.mgmt.modules.inventory.domain.model.ProductVariant.class);
             query.setParameter("barcode", barcode.getValue());
             query.setParameter("orgId", organizationId.getValue());
 
@@ -94,12 +94,12 @@ public class JpaProductVariantRepository implements ProductVariantRepository {
 
     @Override
     public List<ProductVariant> findByTemplateId(ProductTemplateId templateId) {
-        TypedQuery<com.store.mgmt.inventory.model.entity.ProductVariant> query = em.createQuery("""
+        TypedQuery<com.store.mgmt.modules.inventory.domain.model.ProductVariant> query = em.createQuery("""
             SELECT pv FROM ProductVariant pv
             WHERE pv.template.id = :templateId
             AND pv.deletedAt IS NULL
             ORDER BY pv.sku ASC
-            """, com.store.mgmt.inventory.model.entity.ProductVariant.class);
+            """, com.store.mgmt.modules.inventory.domain.model.ProductVariant.class);
         query.setParameter("templateId", templateId.getValue());
 
         return query.getResultList().stream()
@@ -109,13 +109,13 @@ public class JpaProductVariantRepository implements ProductVariantRepository {
 
     @Override
     public List<ProductVariant> findActiveByTemplateId(ProductTemplateId templateId) {
-        TypedQuery<com.store.mgmt.inventory.model.entity.ProductVariant> query = em.createQuery("""
+        TypedQuery<com.store.mgmt.modules.inventory.domain.model.ProductVariant> query = em.createQuery("""
             SELECT pv FROM ProductVariant pv
             WHERE pv.template.id = :templateId
             AND pv.isActive = true
             AND pv.deletedAt IS NULL
             ORDER BY pv.sku ASC
-            """, com.store.mgmt.inventory.model.entity.ProductVariant.class);
+            """, com.store.mgmt.modules.inventory.domain.model.ProductVariant.class);
         query.setParameter("templateId", templateId.getValue());
 
         return query.getResultList().stream()
@@ -125,13 +125,13 @@ public class JpaProductVariantRepository implements ProductVariantRepository {
 
     @Override
     public List<ProductVariant> findByOrganizationId(OrganizationId organizationId) {
-        TypedQuery<com.store.mgmt.inventory.model.entity.ProductVariant> query = em.createQuery("""
+        TypedQuery<com.store.mgmt.modules.inventory.domain.model.ProductVariant> query = em.createQuery("""
             SELECT pv FROM ProductVariant pv
             LEFT JOIN FETCH pv.template
-            WHERE pv.organization.id = :orgId
+            WHERE pv.organizationId = :orgId
             AND pv.deletedAt IS NULL
             ORDER BY pv.sku ASC
-            """, com.store.mgmt.inventory.model.entity.ProductVariant.class);
+            """, com.store.mgmt.modules.inventory.domain.model.ProductVariant.class);
         query.setParameter("orgId", organizationId.getValue());
 
         return query.getResultList().stream()
@@ -144,7 +144,7 @@ public class JpaProductVariantRepository implements ProductVariantRepository {
         TypedQuery<Long> query = em.createQuery("""
             SELECT COUNT(pv) FROM ProductVariant pv
             WHERE pv.sku = :sku
-            AND pv.organization.id = :orgId
+            AND pv.organizationId = :orgId
             AND pv.deletedAt IS NULL
             """, Long.class);
         query.setParameter("sku", sku.getValue());
@@ -161,7 +161,7 @@ public class JpaProductVariantRepository implements ProductVariantRepository {
         TypedQuery<Long> query = em.createQuery("""
             SELECT COUNT(pv) FROM ProductVariant pv
             WHERE pv.barcode = :barcode
-            AND pv.organization.id = :orgId
+            AND pv.organizationId = :orgId
             AND pv.deletedAt IS NULL
             """, Long.class);
         query.setParameter("barcode", barcode.getValue());
@@ -172,9 +172,9 @@ public class JpaProductVariantRepository implements ProductVariantRepository {
 
     @Override
     public ProductVariant save(ProductVariant variant) {
-        com.store.mgmt.inventory.model.entity.ProductVariant entity = toEntity(variant);
+        com.store.mgmt.modules.inventory.domain.model.ProductVariant entity = toEntity(variant);
 
-        if (em.find(com.store.mgmt.inventory.model.entity.ProductVariant.class, variant.getId().getValue()) == null) {
+        if (em.find(com.store.mgmt.modules.inventory.domain.model.ProductVariant.class, variant.getId().getValue()) == null) {
             em.persist(entity);
         } else {
             entity = em.merge(entity);
@@ -186,8 +186,8 @@ public class JpaProductVariantRepository implements ProductVariantRepository {
 
     @Override
     public void delete(ProductVariant variant) {
-        com.store.mgmt.inventory.model.entity.ProductVariant entity =
-                em.find(com.store.mgmt.inventory.model.entity.ProductVariant.class, variant.getId().getValue());
+        com.store.mgmt.modules.inventory.domain.model.ProductVariant entity =
+                em.find(com.store.mgmt.modules.inventory.domain.model.ProductVariant.class, variant.getId().getValue());
         if (entity != null) {
             entity.setDeletedAt(variant.getDeletedAt());
             em.merge(entity);
@@ -196,7 +196,7 @@ public class JpaProductVariantRepository implements ProductVariantRepository {
 
     // ==================== Mapping Methods ====================
 
-    private ProductVariant toDomain(com.store.mgmt.inventory.model.entity.ProductVariant entity) {
+    private ProductVariant toDomain(com.store.mgmt.modules.inventory.domain.model.ProductVariant entity) {
         return ProductVariant.reconstitute(
                 ProductVariantId.of(entity.getId()),
                 ProductTemplateId.of(entity.getTemplate().getId()),
@@ -206,30 +206,27 @@ public class JpaProductVariantRepository implements ProductVariantRepository {
                 Money.of(entity.getRetailPrice()),
                 ProductAttributes.of(entity.getAttributeValues()),
                 entity.isActive(),
-                OrganizationId.of(entity.getOrganization().getId()),
+                OrganizationId.of(entity.getOrganizationId()),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt(),
                 entity.getDeletedAt()
         );
     }
 
-    private com.store.mgmt.inventory.model.entity.ProductVariant toEntity(ProductVariant domain) {
-        com.store.mgmt.inventory.model.entity.ProductVariant entity =
-                em.find(com.store.mgmt.inventory.model.entity.ProductVariant.class, domain.getId().getValue());
+    private com.store.mgmt.modules.inventory.domain.model.ProductVariant toEntity(ProductVariant domain) {
+        com.store.mgmt.modules.inventory.domain.model.ProductVariant entity =
+                em.find(com.store.mgmt.modules.inventory.domain.model.ProductVariant.class, domain.getId().getValue());
 
         if (entity == null) {
-            entity = new com.store.mgmt.inventory.model.entity.ProductVariant();
+            entity = new com.store.mgmt.modules.inventory.domain.model.ProductVariant();
             entity.setId(domain.getId().getValue());
 
             // Load template reference
-            com.store.mgmt.inventory.model.entity.ProductTemplate template =
-                    em.find(com.store.mgmt.inventory.model.entity.ProductTemplate.class, domain.getTemplateId().getValue());
+            com.store.mgmt.modules.inventory.domain.model.ProductTemplate template =
+                    em.find(com.store.mgmt.modules.inventory.domain.model.ProductTemplate.class, domain.getTemplateId().getValue());
             entity.setTemplate(template);
 
-            // Load organization reference
-            com.store.mgmt.organization.model.entity.Organization org =
-                    em.find(com.store.mgmt.organization.model.entity.Organization.class, domain.getOrganizationId().getValue());
-            entity.setOrganization(org);
+            entity.setOrganizationId(domain.getOrganizationId().getValue());
         }
 
         entity.setSku(domain.getSku().getValue());

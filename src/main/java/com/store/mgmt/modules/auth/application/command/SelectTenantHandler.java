@@ -5,12 +5,13 @@ import com.store.mgmt.modules.auth.application.service.AuthContextService;
 import com.store.mgmt.modules.auth.application.service.AuthContextService.ActiveContext;
 import com.store.mgmt.modules.auth.application.service.AuthContextService.TokenPair;
 import com.store.mgmt.modules.auth.infrastructure.service.AuthCookieService;
-import com.store.mgmt.organization.model.entity.Store;
-import com.store.mgmt.organization.repository.OrganizationRepository;
-import com.store.mgmt.organization.repository.StoreRepository;
+import com.store.mgmt.modules.organization.domain.model.Store;
+import com.store.mgmt.modules.organization.domain.repository.OrganizationRepository;
+import com.store.mgmt.modules.organization.domain.repository.StoreRepository;
+import com.store.mgmt.modules.organization.domain.repository.UserOrganizationRoleRepository;
 import com.store.mgmt.shared.application.command.CommandHandler;
-import com.store.mgmt.users.model.entity.User;
-import com.store.mgmt.users.repository.UserRepository;
+import com.store.mgmt.modules.users.domain.model.User;
+import com.store.mgmt.modules.users.domain.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,19 +33,22 @@ public class SelectTenantHandler implements CommandHandler<SelectTenantCommand, 
     private final StoreRepository storeRepository;
     private final AuthContextService authContextService;
     private final AuthCookieService authCookieService;
+    private final UserOrganizationRoleRepository userOrganizationRoleRepository;
 
     public SelectTenantHandler(
             UserRepository userRepository,
             OrganizationRepository organizationRepository,
             StoreRepository storeRepository,
             AuthContextService authContextService,
-            AuthCookieService authCookieService
+            AuthCookieService authCookieService,
+            UserOrganizationRoleRepository userOrganizationRoleRepository
     ) {
         this.userRepository = userRepository;
         this.organizationRepository = organizationRepository;
         this.storeRepository = storeRepository;
         this.authContextService = authContextService;
         this.authCookieService = authCookieService;
+        this.userOrganizationRoleRepository = userOrganizationRoleRepository;
     }
 
     @Override
@@ -53,13 +57,11 @@ public class SelectTenantHandler implements CommandHandler<SelectTenantCommand, 
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        // Fetch user with roles to avoid N+1
-        User user = userRepository.findByUsernameWithAllRelatedData(username)
+        User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new IllegalStateException("Current user not found"));
 
         // Validate user has access to the organization
-        boolean hasAccess = user.getOrganizationRoles().stream()
-                .anyMatch(uor -> uor.getOrganization().getId().equals(cmd.organizationId()));
+        boolean hasAccess = userOrganizationRoleRepository.existsByUserIdAndOrganizationId(user.getId(), cmd.organizationId());
 
         if (!hasAccess) {
             throw new SecurityException("User not authorized for this organization");

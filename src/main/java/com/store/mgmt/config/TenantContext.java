@@ -1,8 +1,8 @@
 package com.store.mgmt.config;
 
-import com.store.mgmt.organization.model.entity.Organization;
-import com.store.mgmt.organization.model.entity.Store;
-import com.store.mgmt.users.model.entity.User;
+import com.store.mgmt.modules.organization.domain.model.Organization;
+import com.store.mgmt.modules.organization.domain.model.Store;
+import com.store.mgmt.modules.users.domain.model.User;
 
 import java.util.UUID;
 

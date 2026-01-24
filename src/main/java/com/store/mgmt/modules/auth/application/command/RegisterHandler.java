@@ -1,26 +1,27 @@
 package com.store.mgmt.modules.auth.application.command;
 
-import com.store.mgmt.globaltemplates.service.TemplateCopyService;
+import com.store.mgmt.modules.globaltemplates.domain.service.TemplateCopyService;
 import com.store.mgmt.modules.auth.application.dto.AuthResponseDTO;
 import com.store.mgmt.modules.auth.application.service.AuthContextService;
 import com.store.mgmt.modules.auth.application.service.AuthContextService.ActiveContext;
 import com.store.mgmt.modules.auth.application.service.AuthContextService.TokenPair;
 import com.store.mgmt.modules.auth.infrastructure.service.AuthCookieService;
-import com.store.mgmt.organization.enums.StoreStatus;
-import com.store.mgmt.organization.model.entity.Invitation;
-import com.store.mgmt.organization.model.entity.Organization;
-import com.store.mgmt.organization.model.entity.Store;
-import com.store.mgmt.organization.model.entity.UserOrganizationRole;
-import com.store.mgmt.organization.repository.InvitationRepository;
-import com.store.mgmt.organization.repository.OrganizationRepository;
-import com.store.mgmt.organization.repository.StoreRepository;
+import com.store.mgmt.modules.organization.domain.model.StoreStatus;
+import com.store.mgmt.modules.organization.domain.model.Invitation;
+import com.store.mgmt.modules.organization.domain.model.Organization;
+import com.store.mgmt.modules.organization.domain.model.Store;
+import com.store.mgmt.modules.organization.domain.model.UserOrganizationRole;
+import com.store.mgmt.modules.organization.domain.repository.InvitationRepository;
+import com.store.mgmt.modules.organization.domain.repository.OrganizationRepository;
+import com.store.mgmt.modules.organization.domain.repository.StoreRepository;
+import com.store.mgmt.modules.organization.domain.repository.UserOrganizationRoleRepository;
 import com.store.mgmt.shared.application.command.CommandHandler;
-import com.store.mgmt.users.model.RoleType;
-import com.store.mgmt.users.model.entity.Role;
-import com.store.mgmt.users.model.entity.User;
-import com.store.mgmt.users.repository.RoleRepository;
-import com.store.mgmt.users.repository.UserRepository;
-import com.store.mgmt.users.service.AuditLogService;
+import com.store.mgmt.modules.users.domain.model.RoleType;
+import com.store.mgmt.modules.users.domain.model.Role;
+import com.store.mgmt.modules.users.domain.model.User;
+import com.store.mgmt.modules.users.domain.repository.RoleRepository;
+import com.store.mgmt.modules.users.domain.repository.UserRepository;
+import com.store.mgmt.shared.infrastructure.audit.AuditLogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,7 +29,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -46,6 +46,7 @@ public class RegisterHandler implements CommandHandler<RegisterCommand, AuthResp
     private final OrganizationRepository organizationRepository;
     private final StoreRepository storeRepository;
     private final InvitationRepository invitationRepository;
+    private final UserOrganizationRoleRepository userOrganizationRoleRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthContextService authContextService;
     private final AuthCookieService authCookieService;
@@ -58,6 +59,7 @@ public class RegisterHandler implements CommandHandler<RegisterCommand, AuthResp
             OrganizationRepository organizationRepository,
             StoreRepository storeRepository,
             InvitationRepository invitationRepository,
+            UserOrganizationRoleRepository userOrganizationRoleRepository,
             PasswordEncoder passwordEncoder,
             AuthContextService authContextService,
             AuthCookieService authCookieService,
@@ -69,6 +71,7 @@ public class RegisterHandler implements CommandHandler<RegisterCommand, AuthResp
         this.organizationRepository = organizationRepository;
         this.storeRepository = storeRepository;
         this.invitationRepository = invitationRepository;
+        this.userOrganizationRoleRepository = userOrganizationRoleRepository;
         this.passwordEncoder = passwordEncoder;
         this.authContextService = authContextService;
         this.authCookieService = authCookieService;
@@ -112,8 +115,11 @@ public class RegisterHandler implements CommandHandler<RegisterCommand, AuthResp
             store = result.store;
         }
 
-        user.setOrganizationRoles(Set.of(userOrgRole));
         User savedUser = userRepository.save(user);
+
+        // Now set the userId and save the UserOrganizationRole
+        userOrgRole.setUserId(savedUser.getId());
+        userOrganizationRoleRepository.save(userOrgRole);
 
         // Build context and generate tokens
         ActiveContext context = authContextService.buildContextForOrganization(savedUser, organization, store);
@@ -142,9 +148,9 @@ public class RegisterHandler implements CommandHandler<RegisterCommand, AuthResp
         }
 
         UserOrganizationRole userOrgRole = new UserOrganizationRole();
-        userOrgRole.setUser(user);
+        // userId will be set after user is saved
         userOrgRole.setOrganization(invitation.getOrganization());
-        userOrgRole.setRole(invitation.getRole());
+        userOrgRole.setRoleId(invitation.getRoleId());
         userOrgRole.setStore(invitation.getStore());
 
         invitation.setUsed(true);
@@ -189,9 +195,9 @@ public class RegisterHandler implements CommandHandler<RegisterCommand, AuthResp
                 .orElseThrow(() -> new IllegalStateException("SUPER_ADMIN role not found."));
 
         UserOrganizationRole userOrgRole = new UserOrganizationRole();
-        userOrgRole.setUser(user);
+        // userId will be set after user is saved
         userOrgRole.setOrganization(savedOrganization);
-        userOrgRole.setRole(superAdminRole);
+        userOrgRole.setRoleId(superAdminRole.getId());
 
         log.info("User registered as SUPER_ADMIN of new organization: {}", savedOrganization.getName());
 

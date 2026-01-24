@@ -1,0 +1,43 @@
+package com.store.mgmt.modules.inventory.domain.repository;
+
+import com.store.mgmt.modules.inventory.domain.model.BatchLot;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Repository
+public interface BatchLotRepository extends JpaRepository<BatchLot, UUID> {
+    
+    // Find by batch number (should be unique)
+    Optional<BatchLot> findByBatchNumber(String batchNumber);
+    
+    // Find batch lots expiring soon
+    @Query("SELECT bl FROM BatchLot bl WHERE bl.expiryDate BETWEEN :startDate AND :endDate AND bl.deletedAt IS NULL ORDER BY bl.expiryDate ASC")
+    List<BatchLot> findExpiringBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+    
+    // Find expired batch lots
+    @Query("SELECT bl FROM BatchLot bl WHERE bl.expiryDate < :currentDate AND bl.deletedAt IS NULL")
+    List<BatchLot> findExpired(@Param("currentDate") LocalDate currentDate);
+    
+    // Find batch lots by supplier
+    @Query("SELECT bl FROM BatchLot bl WHERE bl.supplier.id = :supplierId AND bl.deletedAt IS NULL")
+    List<BatchLot> findBySupplierId(@Param("supplierId") UUID supplierId);
+    
+    // Find batch lots created today (for sequence number generation)
+    @Query("SELECT bl FROM BatchLot bl WHERE bl.batchNumber LIKE :pattern AND bl.deletedAt IS NULL ORDER BY bl.batchNumber DESC")
+    List<BatchLot> findByBatchNumberPattern(@Param("pattern") String pattern);
+    
+    // Get max sequence number for a date prefix (optimized - returns only the max sequence)
+    // Uses PostgreSQL-compatible syntax
+    @Query(value = "SELECT MAX(CAST(SUBSTRING(bl.batch_number FROM :prefixLength + 1) AS INTEGER)) " +
+                   "FROM batch_lots bl " +
+                   "WHERE bl.batch_number LIKE :pattern AND bl.deleted_at IS NULL", nativeQuery = true)
+    Integer findMaxSequenceForPattern(@Param("pattern") String pattern, @Param("prefixLength") int prefixLength);
+}
+

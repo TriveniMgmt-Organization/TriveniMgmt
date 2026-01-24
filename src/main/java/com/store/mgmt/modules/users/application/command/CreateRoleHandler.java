@@ -36,17 +36,20 @@ public class CreateRoleHandler implements CommandHandler<CreateRoleCommand, Role
         }
 
         // Create role
-        Role role = Role.create(cmd.name(), cmd.description());
+        Role role = new Role();
+        role.setName(cmd.name());
+        role.setDescription(cmd.description());
+
         role = roleRepo.save(role);
 
-        log.info("Created role: {}", role.getId().getValue());
+        log.info("Created role: {}", role.getId());
 
         return toDTO(role);
     }
 
     private RoleDTO toDTO(Role role) {
         return RoleDTO.builder()
-                .id(role.getId().getValue())
+                .id(role.getId())
                 .name(role.getName())
                 .description(role.getDescription())
                 .permissions(List.of())

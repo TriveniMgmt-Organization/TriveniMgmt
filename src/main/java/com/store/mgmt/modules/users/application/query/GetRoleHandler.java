@@ -4,7 +4,6 @@ import com.store.mgmt.modules.users.application.dto.PermissionDTO;
 import com.store.mgmt.modules.users.application.dto.RoleDTO;
 import com.store.mgmt.modules.users.domain.exception.RoleNotFoundException;
 import com.store.mgmt.modules.users.domain.model.Role;
-import com.store.mgmt.modules.users.domain.model.RoleId;
 import com.store.mgmt.modules.users.domain.repository.RoleRepository;
 import com.store.mgmt.shared.application.query.QueryHandler;
 import org.slf4j.Logger;
@@ -12,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -33,23 +33,25 @@ public class GetRoleHandler implements QueryHandler<GetRoleQuery, RoleDTO> {
     public RoleDTO handle(GetRoleQuery query) {
         log.debug("Getting role: {}", query.roleId());
 
-        Role role = roleRepo.findById(RoleId.of(query.roleId()))
-                .orElseThrow(() -> new RoleNotFoundException(RoleId.of(query.roleId())));
+        Role role = roleRepo.findById(query.roleId())
+                .orElseThrow(() -> new RoleNotFoundException(query.roleId()));
 
         return toDTO(role);
     }
 
     private RoleDTO toDTO(Role role) {
-        // Note: Permission details would need to be loaded from permission repository
-        List<PermissionDTO> permissions = role.getPermissionIds().stream()
-                .map(pid -> PermissionDTO.builder()
-                        .id(pid.getValue())
-                        .name(null) // Would need to be loaded
-                        .build())
-                .toList();
+        List<PermissionDTO> permissions = role.getPermissions() != null ?
+                role.getPermissions().stream()
+                        .map(p -> PermissionDTO.builder()
+                                .id(p.getId())
+                                .name(p.getName())
+                                .description(p.getDescription())
+                                .build())
+                        .toList()
+                : Collections.emptyList();
 
         return RoleDTO.builder()
-                .id(role.getId().getValue())
+                .id(role.getId())
                 .name(role.getName())
                 .description(role.getDescription())
                 .permissions(permissions)

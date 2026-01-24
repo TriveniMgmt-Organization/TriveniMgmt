@@ -1,7 +1,11 @@
 package com.store.mgmt.config.security;
 
-import com.store.mgmt.users.model.entity.User;
-import com.store.mgmt.users.repository.UserRepository;
+import com.store.mgmt.modules.organization.domain.model.UserOrganizationRole;
+import com.store.mgmt.modules.organization.domain.repository.UserOrganizationRoleRepository;
+import com.store.mgmt.modules.users.domain.model.Role;
+import com.store.mgmt.modules.users.domain.model.User;
+import com.store.mgmt.modules.users.domain.repository.UserRepository;
+import com.store.mgmt.modules.users.infrastructure.persistence.repository.JpaRoleRepository;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,22 +15,28 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
     private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CustomUserDetailsService.class);
     private final UserRepository userRepository;
+    private final UserOrganizationRoleRepository userOrganizationRoleRepository;
+    private final JpaRoleRepository roleRepository;
 
-    public CustomUserDetailsService(UserRepository userRepository) {
+    public CustomUserDetailsService(
+            UserRepository userRepository,
+            UserOrganizationRoleRepository userOrganizationRoleRepository,
+            JpaRoleRepository roleRepository
+    ) {
         this.userRepository = userRepository;
+        this.userOrganizationRoleRepository = userOrganizationRoleRepository;
+        this.roleRepository = roleRepository;
     }
 
     @Override
-    @Transactional // This is important for fetching lazy-loaded collections
+    @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) {
         logger.debug("Attempting to load user by username: {}", username);
         return userRepository.findByEmail(username)
@@ -34,20 +44,16 @@ public class CustomUserDetailsService implements UserDetailsService {
                     logger.debug("User found: {}", user.getEmail());
                     if (!user.isActive()) {
                         logger.warn("User {} is inactive.", username);
-                        // Consider throwing DisabledException here directly if you want
-                        // Spring Security to handle it specifically.
-                        // The AuthenticationManager usually checks UserDetails.isEnabled() too.
                     }
                     try {
                         Collection<? extends GrantedAuthority> authorities = getAuthorities(user);
-                        // logger.debug("Authorities for user {}: {}", user.getEmail(), authorities);
                         return new org.springframework.security.core.userdetails.User(
                                 user.getEmail(),
                                 user.getPasswordHash(),
-                                user.isActive(), // enabled
-                                true, // accountNonExpired
-                                true, // credentialsNonExpired
-                                true, // accountNonLocked
+                                user.isActive(),
+                                true,
+                                true,
+                                true,
                                 authorities);
                     } catch (Exception e) {
                         logger.error("Error building UserDetails for user {}: {}", user.getEmail(), e.getMessage(), e);
@@ -62,25 +68,38 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private Collection<? extends GrantedAuthority> getAuthorities(User user) {
         logger.debug("Getting authorities for user: {}", user.getEmail());
-        if (user.getOrganizationRoles() == null || user.getOrganizationRoles().isEmpty()) {
+
+        List<UserOrganizationRole> orgRoles = userOrganizationRoleRepository.findByUserId(user.getId());
+        if (orgRoles.isEmpty()) {
             logger.warn("User {} has no organization roles assigned.", user.getEmail());
-            return Collections.emptyList(); // Or a default "ROLE_USER" if all users should have it
+            return Collections.emptyList();
         }
-        return user.getOrganizationRoles().stream()
+
+        // Fetch all roles by IDs
+        List<UUID> roleIds = orgRoles.stream()
+                .map(UserOrganizationRole::getRoleId)
+                .distinct()
+                .collect(Collectors.toList());
+        List<Role> roles = roleRepository.findByIdsWithPermissions(roleIds);
+        Map<UUID, Role> roleMap = roles.stream()
+                .collect(Collectors.toMap(Role::getId, r -> r));
+
+        return orgRoles.stream()
                 .map(userOrgRole -> {
-                    if (userOrgRole.getRole() == null) {
-                        logger.error("UserOrganizationRole for user {} has a null role. Skipping.", user.getEmail());
-                        return null; // Filter this out later
+                    Role role = roleMap.get(userOrgRole.getRoleId());
+                    if (role == null) {
+                        logger.error("Role not found for UserOrganizationRole of user {}. Skipping.", user.getEmail());
+                        return null;
                     }
-                    String roleName = userOrgRole.getRole().getName();
+                    String roleName = role.getName();
                     if (roleName == null) {
                         logger.error("Role name is null for UserOrganizationRole of user {}. Skipping.", user.getEmail());
-                        return null; // Filter this out later
+                        return null;
                     }
                     logger.debug("Adding role authority: ROLE_{} for user {}", roleName, user.getEmail());
                     return new SimpleGrantedAuthority("ROLE_" + roleName);
                 })
-                .filter(Objects::nonNull) // Filter out any null authorities
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 }

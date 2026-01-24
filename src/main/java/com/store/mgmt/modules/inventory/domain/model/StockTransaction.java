@@ -1,0 +1,77 @@
+package com.store.mgmt.modules.inventory.domain.model;
+
+import com.store.mgmt.shared.domain.model.BaseEntity;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+/**
+ * StockTransaction entity - Stock transactions for inventory items.
+ * Uses UUID reference for User to avoid cross-module entity dependency.
+ */
+@Entity
+@Table(name = "stock_transactions",
+       indexes = {
+           @Index(name = "idx_tx_inventory", columnList = "inventory_item_id"),
+           @Index(name = "idx_tx_type", columnList = "type"),
+           @Index(name = "idx_tx_timestamp", columnList = "timestamp DESC"),
+           @Index(name = "idx_tx_reference", columnList = "reference_type, reference_id")
+       })
+@Data
+@EqualsAndHashCode(callSuper = false)
+public class StockTransaction extends BaseEntity {
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "inventory_item_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private InventoryItem inventoryItem;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false, length = 30)
+    private TransactionType type;
+
+    @Column(name = "quantity_delta", nullable = false)
+    private int quantityDelta;
+
+    // --- Reference (e.g., PO-123, SALE-456) ---
+    @Column(name = "reference_type", length = 50)
+    private String referenceType; // "PURCHASE_ORDER", "SALE", "TRANSFER"
+
+    @Column(name = "reference_id")
+    private UUID referenceId;
+
+    // --- For transfers ---
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "from_location_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private InventoryLocation fromLocation;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "to_location_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private InventoryLocation toLocation;
+
+    // --- For adjustments ---
+    @Enumerated(EnumType.STRING)
+    @Column(name = "reason", length = 50)
+    private AdjustmentReason reason;
+
+    @Column(name = "user_id")
+    private UUID userId;
+
+    @PrePersist
+    protected void onCreate() {
+        timestamp = LocalDateTime.now();
+    }
+
+    @Column(name = "timestamp", nullable = false, updatable = false)
+    private LocalDateTime timestamp;
+
+    @Column(name = "notes", columnDefinition = "TEXT")
+    private String notes;
+}

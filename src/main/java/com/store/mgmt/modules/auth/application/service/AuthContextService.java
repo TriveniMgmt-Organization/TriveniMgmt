@@ -1,16 +1,19 @@
 package com.store.mgmt.modules.auth.application.service;
 
-import com.store.mgmt.auth.model.entity.RefreshToken;
-import com.store.mgmt.auth.service.JWTService;
+import com.store.mgmt.modules.auth.domain.model.RefreshToken;
+import com.store.mgmt.shared.infrastructure.security.JWTService;
 import com.store.mgmt.modules.auth.application.dto.AuthUserDTO;
 import com.store.mgmt.modules.organization.application.dto.OrganizationDTO;
 import com.store.mgmt.modules.organization.application.dto.StoreDTO;
-import com.store.mgmt.organization.model.entity.Organization;
-import com.store.mgmt.organization.model.entity.Store;
-import com.store.mgmt.organization.model.entity.UserOrganizationRole;
-import com.store.mgmt.users.model.RoleType;
-import com.store.mgmt.users.model.entity.User;
-import com.store.mgmt.users.repository.RefreshTokenRepository;
+import com.store.mgmt.modules.organization.domain.model.Organization;
+import com.store.mgmt.modules.organization.domain.model.Store;
+import com.store.mgmt.modules.organization.domain.model.UserOrganizationRole;
+import com.store.mgmt.modules.organization.domain.repository.UserOrganizationRoleRepository;
+import com.store.mgmt.modules.users.domain.model.Role;
+import com.store.mgmt.modules.users.domain.model.RoleType;
+import com.store.mgmt.modules.users.domain.model.User;
+import com.store.mgmt.modules.auth.domain.repository.RefreshTokenRepository;
+import com.store.mgmt.modules.users.infrastructure.persistence.repository.JpaRoleRepository;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
@@ -27,10 +30,19 @@ public class AuthContextService {
 
     private final JWTService jwtService;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final UserOrganizationRoleRepository userOrganizationRoleRepository;
+    private final JpaRoleRepository roleRepository;
 
-    public AuthContextService(JWTService jwtService, RefreshTokenRepository refreshTokenRepository) {
+    public AuthContextService(
+            JWTService jwtService,
+            RefreshTokenRepository refreshTokenRepository,
+            UserOrganizationRoleRepository userOrganizationRoleRepository,
+            JpaRoleRepository roleRepository
+    ) {
         this.jwtService = jwtService;
         this.refreshTokenRepository = refreshTokenRepository;
+        this.userOrganizationRoleRepository = userOrganizationRoleRepository;
+        this.roleRepository = roleRepository;
     }
 
     /**
@@ -38,27 +50,48 @@ public class AuthContextService {
      * Priority: SUPER_ADMIN role org > first available org
      */
     public ActiveContext determineActiveContext(User user) {
-        Set<UserOrganizationRole> orgRoles = user.getOrganizationRoles();
+        List<UserOrganizationRole> orgRoles = userOrganizationRoleRepository.findByUserIdWithOrganizationAndStore(user.getId());
 
-        if (orgRoles == null || orgRoles.isEmpty()) {
+        if (orgRoles.isEmpty()) {
             throw new IllegalStateException("User account is not associated with any organization.");
         }
 
+        // Fetch all roles by IDs
+        List<UUID> roleIds = orgRoles.stream()
+                .map(UserOrganizationRole::getRoleId)
+                .distinct()
+                .collect(Collectors.toList());
+        List<Role> roles = roleRepository.findByIdsWithPermissions(roleIds);
+        Map<UUID, Role> roleMap = roles.stream()
+                .collect(Collectors.toMap(Role::getId, r -> r));
+
         // Try to find primary organization (SUPER_ADMIN role)
         UserOrganizationRole activeRole = orgRoles.stream()
-                .filter(uor -> RoleType.SUPER_ADMIN.toString().equals(uor.getRole().getName())
-                        && uor.getOrganization() != null)
+                .filter(uor -> {
+                    Role role = roleMap.get(uor.getRoleId());
+                    return role != null && RoleType.SUPER_ADMIN.toString().equals(role.getName())
+                            && uor.getOrganization() != null;
+                })
                 .findFirst()
-                .orElseGet(() -> orgRoles.iterator().next());
+                .orElseGet(() -> orgRoles.get(0));
 
-        return buildActiveContext(user, activeRole);
+        return buildActiveContext(user, activeRole, roleMap);
     }
 
     /**
      * Builds active context for a specific organization and optional store.
      */
     public ActiveContext buildContextForOrganization(User user, Organization organization, Store store) {
-        Set<UserOrganizationRole> orgRoles = user.getOrganizationRoles();
+        List<UserOrganizationRole> orgRoles = userOrganizationRoleRepository.findByUserIdWithOrganizationAndStore(user.getId());
+
+        // Fetch all roles by IDs
+        List<UUID> roleIds = orgRoles.stream()
+                .map(UserOrganizationRole::getRoleId)
+                .distinct()
+                .collect(Collectors.toList());
+        List<Role> roles = roleRepository.findByIdsWithPermissions(roleIds);
+        Map<UUID, Role> roleMap = roles.stream()
+                .collect(Collectors.toMap(Role::getId, r -> r));
 
         // Find the user's role in this organization
         UserOrganizationRole activeRole = orgRoles.stream()
@@ -70,9 +103,11 @@ public class AuthContextService {
         List<GrantedAuthority> authorities = orgRoles.stream()
                 .filter(uor -> uor.getOrganization().getId().equals(organization.getId()))
                 .flatMap(uor -> {
+                    Role role = roleMap.get(uor.getRoleId());
+                    if (role == null) return java.util.stream.Stream.empty();
                     List<GrantedAuthority> auths = new ArrayList<>();
-                    auths.add(new SimpleGrantedAuthority("ROLE_" + uor.getRole().getName()));
-                    uor.getRole().getPermissions().forEach(perm ->
+                    auths.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
+                    role.getPermissions().forEach(perm ->
                             auths.add(new SimpleGrantedAuthority(perm.getName())));
                     return auths.stream();
                 })
@@ -85,15 +120,19 @@ public class AuthContextService {
                 authorities,
                 activeRole,
                 organization,
-                store
+                store,
+                roleMap
         );
     }
 
-    private ActiveContext buildActiveContext(User user, UserOrganizationRole activeRole) {
+    private ActiveContext buildActiveContext(User user, UserOrganizationRole activeRole, Map<UUID, Role> roleMap) {
+        Role role = roleMap.get(activeRole.getRoleId());
         List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_" + activeRole.getRole().getName()));
-        activeRole.getRole().getPermissions().forEach(perm ->
-                authorities.add(new SimpleGrantedAuthority(perm.getName())));
+        if (role != null) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
+            role.getPermissions().forEach(perm ->
+                    authorities.add(new SimpleGrantedAuthority(perm.getName())));
+        }
 
         return new ActiveContext(
                 activeRole.getOrganization().getId(),
@@ -101,7 +140,8 @@ public class AuthContextService {
                 authorities,
                 activeRole,
                 activeRole.getOrganization(),
-                activeRole.getStore()
+                activeRole.getStore(),
+                roleMap
         );
     }
 
@@ -119,7 +159,7 @@ public class AuthContextService {
 
         // Store refresh token
         RefreshToken token = new RefreshToken();
-        token.setUser(user);
+        token.setUserId(user.getId());
         token.setToken(refreshToken);
         token.setExpiryDate(new Date(System.currentTimeMillis() + jwtService.getRefreshTokenExpiration()));
         refreshTokenRepository.save(token);
@@ -179,7 +219,8 @@ public class AuthContextService {
                 .build();
 
         // Get stores user has access to in this organization
-        List<StoreDTO> stores = user.getOrganizationRoles().stream()
+        List<UserOrganizationRole> userOrgRoles = userOrganizationRoleRepository.findByUserIdWithOrganizationAndStore(user.getId());
+        List<StoreDTO> stores = userOrgRoles.stream()
                 .filter(uor -> uor.getOrganization().getId().equals(org.getId()))
                 .map(UserOrganizationRole::getStore)
                 .filter(Objects::nonNull)
@@ -210,7 +251,7 @@ public class AuthContextService {
     }
 
     /**
-     * Active context record containing organization, store, and authorities.
+     * Active context record containing organization, store, authorities, and role map.
      */
     public record ActiveContext(
             UUID organizationId,
@@ -218,7 +259,8 @@ public class AuthContextService {
             List<GrantedAuthority> authorities,
             UserOrganizationRole activeRole,
             Organization organization,
-            Store store
+            Store store,
+            Map<UUID, Role> roleMap
     ) {}
 
     /**

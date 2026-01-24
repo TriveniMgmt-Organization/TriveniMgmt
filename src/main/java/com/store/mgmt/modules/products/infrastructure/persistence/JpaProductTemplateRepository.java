@@ -25,8 +25,8 @@ public class JpaProductTemplateRepository implements ProductTemplateRepository {
 
     @Override
     public Optional<ProductTemplate> findById(ProductTemplateId id) {
-        com.store.mgmt.inventory.model.entity.ProductTemplate entity =
-                em.find(com.store.mgmt.inventory.model.entity.ProductTemplate.class, id.getValue());
+        com.store.mgmt.modules.inventory.domain.model.ProductTemplate entity =
+                em.find(com.store.mgmt.modules.inventory.domain.model.ProductTemplate.class, id.getValue());
         if (entity == null || entity.getDeletedAt() != null) {
             return Optional.empty();
         }
@@ -36,15 +36,15 @@ public class JpaProductTemplateRepository implements ProductTemplateRepository {
     @Override
     public Optional<ProductTemplate> findByIdAndOrganizationId(ProductTemplateId id, OrganizationId organizationId) {
         try {
-            TypedQuery<com.store.mgmt.inventory.model.entity.ProductTemplate> query = em.createQuery("""
+            TypedQuery<com.store.mgmt.modules.inventory.domain.model.ProductTemplate> query = em.createQuery("""
                 SELECT pt FROM ProductTemplate pt
                 LEFT JOIN FETCH pt.category
                 LEFT JOIN FETCH pt.brand
                 LEFT JOIN FETCH pt.unitOfMeasure
                 WHERE pt.id = :id
-                AND pt.organization.id = :orgId
+                AND pt.organizationId = :orgId
                 AND pt.deletedAt IS NULL
-                """, com.store.mgmt.inventory.model.entity.ProductTemplate.class);
+                """, com.store.mgmt.modules.inventory.domain.model.ProductTemplate.class);
             query.setParameter("id", id.getValue());
             query.setParameter("orgId", organizationId.getValue());
 
@@ -56,15 +56,15 @@ public class JpaProductTemplateRepository implements ProductTemplateRepository {
 
     @Override
     public List<ProductTemplate> findByOrganizationId(OrganizationId organizationId) {
-        TypedQuery<com.store.mgmt.inventory.model.entity.ProductTemplate> query = em.createQuery("""
+        TypedQuery<com.store.mgmt.modules.inventory.domain.model.ProductTemplate> query = em.createQuery("""
             SELECT DISTINCT pt FROM ProductTemplate pt
             LEFT JOIN FETCH pt.category
             LEFT JOIN FETCH pt.brand
             LEFT JOIN FETCH pt.unitOfMeasure
-            WHERE pt.organization.id = :orgId
+            WHERE pt.organizationId = :orgId
             AND pt.deletedAt IS NULL
             ORDER BY pt.name ASC
-            """, com.store.mgmt.inventory.model.entity.ProductTemplate.class);
+            """, com.store.mgmt.modules.inventory.domain.model.ProductTemplate.class);
         query.setParameter("orgId", organizationId.getValue());
 
         return query.getResultList().stream()
@@ -74,16 +74,16 @@ public class JpaProductTemplateRepository implements ProductTemplateRepository {
 
     @Override
     public List<ProductTemplate> findByCategoryIdAndOrganizationId(CategoryId categoryId, OrganizationId organizationId) {
-        TypedQuery<com.store.mgmt.inventory.model.entity.ProductTemplate> query = em.createQuery("""
+        TypedQuery<com.store.mgmt.modules.inventory.domain.model.ProductTemplate> query = em.createQuery("""
             SELECT DISTINCT pt FROM ProductTemplate pt
             LEFT JOIN FETCH pt.category
             LEFT JOIN FETCH pt.brand
             LEFT JOIN FETCH pt.unitOfMeasure
             WHERE pt.category.id = :categoryId
-            AND pt.organization.id = :orgId
+            AND pt.organizationId = :orgId
             AND pt.deletedAt IS NULL
             ORDER BY pt.name ASC
-            """, com.store.mgmt.inventory.model.entity.ProductTemplate.class);
+            """, com.store.mgmt.modules.inventory.domain.model.ProductTemplate.class);
         query.setParameter("categoryId", categoryId.getValue());
         query.setParameter("orgId", organizationId.getValue());
 
@@ -94,16 +94,16 @@ public class JpaProductTemplateRepository implements ProductTemplateRepository {
 
     @Override
     public List<ProductTemplate> findByUnitOfMeasureIdAndOrganizationId(UnitOfMeasureId unitOfMeasureId, OrganizationId organizationId) {
-        TypedQuery<com.store.mgmt.inventory.model.entity.ProductTemplate> query = em.createQuery("""
+        TypedQuery<com.store.mgmt.modules.inventory.domain.model.ProductTemplate> query = em.createQuery("""
             SELECT DISTINCT pt FROM ProductTemplate pt
             LEFT JOIN FETCH pt.category
             LEFT JOIN FETCH pt.brand
             LEFT JOIN FETCH pt.unitOfMeasure
             WHERE pt.unitOfMeasure.id = :uomId
-            AND pt.organization.id = :orgId
+            AND pt.organizationId = :orgId
             AND pt.deletedAt IS NULL
             ORDER BY pt.name ASC
-            """, com.store.mgmt.inventory.model.entity.ProductTemplate.class);
+            """, com.store.mgmt.modules.inventory.domain.model.ProductTemplate.class);
         query.setParameter("uomId", unitOfMeasureId.getValue());
         query.setParameter("orgId", organizationId.getValue());
 
@@ -114,16 +114,16 @@ public class JpaProductTemplateRepository implements ProductTemplateRepository {
 
     @Override
     public List<ProductTemplate> findActiveByOrganizationId(OrganizationId organizationId) {
-        TypedQuery<com.store.mgmt.inventory.model.entity.ProductTemplate> query = em.createQuery("""
+        TypedQuery<com.store.mgmt.modules.inventory.domain.model.ProductTemplate> query = em.createQuery("""
             SELECT DISTINCT pt FROM ProductTemplate pt
             LEFT JOIN FETCH pt.category
             LEFT JOIN FETCH pt.brand
             LEFT JOIN FETCH pt.unitOfMeasure
-            WHERE pt.organization.id = :orgId
+            WHERE pt.organizationId = :orgId
             AND pt.isActive = true
             AND pt.deletedAt IS NULL
             ORDER BY pt.name ASC
-            """, com.store.mgmt.inventory.model.entity.ProductTemplate.class);
+            """, com.store.mgmt.modules.inventory.domain.model.ProductTemplate.class);
         query.setParameter("orgId", organizationId.getValue());
 
         return query.getResultList().stream()
@@ -136,7 +136,7 @@ public class JpaProductTemplateRepository implements ProductTemplateRepository {
         TypedQuery<Long> query = em.createQuery("""
             SELECT COUNT(pt) FROM ProductTemplate pt
             WHERE pt.name = :name
-            AND pt.organization.id = :orgId
+            AND pt.organizationId = :orgId
             AND pt.deletedAt IS NULL
             """, Long.class);
         query.setParameter("name", name);
@@ -147,9 +147,9 @@ public class JpaProductTemplateRepository implements ProductTemplateRepository {
 
     @Override
     public ProductTemplate save(ProductTemplate template) {
-        com.store.mgmt.inventory.model.entity.ProductTemplate entity = toEntity(template);
+        com.store.mgmt.modules.inventory.domain.model.ProductTemplate entity = toEntity(template);
 
-        if (em.find(com.store.mgmt.inventory.model.entity.ProductTemplate.class, template.getId().getValue()) == null) {
+        if (em.find(com.store.mgmt.modules.inventory.domain.model.ProductTemplate.class, template.getId().getValue()) == null) {
             em.persist(entity);
         } else {
             entity = em.merge(entity);
@@ -161,8 +161,8 @@ public class JpaProductTemplateRepository implements ProductTemplateRepository {
 
     @Override
     public void delete(ProductTemplate template) {
-        com.store.mgmt.inventory.model.entity.ProductTemplate entity =
-                em.find(com.store.mgmt.inventory.model.entity.ProductTemplate.class, template.getId().getValue());
+        com.store.mgmt.modules.inventory.domain.model.ProductTemplate entity =
+                em.find(com.store.mgmt.modules.inventory.domain.model.ProductTemplate.class, template.getId().getValue());
         if (entity != null) {
             entity.setDeletedAt(template.getDeletedAt());
             em.merge(entity);
@@ -171,7 +171,7 @@ public class JpaProductTemplateRepository implements ProductTemplateRepository {
 
     // ==================== Mapping Methods ====================
 
-    private ProductTemplate toDomain(com.store.mgmt.inventory.model.entity.ProductTemplate entity) {
+    private ProductTemplate toDomain(com.store.mgmt.modules.inventory.domain.model.ProductTemplate entity) {
         List<ProductVariantId> variantIds = new ArrayList<>();
         if (entity.getVariants() != null) {
             entity.getVariants().forEach(v -> variantIds.add(ProductVariantId.of(v.getId())));
@@ -189,7 +189,7 @@ public class JpaProductTemplateRepository implements ProductTemplateRepository {
                 entity.isRequiresExpiry(),
                 entity.isActive(),
                 ProductAttributes.of(entity.getAttributes()),
-                OrganizationId.of(entity.getOrganization().getId()),
+                OrganizationId.of(entity.getOrganizationId()),
                 variantIds,
                 entity.getCreatedAt(),
                 entity.getUpdatedAt(),
@@ -197,18 +197,14 @@ public class JpaProductTemplateRepository implements ProductTemplateRepository {
         );
     }
 
-    private com.store.mgmt.inventory.model.entity.ProductTemplate toEntity(ProductTemplate domain) {
-        com.store.mgmt.inventory.model.entity.ProductTemplate entity =
-                em.find(com.store.mgmt.inventory.model.entity.ProductTemplate.class, domain.getId().getValue());
+    private com.store.mgmt.modules.inventory.domain.model.ProductTemplate toEntity(ProductTemplate domain) {
+        com.store.mgmt.modules.inventory.domain.model.ProductTemplate entity =
+                em.find(com.store.mgmt.modules.inventory.domain.model.ProductTemplate.class, domain.getId().getValue());
 
         if (entity == null) {
-            entity = new com.store.mgmt.inventory.model.entity.ProductTemplate();
+            entity = new com.store.mgmt.modules.inventory.domain.model.ProductTemplate();
             entity.setId(domain.getId().getValue());
-
-            // Load organization reference
-            com.store.mgmt.organization.model.entity.Organization org =
-                    em.find(com.store.mgmt.organization.model.entity.Organization.class, domain.getOrganizationId().getValue());
-            entity.setOrganization(org);
+            entity.setOrganizationId(domain.getOrganizationId().getValue());
         }
 
         entity.setName(domain.getName());
@@ -224,20 +220,20 @@ public class JpaProductTemplateRepository implements ProductTemplateRepository {
 
         // Load references
         if (domain.getCategoryId() != null) {
-            com.store.mgmt.inventory.model.entity.Category category =
-                    em.find(com.store.mgmt.inventory.model.entity.Category.class, domain.getCategoryId().getValue());
+            com.store.mgmt.modules.inventory.domain.model.Category category =
+                    em.find(com.store.mgmt.modules.inventory.domain.model.Category.class, domain.getCategoryId().getValue());
             entity.setCategory(category);
         }
 
         if (domain.getBrandId() != null) {
-            com.store.mgmt.inventory.model.entity.Brand brand =
-                    em.find(com.store.mgmt.inventory.model.entity.Brand.class, domain.getBrandId().getValue());
+            com.store.mgmt.modules.inventory.domain.model.Brand brand =
+                    em.find(com.store.mgmt.modules.inventory.domain.model.Brand.class, domain.getBrandId().getValue());
             entity.setBrand(brand);
         }
 
         if (domain.getUnitOfMeasureId() != null) {
-            com.store.mgmt.inventory.model.entity.UnitOfMeasure uom =
-                    em.find(com.store.mgmt.inventory.model.entity.UnitOfMeasure.class, domain.getUnitOfMeasureId().getValue());
+            com.store.mgmt.modules.inventory.domain.model.UnitOfMeasure uom =
+                    em.find(com.store.mgmt.modules.inventory.domain.model.UnitOfMeasure.class, domain.getUnitOfMeasureId().getValue());
             entity.setUnitOfMeasure(uom);
         }
 

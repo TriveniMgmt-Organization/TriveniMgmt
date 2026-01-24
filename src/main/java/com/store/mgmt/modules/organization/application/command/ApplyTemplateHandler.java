@@ -1,8 +1,8 @@
 package com.store.mgmt.modules.organization.application.command;
 
 import com.store.mgmt.modules.organization.domain.exception.OrganizationNotFoundException;
+import com.store.mgmt.modules.organization.domain.exception.TemplateAlreadyAppliedException;
 import com.store.mgmt.modules.organization.domain.model.Organization;
-import com.store.mgmt.modules.organization.domain.model.OrganizationId;
 import com.store.mgmt.modules.organization.domain.repository.OrganizationRepository;
 import com.store.mgmt.shared.application.command.CommandHandler;
 import org.slf4j.Logger;
@@ -29,10 +29,15 @@ public class ApplyTemplateHandler implements CommandHandler<ApplyTemplateCommand
     public Void handle(ApplyTemplateCommand cmd) {
         log.debug("Applying template {} to organization: {}", cmd.templateCode(), cmd.organizationId());
 
-        Organization org = orgRepo.findById(OrganizationId.of(cmd.organizationId()))
-                .orElseThrow(() -> new OrganizationNotFoundException(OrganizationId.of(cmd.organizationId())));
+        Organization org = orgRepo.findById(cmd.organizationId())
+                .orElseThrow(() -> new OrganizationNotFoundException(cmd.organizationId()));
 
-        org.applyTemplate(cmd.templateCode());
+        // Check if template already applied
+        if (org.getAppliedTemplateCode() != null) {
+            throw new TemplateAlreadyAppliedException(org.getId(), org.getAppliedTemplateCode());
+        }
+
+        org.setAppliedTemplateCode(cmd.templateCode());
         orgRepo.save(org);
 
         log.info("Applied template {} to organization: {}", cmd.templateCode(), cmd.organizationId());

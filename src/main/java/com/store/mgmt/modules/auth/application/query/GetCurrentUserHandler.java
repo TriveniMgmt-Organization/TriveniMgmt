@@ -3,15 +3,17 @@ package com.store.mgmt.modules.auth.application.query;
 import com.store.mgmt.modules.auth.application.dto.AuthUserDTO;
 import com.store.mgmt.modules.organization.application.dto.OrganizationDTO;
 import com.store.mgmt.modules.organization.application.dto.StoreDTO;
-import com.store.mgmt.organization.model.entity.Organization;
-import com.store.mgmt.organization.model.entity.Store;
-import com.store.mgmt.organization.model.entity.UserOrganizationRole;
-import com.store.mgmt.organization.repository.OrganizationRepository;
-import com.store.mgmt.organization.repository.StoreRepository;
-import com.store.mgmt.organization.repository.UserOrganizationRoleRepository;
+import com.store.mgmt.modules.organization.domain.model.Organization;
+import com.store.mgmt.modules.organization.domain.model.Store;
+import com.store.mgmt.modules.organization.domain.model.UserOrganizationRole;
+import com.store.mgmt.modules.organization.domain.repository.OrganizationRepository;
+import com.store.mgmt.modules.organization.domain.repository.StoreRepository;
+import com.store.mgmt.modules.organization.domain.repository.UserOrganizationRoleRepository;
+import com.store.mgmt.modules.users.domain.model.Role;
+import com.store.mgmt.modules.users.infrastructure.persistence.repository.JpaRoleRepository;
 import com.store.mgmt.shared.application.query.QueryHandler;
-import com.store.mgmt.users.model.entity.User;
-import com.store.mgmt.users.repository.UserRepository;
+import com.store.mgmt.modules.users.domain.model.User;
+import com.store.mgmt.modules.users.domain.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,17 +38,20 @@ public class GetCurrentUserHandler implements QueryHandler<GetCurrentUserQuery, 
     private final OrganizationRepository organizationRepository;
     private final StoreRepository storeRepository;
     private final UserOrganizationRoleRepository userOrganizationRoleRepository;
+    private final JpaRoleRepository roleRepository;
 
     public GetCurrentUserHandler(
             UserRepository userRepository,
             OrganizationRepository organizationRepository,
             StoreRepository storeRepository,
-            UserOrganizationRoleRepository userOrganizationRoleRepository
+            UserOrganizationRoleRepository userOrganizationRoleRepository,
+            JpaRoleRepository roleRepository
     ) {
         this.userRepository = userRepository;
         this.organizationRepository = organizationRepository;
         this.storeRepository = storeRepository;
         this.userOrganizationRoleRepository = userOrganizationRoleRepository;
+        this.roleRepository = roleRepository;
     }
 
     @Override
@@ -99,8 +104,20 @@ public class GetCurrentUserHandler implements QueryHandler<GetCurrentUserQuery, 
                 .updatedAt(organization.getUpdatedAt())
                 .build();
 
+        // Get user's organization roles
+        List<UserOrganizationRole> userOrgRoles = userOrganizationRoleRepository.findByUserIdWithOrganizationAndStore(user.getId());
+
+        // Fetch all roles by IDs
+        List<UUID> roleIds = userOrgRoles.stream()
+                .map(UserOrganizationRole::getRoleId)
+                .distinct()
+                .collect(Collectors.toList());
+        Map<UUID, Role> roleMap = roleIds.isEmpty() ? Collections.emptyMap() :
+                roleRepository.findByIdsWithPermissions(roleIds).stream()
+                        .collect(Collectors.toMap(Role::getId, r -> r));
+
         // Get stores user has access to
-        List<StoreDTO> stores = user.getOrganizationRoles().stream()
+        List<StoreDTO> stores = userOrgRoles.stream()
                 .filter(uor -> uor.getOrganization().getId().equals(orgId))
                 .map(UserOrganizationRole::getStore)
                 .filter(Objects::nonNull)
@@ -137,11 +154,14 @@ public class GetCurrentUserHandler implements QueryHandler<GetCurrentUserQuery, 
         Set<String> roles = new HashSet<>();
         Set<String> permissions = new HashSet<>();
 
-        user.getOrganizationRoles().stream()
+        userOrgRoles.stream()
                 .filter(uor -> uor.getOrganization().getId().equals(orgId))
                 .forEach(uor -> {
-                    roles.add(uor.getRole().getName());
-                    uor.getRole().getPermissions().forEach(perm -> permissions.add(perm.getName()));
+                    Role role = roleMap.get(uor.getRoleId());
+                    if (role != null) {
+                        roles.add(role.getName());
+                        role.getPermissions().forEach(perm -> permissions.add(perm.getName()));
+                    }
                 });
 
         return AuthUserDTO.builder()

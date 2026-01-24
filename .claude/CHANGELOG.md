@@ -5,6 +5,273 @@
 
 ---
 
+## 2026-01-24
+
+### Architecture: Pragmatic Clean Architecture Fix
+
+**Completed critical architecture fixes for multi-tenant isolation and module decoupling.**
+
+#### Why "Pragmatic" Clean Architecture?
+
+We chose pragmatic over strict clean architecture for these reasons:
+
+| Strict Approach | Pragmatic Approach (Chosen) |
+|-----------------|----------------------------|
+| Pure domain POJOs + separate JPA entities | JPA entities in domain layer |
+| ~2x code (domain + persistence + mappers) | Less boilerplate |
+| Framework-agnostic domain | Spring Boot committed |
+
+**Key insight**: The real architectural benefit comes from **module decoupling via UUID references**, not from hiding `@Entity` annotations. A `Category` with JPA annotations but no cross-module imports is cleaner than a pure POJO that imports `Organization` entity.
+
+**What we enforce strictly:**
+- ✅ No cross-module entity relationships (UUID only)
+- ✅ CQRS with CommandBus/QueryBus
+- ✅ Automatic tenant isolation (Hibernate filters)
+
+**What we allow:**
+- JPA annotations (`@Entity`, `@Column`) in domain models
+- Spring Data repositories in domain layer
+
+#### Problem Addressed
+| Problem | Severity | Impact |
+|---------|----------|--------|
+| Cross-module entity references | HIGH | Modules couldn't be tested/deployed independently |
+| User ↔ UserOrganizationRole circular dependency | HIGH | Refactoring cascades unexpectedly |
+| No automatic tenant filtering | CRITICAL | Security risk - data leakage between tenants |
+
+#### Changes Made
+
+**1. Cross-Module Dependencies Broken (UUID-based References)**
+
+Entities now reference other modules by UUID only, not by entity:
+
+| Module | Entity | Changed Fields |
+|--------|--------|----------------|
+| Inventory | All entities | `organizationId`, `storeId`, `userId` (UUIDs) |
+| Organization | UserOrganizationRole | `userId`, `roleId` (UUIDs) |
+| Organization | Invitation | `roleId` (UUID) |
+| Organization | UserAssignment | `userId`, `roleId` (UUIDs) |
+| Auth | RefreshToken | `userId` (UUID) |
+| Users | User | Removed `organizationRoles` field |
+
+**Pattern applied:**
+```java
+// BEFORE (cross-module dependency)
+@ManyToOne
+@JoinColumn(name = "organization_id")
+private Organization organization;
+
+// AFTER (decoupled - UUID only)
+@Column(name = "organization_id", nullable = false)
+private UUID organizationId;
+```
+
+**2. Hibernate Tenant Filter Added**
+
+- Created `package-info.java` with `@FilterDef` for tenant filter
+- Added `@Filter` annotations to tenant-scoped entities
+- Created `TenantFilter.java` service to enable/disable filter
+- Created `TenantFilterAspect.java` for automatic filter enablement
+
+**Tenant-filtered entities:**
+- Category, ProductTemplate, ProductVariant, Supplier
+- UnitOfMeasure, TaxRule, Discount
+- PurchaseOrder, DamageLoss
+
+**3. Repository Queries Updated**
+
+Fixed all JPA queries referencing removed entity relationships:
+- `pt.organization.id` → `pt.organizationId`
+- `v.organization.id` → `v.organizationId`
+- `ur.user.id` → `ur.userId`
+- `i.location.store.id` → `i.location.storeId`
+
+**4. Deprecated Methods**
+
+Repository methods with old patterns deprecated with delegation:
+- `JpaUserRepository.findAllWithRolesAndPermissions()` → `findAll()`
+- `JpaUserRepository.findByIdWithRolesAndPermissions()` → `findById()`
+- `RefreshTokenRepository.findByTokenWithUser()` → `findByToken()`
+
+**Files Created:**
+- `modules/inventory/domain/model/package-info.java` - Tenant filter definition
+- `shared/infrastructure/security/TenantFilter.java` - Filter service
+- `config/TenantFilterAspect.java` - AOP aspect for automatic filtering
+
+**Files Modified (~30 files):**
+- All inventory domain entities (Category, ProductTemplate, ProductVariant, Supplier, etc.)
+- UserOrganizationRole, UserAssignment, Invitation (organization module)
+- RefreshToken (auth module)
+- User (users module - removed organizationRoles)
+- Multiple repository interfaces (query fixes)
+- Multiple handlers and mappers (UUID getter/setter changes)
+
+**Intra-Module Relationships Preserved:**
+- Store → Organization (within organization module)
+- UserOrganizationRole → Organization, Store (within organization module)
+- Invitation → Organization, Store (within organization module)
+
+**Build Verified:** `./gradlew test` - BUILD SUCCESSFUL
+
+---
+
+### Architecture: Modular Monolith Restructure Complete
+
+**Completed full restructure to modular monolith with clean architecture:**
+
+**New Package Structure:**
+```
+com.store.mgmt/
+├── modules/                    # Feature Modules
+│   ├── auth/                   # Authentication & Authorization
+│   ├── organization/           # Organization & Store management
+│   ├── users/                  # User, Role, Permission
+│   ├── inventory/              # Stock, Transactions, PO, Sales
+│   ├── products/               # Product Templates & Variants
+│   └── globaltemplates/        # Industry templates
+├── shared/                     # Shared Kernel
+│   ├── application/            # Command/Query interfaces
+│   ├── domain/                 # BaseEntity, exceptions
+│   └── infrastructure/         # CommandBus, QueryBus, security
+└── config/                     # Application Configuration
+```
+
+**Shared Kernel Created:**
+- `shared/domain/model/BaseEntity.java` - Base JPA entity with UUID, audit fields, soft delete
+- `shared/domain/exception/ResourceNotFoundException.java` - Common 404 exception
+- `shared/infrastructure/audit/AuditLog.java` - Audit log entity
+- `shared/infrastructure/audit/AuditLogRepository.java` - Audit log repository
+- `shared/application/command/Command.java`, `CommandHandler.java` - CQRS command interfaces
+- `shared/application/query/Query.java`, `QueryHandler.java` - CQRS query interfaces
+- `shared/infrastructure/CommandBus.java` - Command dispatcher
+- `shared/infrastructure/QueryBus.java` - Query dispatcher
+
+**Module Structure Pattern (each module):**
+```
+modules/{module-name}/
+├── application/
+│   ├── command/           # CreateXxxCommand.java, CreateXxxHandler.java
+│   ├── query/             # GetXxxQuery.java, GetXxxHandler.java
+│   ├── dto/               # XxxDTO.java, XxxResponseDTO.java
+│   └── service/           # Application services, mappers
+├── domain/
+│   ├── model/             # JPA entities (extend BaseEntity)
+│   ├── repository/        # Spring Data JPA repositories
+│   ├── service/           # Domain services (business logic)
+│   └── exception/         # Domain-specific exceptions
+└── infrastructure/
+    ├── web/               # REST controllers
+    ├── persistence/       # Custom JPA implementations
+    └── service/           # Infrastructure services
+```
+
+**Legacy Code Removed:**
+- Deleted duplicate repositories in `organization/repository/`, `users/repository/`
+- Deleted duplicate entities in `organization/model/entity/`, `users/model/entity/`
+- Deleted `globaltemplates/repository/`, `globaltemplates/model/entity/`
+- Deleted `utils/` directory
+- Removed `auth/model/entity/RefreshToken.java` (moved to modules)
+- Removed `organization/enums/StoreStatus.java` (moved to modules)
+
+**Import Updates:**
+- Updated all imports from `com.store.mgmt.common.*` to `com.store.mgmt.shared.*`
+- Updated entity imports to use new module paths
+- Updated repository imports to use new module paths
+
+**Entities Migrated:**
+| Module | Entities |
+|--------|----------|
+| auth | RefreshToken |
+| organization | Organization, Store, UserOrganizationRole, UserAssignment, Invitation, StoreStatus |
+| users | User, Role, Permission, RoleType |
+| inventory | Brand, Category, Supplier, UoM, Location, ProductTemplate, ProductVariant, InventoryItem, StockLevel, BatchLot, StockTransaction, DamageLoss, PurchaseOrder, Sale, Discount, TaxRule |
+| globaltemplates | GlobalTemplate, GlobalTemplateItem |
+
+**Documentation Updated:**
+- `.claude/CONTEXT.md` - Complete rewrite with new architecture
+- `.claude/docs/BACKEND.md` - Complete rewrite with CQRS patterns and module structure
+
+**Build Verified:** `./gradlew compileJava` - BUILD SUCCESSFUL
+
+### Entity Consolidation: Domain + JPA Merged
+
+**Simplified architecture by merging domain POJOs with JPA entities:**
+
+Previously there were separate classes:
+- Domain: `User`, `Role`, `Permission` (POJOs in `domain/model/`)
+- JPA: `UserEntity`, `RoleEntity`, `PermissionEntity` (JPA entities in `infrastructure/persistence/entity/`)
+- Mappers to convert between them
+
+Now consolidated to single JPA entities in `domain/model/`:
+- `User.java` - Full JPA entity with `organizationRoles` relationship
+- `Role.java` - Full JPA entity with `permissions` relationship
+- `Permission.java` - Full JPA entity
+
+**Files Deleted:**
+- `infrastructure/persistence/entity/UserEntity.java`
+- `infrastructure/persistence/entity/RoleEntity.java`
+- `infrastructure/persistence/entity/PermissionEntity.java`
+- `infrastructure/persistence/mapper/UserMapper.java`
+- `infrastructure/persistence/mapper/RoleMapper.java`
+- `infrastructure/persistence/mapper/PermissionMapper.java`
+- `shared/domain/model/DomainEntity.java`
+
+**Files Updated:**
+- `UserOrganizationRole.java` - Now references `User` and `Role` directly
+- `JpaUserRepository.java` - Returns `User` instead of `UserEntity`
+- `JpaRoleRepository.java` - Returns `Role` instead of `RoleEntity`
+- `JpaPermissionRepository.java` - Returns `Permission` instead of `PermissionEntity`
+- Persistence adapters simplified to just delegate (no mapping needed)
+- `DataSeeder.java` - Uses domain models directly
+
+**Rationale:**
+For a modular monolith, having separate domain POJOs and JPA entities added complexity without benefit. Other entities (Organization, Store, etc.) were already direct JPA entities in domain layer. This consolidation makes the codebase consistent.
+
+**Build Verified:** `./gradlew compileJava` - BUILD SUCCESSFUL
+
+---
+
+### V1 to V2 Migration: 100% COMPLETE
+
+**All 17 V2 modules implemented:**
+- Auth, Global Templates, Products, Inventory Items
+- Brands, Categories, Suppliers, Locations
+- Units of Measure, UoM Conversions, Stock Checks, Batch/Lots
+- Stock Transactions, Damage/Loss, Discounts
+- Purchase Orders, Sales
+
+**V2 Architecture:**
+- CQRS with CommandBus/QueryBus dispatch
+- Clean Architecture layers: application (command, query, dto, service), domain (service), infrastructure (web)
+- All 79 V2 endpoints at `/api/v2/*`
+
+**Key V2 Domain Services Created:**
+- `StockAllocationService` - FIFO stock allocation with expiry date sorting
+- `SalePricingService` - Discount calculation (PERCENTAGE and FIXED_AMOUNT)
+- `PurchaseOrderReceiptService` - PO receipt processing with batch lot creation
+
+**V1 Code Removed:**
+- Controllers: AuthController, GlobalTemplateController, InventoryController, PosController
+- Services: InventoryService, InventoryServiceImpl
+- Mappers: 18 files in inventory/mapper/
+- DTOs: 51 files in inventory/model/dto/
+
+**V1 Code Kept (still used by V2):**
+- auth/service/* - Used by V2 auth handlers (JWTService, etc.)
+- globaltemplates/service/* - Used by V2 global templates handlers
+- All entities, repositories, and enums (shared infrastructure)
+
+**Files Created (Summary):**
+- ~150 new V2 files in `src/main/java/com/store/mgmt/modules/`
+- Controllers in `infrastructure/web/`
+- Commands/Queries/Handlers in `application/`
+- Domain services in `domain/service/`
+- Mappers in `application/service/`
+
+**Build Verified:** `./gradlew compileJava` - BUILD SUCCESSFUL
+
+---
+
 ## 2026-01-23 (Session 2)
 
 ### Inventory Creation Flow: Performance & Production Improvements

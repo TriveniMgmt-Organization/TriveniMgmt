@@ -2,13 +2,14 @@ package com.store.mgmt.modules.users.application.command;
 
 import com.store.mgmt.modules.users.domain.exception.UserNotFoundException;
 import com.store.mgmt.modules.users.domain.model.User;
-import com.store.mgmt.modules.users.domain.model.UserId;
 import com.store.mgmt.modules.users.domain.repository.UserRepository;
 import com.store.mgmt.shared.application.command.CommandHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 /**
  * Handler for DeleteUserCommand.
@@ -29,11 +30,13 @@ public class DeleteUserHandler implements CommandHandler<DeleteUserCommand, Void
     public Void handle(DeleteUserCommand cmd) {
         log.debug("Deleting user: {}", cmd.userId());
 
-        User user = userRepo.findById(UserId.of(cmd.userId()))
-                .orElseThrow(() -> new UserNotFoundException(UserId.of(cmd.userId())));
+        User user = userRepo.findById(cmd.userId())
+                .orElseThrow(() -> new UserNotFoundException(cmd.userId()));
 
-        user.delete();
-        userRepo.delete(user);
+        // Soft delete
+        user.setDeletedAt(LocalDateTime.now());
+        user.setActive(false);
+        userRepo.save(user);
 
         log.info("Deleted user: {}", cmd.userId());
 

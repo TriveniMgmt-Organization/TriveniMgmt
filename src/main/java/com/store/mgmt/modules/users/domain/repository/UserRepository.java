@@ -1,55 +1,37 @@
 package com.store.mgmt.modules.users.domain.repository;
 
-import com.store.mgmt.modules.users.domain.model.Email;
 import com.store.mgmt.modules.users.domain.model.User;
-import com.store.mgmt.modules.users.domain.model.UserId;
-import com.store.mgmt.modules.users.domain.model.Username;
+import org.springframework.lang.NonNull;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-/**
- * Repository interface for User aggregate.
- */
 public interface UserRepository {
 
-    /**
-     * Find a user by ID.
-     */
-    Optional<User> findById(UserId id);
+        Optional<User> findByEmail(String email);
 
-    /**
-     * Find a user by email.
-     */
-    Optional<User> findByEmail(Email email);
+        Optional<User> findByUsername(String username);
 
-    /**
-     * Find a user by username.
-     */
-    Optional<User> findByUsername(Username username);
+        @NonNull
+        Optional<User> findById(@NonNull UUID id);
 
-    /**
-     * Find all users.
-     */
-    List<User> findAll();
+        @NonNull
+        List<User> findAll();
 
-    /**
-     * Check if a user with the given email exists.
-     */
-    boolean existsByEmail(Email email);
+        List<User> findAllWithRolesAndPermissions();
 
-    /**
-     * Check if a user with the given username exists.
-     */
-    boolean existsByUsername(Username username);
+        Optional<User> findByIdWithRolesAndPermissions(UUID id);
 
-    /**
-     * Save a user.
-     */
-    User save(User user);
+        Optional<User> findByUsernameWithAllRelatedData(String username);
 
-    /**
-     * Delete a user (soft delete).
-     */
-    void delete(User user);
+        Optional<User> findByEmailWithRolesAndPermissions(String email);
+
+        boolean existsByEmail(String email);
+
+        boolean existsByUsername(String username);
+
+        User save(User user);
+
+        void deleteById(UUID id);
 }

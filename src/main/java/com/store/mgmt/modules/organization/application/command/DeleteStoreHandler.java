@@ -2,13 +2,14 @@ package com.store.mgmt.modules.organization.application.command;
 
 import com.store.mgmt.modules.organization.domain.exception.StoreNotFoundException;
 import com.store.mgmt.modules.organization.domain.model.Store;
-import com.store.mgmt.modules.organization.domain.model.StoreId;
 import com.store.mgmt.modules.organization.domain.repository.StoreRepository;
 import com.store.mgmt.shared.application.command.CommandHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 /**
  * Handler for DeleteStoreCommand.
@@ -29,11 +30,12 @@ public class DeleteStoreHandler implements CommandHandler<DeleteStoreCommand, Vo
     public Void handle(DeleteStoreCommand cmd) {
         log.debug("Deleting store: {}", cmd.storeId());
 
-        Store store = storeRepo.findById(StoreId.of(cmd.storeId()))
-                .orElseThrow(() -> new StoreNotFoundException(StoreId.of(cmd.storeId())));
+        Store store = storeRepo.findById(cmd.storeId())
+                .orElseThrow(() -> new StoreNotFoundException(cmd.storeId()));
 
-        store.delete();
-        storeRepo.delete(store);
+        // Soft delete
+        store.setDeletedAt(LocalDateTime.now());
+        storeRepo.save(store);
 
         log.info("Deleted store: {}", cmd.storeId());
 

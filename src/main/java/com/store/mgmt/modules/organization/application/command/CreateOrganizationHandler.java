@@ -2,9 +2,7 @@ package com.store.mgmt.modules.organization.application.command;
 
 import com.store.mgmt.modules.organization.application.dto.OrganizationDTO;
 import com.store.mgmt.modules.organization.domain.exception.DuplicateOrganizationNameException;
-import com.store.mgmt.modules.organization.domain.model.ContactInfo;
 import com.store.mgmt.modules.organization.domain.model.Organization;
-import com.store.mgmt.modules.organization.domain.model.UserId;
 import com.store.mgmt.modules.organization.domain.repository.OrganizationRepository;
 import com.store.mgmt.shared.application.command.CommandHandler;
 import com.store.mgmt.shared.infrastructure.security.TenantContext;
@@ -39,31 +37,29 @@ public class CreateOrganizationHandler implements CommandHandler<CreateOrganizat
             throw new DuplicateOrganizationNameException(cmd.name());
         }
 
-        Organization org = Organization.create(
-                cmd.name(),
-                cmd.description(),
-                ContactInfo.of(cmd.contactInfo()),
-                UserId.of(tenant.userId())
-        );
+        Organization org = new Organization();
+        org.setName(cmd.name());
+        org.setDescription(cmd.description());
+        org.setContactInfo(cmd.contactInfo());
 
         // Apply template if provided
         if (cmd.templateCode() != null && !cmd.templateCode().isBlank()) {
-            org.applyTemplate(cmd.templateCode());
+            org.setAppliedTemplateCode(cmd.templateCode());
         }
 
         Organization saved = orgRepo.save(org);
 
-        log.info("Created organization: {} with ID: {}", saved.getName(), saved.getId().getValue());
+        log.info("Created organization: {} with ID: {}", saved.getName(), saved.getId());
 
         return toDTO(saved);
     }
 
     private OrganizationDTO toDTO(Organization org) {
         return OrganizationDTO.builder()
-                .id(org.getId().getValue())
+                .id(org.getId())
                 .name(org.getName())
                 .description(org.getDescription())
-                .contactInfo(org.getContactInfo() != null ? org.getContactInfo().getValue() : null)
+                .contactInfo(org.getContactInfo())
                 .appliedTemplateCode(org.getAppliedTemplateCode())
                 .createdAt(org.getCreatedAt())
                 .updatedAt(org.getUpdatedAt())

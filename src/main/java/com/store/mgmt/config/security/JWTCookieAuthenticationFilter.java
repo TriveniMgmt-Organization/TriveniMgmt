@@ -1,14 +1,14 @@
 package com.store.mgmt.config.security;
 
 
-import com.store.mgmt.auth.service.JWTService;
+import com.store.mgmt.shared.infrastructure.security.JWTService;
 import com.store.mgmt.config.TenantContext;
-import com.store.mgmt.organization.model.entity.Organization;
-import com.store.mgmt.organization.model.entity.Store;
-import com.store.mgmt.organization.repository.OrganizationRepository;
-import com.store.mgmt.organization.repository.StoreRepository;
-import com.store.mgmt.users.model.entity.User;
-import com.store.mgmt.users.repository.UserRepository;
+import com.store.mgmt.modules.organization.domain.model.Organization;
+import com.store.mgmt.modules.organization.domain.model.Store;
+import com.store.mgmt.modules.organization.domain.repository.OrganizationRepository;
+import com.store.mgmt.modules.organization.domain.repository.StoreRepository;
+import com.store.mgmt.modules.users.domain.model.User;
+import com.store.mgmt.modules.users.domain.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

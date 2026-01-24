@@ -1,49 +1,40 @@
 package com.store.mgmt.modules.organization.domain.repository;
 
 import com.store.mgmt.modules.organization.domain.model.Organization;
-import com.store.mgmt.modules.organization.domain.model.OrganizationId;
-import com.store.mgmt.modules.organization.domain.model.UserId;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-/**
- * Repository interface for Organization aggregate.
- */
-public interface OrganizationRepository {
+@Repository
+public interface OrganizationRepository extends JpaRepository<Organization, UUID> {
 
-    /**
-     * Find an organization by ID.
-     */
-    Optional<Organization> findById(OrganizationId id);
+    Optional<Organization> findByName(@NonNull String name);
 
-    /**
-     * Find an organization by name.
-     */
-    Optional<Organization> findByName(String name);
+    @Query("SELECT u FROM Organization u WHERE u.id = :id AND u.deletedAt IS NULL")
+    @NonNull
+    Optional<Organization> findById(@NonNull UUID id);
 
-    /**
-     * Find all organizations.
-     */
+    @Query("SELECT DISTINCT o FROM Organization o " +
+           "LEFT JOIN FETCH o.stores s " +
+           "WHERE o.id = :id AND o.deletedAt IS NULL " +
+           "AND (s.deletedAt IS NULL OR s IS NULL)")
+    Optional<Organization> findByIdWithStores(@Param("id") UUID id);
+
+    @Query("SELECT u FROM Organization u WHERE u.deletedAt IS NULL ORDER BY u.createdAt DESC")
+    @NonNull
     List<Organization> findAll();
 
-    /**
-     * Find all organizations for a user.
-     */
-    List<Organization> findAllByUserId(UserId userId);
+    @Query("SELECT o, s FROM Organization o LEFT JOIN Store s ON s.id = :storeId WHERE o.id = :orgId")
+    Optional<Object[]> findOrganizationAndStore(@Param("orgId") UUID orgId, @Param("storeId") UUID storeId);
 
-    /**
-     * Check if an organization name exists.
-     */
+    @Query("SELECT o FROM Organization o JOIN o.userRoles ur WHERE ur.userId = :userId AND o.deletedAt IS NULL")
+    List<Organization> findAllByUserId(@Param("userId") UUID userId);
+
     boolean existsByName(String name);
-
-    /**
-     * Save an organization.
-     */
-    Organization save(Organization organization);
-
-    /**
-     * Delete an organization (soft delete).
-     */
-    void delete(Organization organization);
 }

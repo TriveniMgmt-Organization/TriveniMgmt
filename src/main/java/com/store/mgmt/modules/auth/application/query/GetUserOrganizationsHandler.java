@@ -2,12 +2,13 @@ package com.store.mgmt.modules.auth.application.query;
 
 import com.store.mgmt.modules.organization.application.dto.OrganizationDTO;
 import com.store.mgmt.modules.organization.application.dto.StoreDTO;
-import com.store.mgmt.organization.model.entity.Organization;
-import com.store.mgmt.organization.model.entity.Store;
-import com.store.mgmt.organization.model.entity.UserOrganizationRole;
+import com.store.mgmt.modules.organization.domain.model.Organization;
+import com.store.mgmt.modules.organization.domain.model.Store;
+import com.store.mgmt.modules.organization.domain.model.UserOrganizationRole;
+import com.store.mgmt.modules.organization.domain.repository.UserOrganizationRoleRepository;
 import com.store.mgmt.shared.application.query.QueryHandler;
-import com.store.mgmt.users.model.entity.User;
-import com.store.mgmt.users.repository.UserRepository;
+import com.store.mgmt.modules.users.domain.model.User;
+import com.store.mgmt.modules.users.domain.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,9 +31,14 @@ public class GetUserOrganizationsHandler implements QueryHandler<GetUserOrganiza
     private static final Logger log = LoggerFactory.getLogger(GetUserOrganizationsHandler.class);
 
     private final UserRepository userRepository;
+    private final UserOrganizationRoleRepository userOrganizationRoleRepository;
 
-    public GetUserOrganizationsHandler(UserRepository userRepository) {
+    public GetUserOrganizationsHandler(
+            UserRepository userRepository,
+            UserOrganizationRoleRepository userOrganizationRoleRepository
+    ) {
         this.userRepository = userRepository;
+        this.userOrganizationRoleRepository = userOrganizationRoleRepository;
     }
 
     @Override
@@ -40,12 +46,14 @@ public class GetUserOrganizationsHandler implements QueryHandler<GetUserOrganiza
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         log.info("Retrieving organizations for user: {}", username);
 
-        // Use optimized query to fetch user with all related data
-        User currentUser = userRepository.findByUsernameWithAllRelatedData(username)
+        User currentUser = userRepository.findByEmail(username)
                 .orElseThrow(() -> new IllegalStateException("Current user not found."));
 
+        // Fetch user's organization roles with related data
+        List<UserOrganizationRole> userOrgRoles = userOrganizationRoleRepository.findByUserIdWithOrganizationAndStore(currentUser.getId());
+
         // Group stores by organization
-        Map<Organization, List<Store>> orgStoresMap = currentUser.getOrganizationRoles().stream()
+        Map<Organization, List<Store>> orgStoresMap = userOrgRoles.stream()
                 .collect(Collectors.groupingBy(
                         UserOrganizationRole::getOrganization,
                         Collectors.mapping(UserOrganizationRole::getStore, Collectors.toList())

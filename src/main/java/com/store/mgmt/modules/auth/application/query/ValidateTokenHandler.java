@@ -1,9 +1,9 @@
 package com.store.mgmt.modules.auth.application.query;
 
-import com.store.mgmt.auth.service.JWTService;
+import com.store.mgmt.shared.infrastructure.security.JWTService;
 import com.store.mgmt.shared.application.query.QueryHandler;
-import com.store.mgmt.users.model.entity.User;
-import com.store.mgmt.users.repository.UserRepository;
+import com.store.mgmt.modules.users.domain.model.User;
+import com.store.mgmt.modules.users.domain.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.jwt.JwtException;

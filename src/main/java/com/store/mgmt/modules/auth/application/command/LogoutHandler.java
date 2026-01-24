@@ -2,7 +2,7 @@ package com.store.mgmt.modules.auth.application.command;
 
 import com.store.mgmt.modules.auth.infrastructure.service.AuthCookieService;
 import com.store.mgmt.shared.application.command.CommandHandler;
-import com.store.mgmt.users.repository.RefreshTokenRepository;
+import com.store.mgmt.modules.auth.domain.repository.RefreshTokenRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

@@ -1,43 +1,27 @@
 package com.store.mgmt.modules.users.domain.repository;
 
 import com.store.mgmt.modules.users.domain.model.Role;
-import com.store.mgmt.modules.users.domain.model.RoleId;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-/**
- * Repository interface for Role aggregate.
- */
 public interface RoleRepository {
 
-    /**
-     * Find a role by ID.
-     */
-    Optional<Role> findById(RoleId id);
-
-    /**
-     * Find a role by name.
-     */
-    Optional<Role> findByName(String name);
-
-    /**
-     * Find all roles.
-     */
-    List<Role> findAll();
-
-    /**
-     * Check if a role with the given name exists.
-     */
-    boolean existsByName(String name);
-
-    /**
-     * Save a role.
-     */
     Role save(Role role);
 
-    /**
-     * Delete a role (soft delete).
-     */
-    void delete(Role role);
+    Optional<Role> findById(UUID id);
+
+    Optional<Role> findByName(String name);
+
+    List<Role> findAll();
+
+    Page<Role> findAll(int page, int size);
+
+    void deleteById(UUID id);
+
+    boolean existsByName(String name);
+
+    Optional<Role> findByIdWithPermissions(UUID id);
 }

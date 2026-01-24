@@ -1,49 +1,29 @@
 package com.store.mgmt.modules.organization.domain.repository;
 
-import com.store.mgmt.modules.organization.domain.model.OrganizationId;
 import com.store.mgmt.modules.organization.domain.model.Store;
-import com.store.mgmt.modules.organization.domain.model.StoreId;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-/**
- * Repository interface for Store aggregate.
- */
-public interface StoreRepository {
+@Repository
+public interface StoreRepository extends JpaRepository<Store, UUID> {
 
-    /**
-     * Find a store by ID.
-     */
-    Optional<Store> findById(StoreId id);
+    @Query("SELECT u FROM Store u WHERE u.id = :id AND u.deletedAt IS NULL")
+    @NonNull
+    Optional<Store> findById(@NonNull UUID id);
 
-    /**
-     * Find a store by name within an organization.
-     */
-    Optional<Store> findByNameAndOrganizationId(String name, OrganizationId organizationId);
-
-    /**
-     * Find all stores for an organization.
-     */
-    List<Store> findByOrganizationId(OrganizationId organizationId);
-
-    /**
-     * Find all stores.
-     */
+    @Query("SELECT u FROM Store u WHERE u.deletedAt IS NULL ORDER BY u.createdAt DESC")
+    @NonNull
     List<Store> findAll();
 
-    /**
-     * Check if a store name exists within an organization.
-     */
-    boolean existsByNameAndOrganizationId(String name, OrganizationId organizationId);
+    Optional<Store> findByNameAndOrganizationId(String name, UUID organizationId);
 
-    /**
-     * Save a store.
-     */
-    Store save(Store store);
+    List<Store> findByOrganizationId(UUID organizationId);
 
-    /**
-     * Delete a store (soft delete).
-     */
-    void delete(Store store);
+    boolean existsByNameAndOrganizationId(String name, UUID organizationId);
 }

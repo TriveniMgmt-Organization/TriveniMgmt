@@ -3,7 +3,9 @@ package com.store.mgmt.modules.organization.application.command;
 import com.store.mgmt.modules.organization.application.dto.StoreDTO;
 import com.store.mgmt.modules.organization.domain.exception.DuplicateStoreNameException;
 import com.store.mgmt.modules.organization.domain.exception.OrganizationNotFoundException;
-import com.store.mgmt.modules.organization.domain.model.*;
+import com.store.mgmt.modules.organization.domain.model.Organization;
+import com.store.mgmt.modules.organization.domain.model.Store;
+import com.store.mgmt.modules.organization.domain.model.StoreStatus;
 import com.store.mgmt.modules.organization.domain.repository.OrganizationRepository;
 import com.store.mgmt.modules.organization.domain.repository.StoreRepository;
 import com.store.mgmt.shared.application.command.CommandHandler;
@@ -33,40 +35,38 @@ public class CreateStoreHandler implements CommandHandler<CreateStoreCommand, St
     public StoreDTO handle(CreateStoreCommand cmd) {
         log.debug("Creating store: {} for organization: {}", cmd.name(), cmd.organizationId());
 
-        OrganizationId orgId = OrganizationId.of(cmd.organizationId());
-
         // Verify organization exists
-        orgRepo.findById(orgId)
-                .orElseThrow(() -> new OrganizationNotFoundException(orgId));
+        Organization org = orgRepo.findById(cmd.organizationId())
+                .orElseThrow(() -> new OrganizationNotFoundException(cmd.organizationId()));
 
         // Check for duplicate name within organization
-        if (storeRepo.existsByNameAndOrganizationId(cmd.name(), orgId)) {
+        if (storeRepo.existsByNameAndOrganizationId(cmd.name(), cmd.organizationId())) {
             throw new DuplicateStoreNameException(cmd.name());
         }
 
-        Store store = Store.create(
-                orgId,
-                cmd.name(),
-                cmd.location(),
-                cmd.countryCode(),
-                ContactInfo.of(cmd.contactInfo())
-        );
+        Store store = new Store();
+        store.setOrganization(org);
+        store.setName(cmd.name());
+        store.setLocation(cmd.location());
+        store.setCountryCode(cmd.countryCode());
+        store.setContactInfo(cmd.contactInfo());
+        store.setStatus(StoreStatus.ACTIVE);
 
         Store saved = storeRepo.save(store);
 
-        log.info("Created store: {} with ID: {}", saved.getName(), saved.getId().getValue());
+        log.info("Created store: {} with ID: {}", saved.getName(), saved.getId());
 
         return toDTO(saved);
     }
 
     private StoreDTO toDTO(Store store) {
         return StoreDTO.builder()
-                .id(store.getId().getValue())
-                .organizationId(store.getOrganizationId().getValue())
+                .id(store.getId())
+                .organizationId(store.getOrganization().getId())
                 .name(store.getName())
                 .location(store.getLocation())
                 .countryCode(store.getCountryCode())
-                .contactInfo(store.getContactInfo() != null ? store.getContactInfo().getValue() : null)
+                .contactInfo(store.getContactInfo())
                 .status(store.getStatus().name())
                 .createdAt(store.getCreatedAt())
                 .updatedAt(store.getUpdatedAt())
