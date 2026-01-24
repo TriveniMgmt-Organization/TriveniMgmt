@@ -19,12 +19,15 @@ import java.util.UUID;
 /**
  * Filter that extracts tenant context from request headers and JWT claims.
  * Sets the TenantContext for the duration of the request.
+ *
+ * Note: Named 'moduleTenantContextFilter' to avoid conflict with the legacy
+ * TenantContextFilter in com.store.mgmt.config package.
  */
-@Component
+@Component("moduleTenantContextFilter")
 @Order(10)
-public class TenantContextFilter extends OncePerRequestFilter {
+public class ModuleTenantContextFilter extends OncePerRequestFilter {
 
-    private static final Logger log = LoggerFactory.getLogger(TenantContextFilter.class);
+    private static final Logger log = LoggerFactory.getLogger(ModuleTenantContextFilter.class);
 
     private static final String HEADER_ORGANIZATION_ID = "X-Organization-Id";
     private static final String HEADER_STORE_ID = "X-Store-Id";
