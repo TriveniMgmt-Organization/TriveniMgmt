@@ -19,12 +19,15 @@ import java.util.UUID;
 /**
  * Filter that extracts tenant context from request headers and JWT claims.
  * Sets the TenantContext for the duration of the request.
+ *
+ * Note: Named 'moduleTenantContextFilter' to avoid conflict with the legacy
+ * TenantContextFilter in com.store.mgmt.config package.
  */
-@Component
+@Component("moduleTenantContextFilter")
 @Order(10)
-public class TenantContextFilter extends OncePerRequestFilter {
+public class ModuleTenantContextFilter extends OncePerRequestFilter {
 
-    private static final Logger log = LoggerFactory.getLogger(TenantContextFilter.class);
+    private static final Logger log = LoggerFactory.getLogger(ModuleTenantContextFilter.class);
 
     private static final String HEADER_ORGANIZATION_ID = "X-Organization-Id";
     private static final String HEADER_STORE_ID = "X-Store-Id";
@@ -78,23 +81,32 @@ public class TenantContextFilter extends OncePerRequestFilter {
 
     private UUID extractUserId(Authentication auth) {
         if (auth.getPrincipal() instanceof Jwt jwt) {
+            // First try the user_id claim (preferred)
+            UUID userId = parseUuidClaim(jwt, "user_id");
+            if (userId != null) {
+                return userId;
+            }
+            // Fallback to subject if it's a UUID
             String sub = jwt.getSubject();
             if (sub != null) {
                 try {
                     return UUID.fromString(sub);
                 } catch (IllegalArgumentException e) {
-                    log.warn("Invalid UUID in JWT subject: {}", sub);
+                    log.debug("JWT subject is not a UUID: {}", sub);
                 }
             }
-            // Try user_id claim
-            return parseUuidClaim(jwt, "user_id");
         }
         return null;
     }
 
     private String extractUsername(Authentication auth) {
         if (auth.getPrincipal() instanceof Jwt jwt) {
-            return jwt.getClaimAsString("preferred_username");
+            // Try preferred_username first, then subject
+            String username = jwt.getClaimAsString("preferred_username");
+            if (username != null) {
+                return username;
+            }
+            return jwt.getSubject();
         }
         return auth.getName();
     }

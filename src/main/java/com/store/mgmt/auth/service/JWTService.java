@@ -99,6 +99,9 @@ public class JWTService {
                     .issueTime(new Date())
                     .expirationTime(new Date(System.currentTimeMillis() + expiration));
 
+            // Always add user_id claim for tenant context
+            claimsBuilder.claim("user_id", user.getId().toString());
+
             if (!isRefreshToken) {
                 // 1. Add authorities relevant to the *active* organization/store
                 claimsBuilder.claim("authorities", authoritiesForActiveOrg.stream()
