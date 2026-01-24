@@ -4,6 +4,8 @@ import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.store.mgmt.auth.service.JWTService;
+import com.store.mgmt.organization.repository.OrganizationRepository;
+import com.store.mgmt.organization.repository.StoreRepository;
 import com.store.mgmt.users.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
@@ -67,6 +69,8 @@ public class SecurityConfig {
     private final CustomUserDetailsService userService;
     private final JWTService jwtService;
     private final UserRepository userRepository;
+    private final OrganizationRepository organizationRepository;
+    private final StoreRepository storeRepository;
 
     // JWT Configuration
     @Value("${jwt.secret}")
@@ -95,10 +99,13 @@ public class SecurityConfig {
     private SecretKey signingKey;
 
     public SecurityConfig(CustomUserDetailsService userService, JWTService jwtService,
-                          UserRepository userRepository) {
+                          UserRepository userRepository, OrganizationRepository organizationRepository,
+                          StoreRepository storeRepository) {
         this.userService = userService;
         this.jwtService = jwtService;
         this.userRepository = userRepository;
+        this.organizationRepository = organizationRepository;
+        this.storeRepository = storeRepository;
     }
 
     @PostConstruct
@@ -149,7 +156,7 @@ public class SecurityConfig {
 //                        .requestMatchers("/api/v1/inventory/**").permitAll()
                                 .anyRequest().authenticated()
                 )
-                .addFilterBefore(new JWTCookieAuthenticationFilter(jwtService, userRepository ), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JWTCookieAuthenticationFilter(jwtService, userRepository, organizationRepository, storeRepository), UsernamePasswordAuthenticationFilter.class)
                 .userDetailsService(userService)
                 .headers(headers -> headers
                         .xssProtection(xss -> xss.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))

@@ -3,6 +3,10 @@ package com.store.mgmt.config.security;
 
 import com.store.mgmt.auth.service.JWTService;
 import com.store.mgmt.config.TenantContext;
+import com.store.mgmt.organization.model.entity.Organization;
+import com.store.mgmt.organization.model.entity.Store;
+import com.store.mgmt.organization.repository.OrganizationRepository;
+import com.store.mgmt.organization.repository.StoreRepository;
 import com.store.mgmt.users.model.entity.User;
 import com.store.mgmt.users.repository.UserRepository;
 import org.slf4j.Logger;
@@ -30,10 +34,15 @@ public class JWTCookieAuthenticationFilter  extends OncePerRequestFilter{
     private static final Logger logger = LoggerFactory.getLogger(JWTCookieAuthenticationFilter.class);
     private final JWTService jwtService;
     private final UserRepository userRepository;
+    private final OrganizationRepository organizationRepository;
+    private final StoreRepository storeRepository;
 
-    public JWTCookieAuthenticationFilter(JWTService jwtService, UserRepository userRepository ) {
+    public JWTCookieAuthenticationFilter(JWTService jwtService, UserRepository userRepository,
+                                         OrganizationRepository organizationRepository, StoreRepository storeRepository) {
         this.jwtService = jwtService;
         this.userRepository = userRepository;
+        this.organizationRepository = organizationRepository;
+        this.storeRepository = storeRepository;
     }
 
     @Override
@@ -69,17 +78,21 @@ public class JWTCookieAuthenticationFilter  extends OncePerRequestFilter{
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
                     logger.debug("Set authentication context - Organization ID: {}, Store ID: {}", orgId, storeId);
-                    // Set TenantContext
-//                    if (orgId != null) {
-//                        Organization organization = organizationRepository.findById(orgId)
-//                                .orElseThrow(() -> new IllegalStateException("Organization not found for id: " + orgId));
-//                        TenantContext.setCurrentOrganization(organization);
-//                    }
-//                    if (storeId != null) {
-//                        Store store = storeRepository.findById(storeId)
-//                                .orElseThrow(() -> new IllegalStateException("Store not found for id: " + storeId));
-//                        TenantContext.setCurrentStore(store);
-//                    }
+                    // Set TenantContext for legacy services
+                    if (orgId != null) {
+                        Organization organization = organizationRepository.findById(orgId)
+                                .orElse(null);
+                        if (organization != null) {
+                            TenantContext.setCurrentOrganization(organization);
+                        }
+                    }
+                    if (storeId != null) {
+                        Store store = storeRepository.findById(storeId)
+                                .orElse(null);
+                        if (store != null) {
+                            TenantContext.setCurrentStore(store);
+                        }
+                    }
                     TenantContext.setCurrentUser(user);
 
                     logger.debug("Authenticated user: {} with organization_id: {} and store_id: {}",

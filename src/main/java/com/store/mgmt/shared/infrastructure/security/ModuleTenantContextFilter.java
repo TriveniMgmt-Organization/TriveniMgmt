@@ -92,11 +92,6 @@ public class ModuleTenantContextFilter extends OncePerRequestFilter {
                 try {
                     return UUID.fromString(sub);
                 } catch (IllegalArgumentException e) {
-                    log.warn("Invalid UUID in JWT subject: {}", sub);
-                }
-            }
-            // Try user_id claim
-            return parseUuidClaim(jwt, "user_id");
                     log.debug("JWT subject is not a UUID: {}", sub);
                 }
             }
@@ -106,7 +101,6 @@ public class ModuleTenantContextFilter extends OncePerRequestFilter {
 
     private String extractUsername(Authentication auth) {
         if (auth.getPrincipal() instanceof Jwt jwt) {
-            return jwt.getClaimAsString("preferred_username");
             // Try preferred_username first, then subject
             String username = jwt.getClaimAsString("preferred_username");
             if (username != null) {
