@@ -81,6 +81,12 @@ public class ModuleTenantContextFilter extends OncePerRequestFilter {
 
     private UUID extractUserId(Authentication auth) {
         if (auth.getPrincipal() instanceof Jwt jwt) {
+            // First try the user_id claim (preferred)
+            UUID userId = parseUuidClaim(jwt, "user_id");
+            if (userId != null) {
+                return userId;
+            }
+            // Fallback to subject if it's a UUID
             String sub = jwt.getSubject();
             if (sub != null) {
                 try {
@@ -91,6 +97,9 @@ public class ModuleTenantContextFilter extends OncePerRequestFilter {
             }
             // Try user_id claim
             return parseUuidClaim(jwt, "user_id");
+                    log.debug("JWT subject is not a UUID: {}", sub);
+                }
+            }
         }
         return null;
     }
@@ -98,6 +107,12 @@ public class ModuleTenantContextFilter extends OncePerRequestFilter {
     private String extractUsername(Authentication auth) {
         if (auth.getPrincipal() instanceof Jwt jwt) {
             return jwt.getClaimAsString("preferred_username");
+            // Try preferred_username first, then subject
+            String username = jwt.getClaimAsString("preferred_username");
+            if (username != null) {
+                return username;
+            }
+            return jwt.getSubject();
         }
         return auth.getName();
     }
