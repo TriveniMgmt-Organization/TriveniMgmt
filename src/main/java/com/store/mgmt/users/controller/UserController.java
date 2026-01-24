@@ -21,9 +21,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * @deprecated Use {@link com.store.mgmt.modules.users.infrastructure.web.UsersModuleController} instead.
+ *             This v1 controller will be removed in a future release.
+ *             Migrate to: /api/v2/users
+ *             Note: inviteUser, assignUserToOrganization/Store features not yet in v2.
+ */
+@Deprecated(forRemoval = true)
 @RestController
 @RequestMapping("/api/v1/users")
-@Tag(name = "UserController", description = "Operations related to user management and roles")
+@Tag(name = "Users (v1 - Deprecated)", description = "DEPRECATED: Use /api/v2/users instead")
 @Slf4j
 public class UserController {
     private final UserService userService;

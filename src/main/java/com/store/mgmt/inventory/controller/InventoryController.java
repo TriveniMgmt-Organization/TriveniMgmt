@@ -23,9 +23,23 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * @deprecated Partially migrated to v2 modules:
+ *   - Inventory items: /api/v2/inventory (InventoryModuleController)
+ *   - Products/Variants: /api/v2/products (ProductsModuleController)
+ *
+ * Features NOT yet migrated (still use v1):
+ *   - Categories, Brands, Suppliers, Locations, Units of Measure
+ *   - Purchase Orders, Sales, Discounts
+ *   - Damage/Loss, Batch/Lots, Stock Transactions
+ *   - UoM Conversions, Stock Checks
+ *
+ * This controller will be fully deprecated once all features are migrated.
+ */
+@Deprecated(forRemoval = true)
 @RestController
 @RequestMapping("/api/v1/inventory")
-@Tag(name = "InventoryController", description = "Comprehensive API for managing product inventory, sales, purchases, and related master data.")
+@Tag(name = "Inventory (v1 - Partial Deprecation)", description = "Partially deprecated: Use /api/v2/inventory and /api/v2/products for migrated features")
 @Slf4j
 public class InventoryController {
     private final InventoryService inventoryService;
