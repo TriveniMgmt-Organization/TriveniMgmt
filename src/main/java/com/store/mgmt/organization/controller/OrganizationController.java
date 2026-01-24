@@ -20,9 +20,15 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * @deprecated Use {@link com.store.mgmt.modules.organization.infrastructure.web.OrganizationModuleController} instead.
+ *             This v1 controller will be removed in a future release.
+ *             Migrate to: /api/v2/organizations
+ */
+@Deprecated(forRemoval = true)
 @RestController
 @RequestMapping("/api/v1/organizations")
-@Tag(name = "Organizations", description = "Organization management endpoints")
+@Tag(name = "Organizations (v1 - Deprecated)", description = "DEPRECATED: Use /api/v2/organizations instead")
 @Slf4j
 public class OrganizationController {
     private final OrganizationServiceImpl organizationService;
