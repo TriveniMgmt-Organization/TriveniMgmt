@@ -1,18 +1,12 @@
 package com.store.mgmt.config.security;
 
-
 import com.store.mgmt.shared.infrastructure.security.JWTService;
-import com.store.mgmt.config.TenantContext;
-import com.store.mgmt.modules.organization.domain.model.Organization;
-import com.store.mgmt.modules.organization.domain.model.Store;
-import com.store.mgmt.modules.organization.domain.repository.OrganizationRepository;
-import com.store.mgmt.modules.organization.domain.repository.StoreRepository;
+import com.store.mgmt.shared.infrastructure.security.TenantContext;
 import com.store.mgmt.modules.users.domain.model.User;
 import com.store.mgmt.modules.users.domain.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.JwtException;
@@ -27,90 +21,81 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
-public class JWTCookieAuthenticationFilter  extends OncePerRequestFilter{
+/**
+ * JWT Cookie Authentication Filter for the new architecture.
+ * Extracts JWT from cookies and sets up SecurityContext and TenantContext.
+ */
+public class JWTCookieAuthenticationFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JWTCookieAuthenticationFilter.class);
+
     private final JWTService jwtService;
     private final UserRepository userRepository;
-    private final OrganizationRepository organizationRepository;
-    private final StoreRepository storeRepository;
 
-    public JWTCookieAuthenticationFilter(JWTService jwtService, UserRepository userRepository,
-                                         OrganizationRepository organizationRepository, StoreRepository storeRepository) {
+    public JWTCookieAuthenticationFilter(JWTService jwtService, UserRepository userRepository) {
         this.jwtService = jwtService;
         this.userRepository = userRepository;
-        this.organizationRepository = organizationRepository;
-        this.storeRepository = storeRepository;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        String token = jwtService.extractTokenFromCookie(request);
 
-        if (token != null) {
-            try {
-                JWTService.JwtData jwtData = jwtService.extractJwtData(token);
-                 String email = jwtData.username;
-                 UUID orgId = jwtData.organizationId;
-                 UUID storeId = jwtData.storeId;
-                // Fetch user with roles and permissions eagerly to avoid LazyInitializationException
-                User user = userRepository.findByEmailWithRolesAndPermissions(email)
-                        .orElseThrow(() -> new IllegalStateException("User not found for email: " + email));
-                if (jwtService.validateToken(token, user)) {
+        try {
+            String token = jwtService.extractTokenFromCookie(request);
 
-                    logger.info("Extracted JWT data: username={}, organizationId={}, storeId={}",
-                            jwtData.username, jwtData.organizationId, jwtData.storeId);
-                    
-                    // Load user details with authorities (roles + permissions) from database
-                    // Spring Security will handle authorization checks based on these authorities
-                    UserDetails userDetails = jwtService.createUserDetails(user);
-                    
-                    Map<String, Object> claims = new HashMap<>();
-                    claims.put("org_id", orgId != null ? orgId.toString() : null);
-                    claims.put("store_id", storeId != null ? storeId.toString() : null);
-
-                    UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    authentication.setDetails(claims);
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-
-                    logger.debug("Set authentication context - Organization ID: {}, Store ID: {}", orgId, storeId);
-                    // Set TenantContext for legacy services
-                    if (orgId != null) {
-                        Organization organization = organizationRepository.findById(orgId)
-                                .orElse(null);
-                        if (organization != null) {
-                            TenantContext.setCurrentOrganization(organization);
-                        }
-                    }
-                    if (storeId != null) {
-                        Store store = storeRepository.findById(storeId)
-                                .orElse(null);
-                        if (store != null) {
-                            TenantContext.setCurrentStore(store);
-                        }
-                    }
-                    TenantContext.setCurrentUser(user);
-
-                    logger.debug("Authenticated user: {} with organization_id: {} and store_id: {}",
-                            email, orgId, storeId);
-                } else {
-                    logger.warn("Invalid or expired JWT for user: {}", email);
-                    SecurityContextHolder.clearContext();
-                }
-            } catch (JwtException e) {
-                logger.warn("Failed to validate JWT from cookie: {}", e.getMessage());
-                SecurityContextHolder.clearContext();
+            if (token != null) {
+                authenticateFromToken(token);
+            } else {
+                logger.debug("No session_token cookie found in request");
             }
-        } else {
-            logger.debug("No session_token cookie found in request");
-        }
 
-        filterChain.doFilter(request, response);
+            filterChain.doFilter(request, response);
+        } finally {
+            // Always clear TenantContext after request completes
+            TenantContext.clear();
+        }
     }
 
+    private void authenticateFromToken(String token) {
+        try {
+            JWTService.JwtData jwtData = jwtService.extractJwtData(token);
+            String email = jwtData.username;
+            UUID orgId = jwtData.organizationId;
+            UUID storeId = jwtData.storeId;
 
+            // Fetch user (minimal query - just for validation and user ID)
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new IllegalStateException("User not found for email: " + email));
+
+            if (!jwtService.validateToken(token, user)) {
+                logger.warn("Invalid or expired JWT for user: {}", email);
+                SecurityContextHolder.clearContext();
+                return;
+            }
+
+            logger.debug("Authenticated user: {} with organizationId={}, storeId={}, authorities={}",
+                    email, orgId, storeId, jwtData.authorities);
+
+            // Use authorities from JWT token (not from database)
+            // This is more efficient and ensures consistency with what was granted at login
+            Map<String, Object> claims = new HashMap<>();
+            claims.put("org_id", orgId != null ? orgId.toString() : null);
+            claims.put("store_id", storeId != null ? storeId.toString() : null);
+
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(email, null, jwtData.authorities);
+            authentication.setDetails(claims);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            // Set TenantContext for handlers
+            TenantContext tenantContext = new TenantContext(orgId, storeId, user.getId(), user.getEmail());
+            TenantContext.set(tenantContext);
+
+        } catch (JwtException e) {
+            logger.warn("Failed to validate JWT from cookie: {}", e.getMessage());
+            SecurityContextHolder.clearContext();
+        }
+    }
 }

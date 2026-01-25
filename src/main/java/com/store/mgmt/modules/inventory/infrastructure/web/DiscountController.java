@@ -5,6 +5,7 @@ import com.store.mgmt.modules.inventory.application.dto.*;
 import com.store.mgmt.modules.inventory.application.query.*;
 import com.store.mgmt.shared.infrastructure.CommandBus;
 import com.store.mgmt.shared.infrastructure.QueryBus;
+import com.store.mgmt.shared.infrastructure.security.TenantContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -48,9 +49,9 @@ public class DiscountController {
     })
     @PreAuthorize("hasAuthority('DISCOUNT_READ')")
     public ResponseEntity<List<DiscountResponseDTO>> getAllDiscounts(
-            @RequestHeader("X-Organization-Id") UUID organizationId,
             @RequestParam(required = false, defaultValue = "false") boolean includeInactive
     ) {
+        UUID organizationId = TenantContext.current().organizationId();
         log.debug("Getting all discounts for organization: {}, includeInactive: {}", organizationId, includeInactive);
         List<DiscountResponseDTO> result = queryBus.dispatch(new GetAllDiscountsQuery(organizationId, includeInactive));
         return ResponseEntity.ok(result);
@@ -63,10 +64,8 @@ public class DiscountController {
             @ApiResponse(responseCode = "404", description = "Discount not found")
     })
     @PreAuthorize("hasAuthority('DISCOUNT_READ')")
-    public ResponseEntity<DiscountResponseDTO> getDiscountById(
-            @PathVariable UUID id,
-            @RequestHeader("X-Store-Id") UUID storeId
-    ) {
+    public ResponseEntity<DiscountResponseDTO> getDiscountById(@PathVariable UUID id) {
+        UUID storeId = TenantContext.current().storeId();
         log.debug("Getting discount by ID: {}", id);
         try {
             DiscountResponseDTO result = queryBus.dispatch(new GetDiscountByIdQuery(id, storeId));
@@ -112,10 +111,10 @@ public class DiscountController {
     })
     @PreAuthorize("hasAuthority('DISCOUNT_WRITE')")
     public ResponseEntity<DiscountResponseDTO> createDiscount(
-            @RequestHeader("X-Organization-Id") UUID organizationId,
-            @RequestHeader("X-Store-Id") UUID storeId,
             @Valid @RequestBody CreateDiscountRequestDTO request
     ) {
+        UUID organizationId = TenantContext.current().organizationId();
+        UUID storeId = TenantContext.current().storeId();
         log.info("Creating discount: {}", request.name());
         try {
             CreateDiscountCommand cmd = new CreateDiscountCommand(
@@ -153,9 +152,9 @@ public class DiscountController {
     @PreAuthorize("hasAuthority('DISCOUNT_WRITE')")
     public ResponseEntity<DiscountResponseDTO> updateDiscount(
             @PathVariable UUID id,
-            @RequestHeader("X-Store-Id") UUID storeId,
             @Valid @RequestBody UpdateDiscountRequestDTO request
     ) {
+        UUID storeId = TenantContext.current().storeId();
         log.info("Updating discount: {}", id);
         try {
             UpdateDiscountCommand cmd = new UpdateDiscountCommand(
@@ -190,10 +189,8 @@ public class DiscountController {
             @ApiResponse(responseCode = "404", description = "Discount not found")
     })
     @PreAuthorize("hasAuthority('DISCOUNT_WRITE')")
-    public ResponseEntity<Void> deactivateDiscount(
-            @PathVariable UUID id,
-            @RequestHeader("X-Store-Id") UUID storeId
-    ) {
+    public ResponseEntity<Void> deactivateDiscount(@PathVariable UUID id) {
+        UUID storeId = TenantContext.current().storeId();
         log.info("Deactivating discount: {}", id);
         try {
             commandBus.dispatch(new DeactivateDiscountCommand(id, storeId));

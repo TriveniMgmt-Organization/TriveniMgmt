@@ -1,25 +1,19 @@
 package com.store.mgmt.modules.auth.application.command;
 
-import com.store.mgmt.modules.globaltemplates.domain.service.TemplateCopyService;
 import com.store.mgmt.modules.auth.application.dto.AuthResponseDTO;
 import com.store.mgmt.modules.auth.application.service.AuthContextService;
 import com.store.mgmt.modules.auth.application.service.AuthContextService.ActiveContext;
 import com.store.mgmt.modules.auth.application.service.AuthContextService.TokenPair;
 import com.store.mgmt.modules.auth.infrastructure.service.AuthCookieService;
-import com.store.mgmt.modules.organization.domain.model.StoreStatus;
 import com.store.mgmt.modules.organization.domain.model.Invitation;
 import com.store.mgmt.modules.organization.domain.model.Organization;
 import com.store.mgmt.modules.organization.domain.model.Store;
 import com.store.mgmt.modules.organization.domain.model.UserOrganizationRole;
 import com.store.mgmt.modules.organization.domain.repository.InvitationRepository;
-import com.store.mgmt.modules.organization.domain.repository.OrganizationRepository;
-import com.store.mgmt.modules.organization.domain.repository.StoreRepository;
-import com.store.mgmt.modules.organization.domain.repository.UserOrganizationRoleRepository;
+import com.store.mgmt.modules.organization.domain.service.TenantProvisioningService;
 import com.store.mgmt.shared.application.command.CommandHandler;
 import com.store.mgmt.modules.users.domain.model.RoleType;
-import com.store.mgmt.modules.users.domain.model.Role;
 import com.store.mgmt.modules.users.domain.model.User;
-import com.store.mgmt.modules.users.domain.repository.RoleRepository;
 import com.store.mgmt.modules.users.domain.repository.UserRepository;
 import com.store.mgmt.shared.infrastructure.audit.AuditLogService;
 import org.slf4j.Logger;
@@ -42,40 +36,28 @@ public class RegisterHandler implements CommandHandler<RegisterCommand, AuthResp
     private static final Logger log = LoggerFactory.getLogger(RegisterHandler.class);
 
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
-    private final OrganizationRepository organizationRepository;
-    private final StoreRepository storeRepository;
     private final InvitationRepository invitationRepository;
-    private final UserOrganizationRoleRepository userOrganizationRoleRepository;
+    private final TenantProvisioningService tenantProvisioningService;
     private final PasswordEncoder passwordEncoder;
     private final AuthContextService authContextService;
     private final AuthCookieService authCookieService;
-    private final TemplateCopyService templateCopyService;
     private final AuditLogService auditLogService;
 
     public RegisterHandler(
             UserRepository userRepository,
-            RoleRepository roleRepository,
-            OrganizationRepository organizationRepository,
-            StoreRepository storeRepository,
             InvitationRepository invitationRepository,
-            UserOrganizationRoleRepository userOrganizationRoleRepository,
+            TenantProvisioningService tenantProvisioningService,
             PasswordEncoder passwordEncoder,
             AuthContextService authContextService,
             AuthCookieService authCookieService,
-            TemplateCopyService templateCopyService,
             AuditLogService auditLogService
     ) {
         this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.organizationRepository = organizationRepository;
-        this.storeRepository = storeRepository;
         this.invitationRepository = invitationRepository;
-        this.userOrganizationRoleRepository = userOrganizationRoleRepository;
+        this.tenantProvisioningService = tenantProvisioningService;
         this.passwordEncoder = passwordEncoder;
         this.authContextService = authContextService;
         this.authCookieService = authCookieService;
-        this.templateCopyService = templateCopyService;
         this.auditLogService = auditLogService;
     }
 
@@ -99,7 +81,7 @@ public class RegisterHandler implements CommandHandler<RegisterCommand, AuthResp
 
         UserOrganizationRole userOrgRole;
         Organization organization;
-        Store store = null;
+        Store store;
 
         if (cmd.invitationToken() != null && !cmd.invitationToken().isEmpty()) {
             // Handle invitation-based registration
@@ -119,7 +101,7 @@ public class RegisterHandler implements CommandHandler<RegisterCommand, AuthResp
 
         // Now set the userId and save the UserOrganizationRole
         userOrgRole.setUserId(savedUser.getId());
-        userOrganizationRoleRepository.save(userOrgRole);
+        tenantProvisioningService.saveRoleAssignment(userOrgRole);
 
         // Build context and generate tokens
         ActiveContext context = authContextService.buildContextForOrganization(savedUser, organization, store);
@@ -147,11 +129,13 @@ public class RegisterHandler implements CommandHandler<RegisterCommand, AuthResp
             throw new IllegalArgumentException("Invitation token has expired.");
         }
 
-        UserOrganizationRole userOrgRole = new UserOrganizationRole();
-        // userId will be set after user is saved
-        userOrgRole.setOrganization(invitation.getOrganization());
-        userOrgRole.setRoleId(invitation.getRoleId());
-        userOrgRole.setStore(invitation.getStore());
+        // Create role assignment using provisioning service
+        UserOrganizationRole userOrgRole = tenantProvisioningService.createRoleAssignment(
+                null, // userId will be set after user is saved
+                invitation.getOrganization(),
+                invitation.getStore(),
+                invitation.getRoleId()
+        );
 
         invitation.setUsed(true);
         invitationRepository.save(invitation);
@@ -162,63 +146,21 @@ public class RegisterHandler implements CommandHandler<RegisterCommand, AuthResp
     }
 
     private RegistrationResult handleNewOrganizationRegistration(RegisterCommand cmd, User user) {
-        // Generate unique organization name
-        String orgName = cmd.firstName() + "'s Organization";
-        String baseOrgName = orgName;
-        int suffix = 1;
-        while (organizationRepository.findByName(orgName).isPresent()) {
-            orgName = baseOrgName + " " + suffix++;
-        }
+        // Provision new organization with default store
+        TenantProvisioningService.ProvisioningResult provisioningResult =
+                tenantProvisioningService.provisionNewOrganization(cmd.firstName(), cmd.templateCode());
 
-        // Create organization
-        Organization organization = new Organization();
-        organization.setName(orgName);
-        Organization savedOrganization = organizationRepository.save(organization);
+        // Create SUPER_ADMIN role assignment (userId will be set after user is saved)
+        UserOrganizationRole userOrgRole = tenantProvisioningService.createRoleAssignment(
+                null,
+                provisioningResult.organization(),
+                null, // Organization-level role, no specific store
+                RoleType.SUPER_ADMIN
+        );
 
-        // Create default store
-        Store defaultStore = new Store();
-        defaultStore.setOrganization(savedOrganization);
-        defaultStore.setName("Main Store");
-        defaultStore.setLocation("Default Location");
-        defaultStore.setStatus(StoreStatus.ACTIVE);
-        Store savedStore = storeRepository.save(defaultStore);
+        log.info("User registered as SUPER_ADMIN of new organization: {}", provisioningResult.organization().getName());
 
-        log.info("Created default store '{}' for organization '{}'", savedStore.getName(), savedOrganization.getName());
-        logAudit("CREATE_DEFAULT_STORE", savedStore.getId(),
-                "Default store created for organization: " + savedOrganization.getName());
-
-        // Apply template if provided
-        applyTemplateIfProvided(cmd.templateCode(), savedOrganization);
-
-        // Assign SUPER_ADMIN role
-        Role superAdminRole = roleRepository.findByName(RoleType.SUPER_ADMIN.toString())
-                .orElseThrow(() -> new IllegalStateException("SUPER_ADMIN role not found."));
-
-        UserOrganizationRole userOrgRole = new UserOrganizationRole();
-        // userId will be set after user is saved
-        userOrgRole.setOrganization(savedOrganization);
-        userOrgRole.setRoleId(superAdminRole.getId());
-
-        log.info("User registered as SUPER_ADMIN of new organization: {}", savedOrganization.getName());
-
-        return new RegistrationResult(userOrgRole, savedOrganization, savedStore);
-    }
-
-    private void applyTemplateIfProvided(String templateCode, Organization organization) {
-        if (templateCode != null && !templateCode.trim().isEmpty()
-                && !templateCode.equalsIgnoreCase("CUSTOM")) {
-            try {
-                templateCopyService.applyTemplate(organization, templateCode);
-                organization.setAppliedTemplateCode(templateCode);
-                organizationRepository.save(organization);
-                logAudit("APPLY_TEMPLATE", organization.getId(),
-                        "Template '" + templateCode + "' applied during registration");
-            } catch (Exception e) {
-                log.error("Failed to apply template '{}': {}", templateCode, e.getMessage());
-                logAudit("APPLY_TEMPLATE_ERROR", organization.getId(),
-                        "Failed to apply template '" + templateCode + "': " + e.getMessage());
-            }
-        }
+        return new RegistrationResult(userOrgRole, provisioningResult.organization(), provisioningResult.defaultStore());
     }
 
     private void logAudit(String action, UUID entityId, String message) {

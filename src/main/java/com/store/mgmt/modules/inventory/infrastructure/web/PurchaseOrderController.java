@@ -5,6 +5,7 @@ import com.store.mgmt.modules.inventory.application.dto.*;
 import com.store.mgmt.modules.inventory.application.query.*;
 import com.store.mgmt.shared.infrastructure.CommandBus;
 import com.store.mgmt.shared.infrastructure.QueryBus;
+import com.store.mgmt.shared.infrastructure.security.TenantContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -47,9 +48,8 @@ public class PurchaseOrderController {
             @ApiResponse(responseCode = "200", description = "Purchase orders retrieved successfully")
     })
     @PreAuthorize("hasAuthority('PURCHASE_ORDER_READ')")
-    public ResponseEntity<List<PurchaseOrderResponseDTO>> getAllPurchaseOrders(
-            @RequestHeader("X-Organization-Id") UUID organizationId
-    ) {
+    public ResponseEntity<List<PurchaseOrderResponseDTO>> getAllPurchaseOrders() {
+        UUID organizationId = TenantContext.current().organizationId();
         log.debug("Getting all purchase orders for organization: {}", organizationId);
         List<PurchaseOrderResponseDTO> result = queryBus.dispatch(new GetAllPurchaseOrdersQuery(organizationId));
         return ResponseEntity.ok(result);
@@ -62,10 +62,8 @@ public class PurchaseOrderController {
             @ApiResponse(responseCode = "404", description = "Purchase order not found")
     })
     @PreAuthorize("hasAuthority('PURCHASE_ORDER_READ')")
-    public ResponseEntity<PurchaseOrderResponseDTO> getPurchaseOrderById(
-            @PathVariable UUID id,
-            @RequestHeader("X-Organization-Id") UUID organizationId
-    ) {
+    public ResponseEntity<PurchaseOrderResponseDTO> getPurchaseOrderById(@PathVariable UUID id) {
+        UUID organizationId = TenantContext.current().organizationId();
         log.debug("Getting purchase order by ID: {}", id);
         try {
             PurchaseOrderResponseDTO result = queryBus.dispatch(new GetPurchaseOrderByIdQuery(id, organizationId));
@@ -82,10 +80,8 @@ public class PurchaseOrderController {
             @ApiResponse(responseCode = "400", description = "Invalid status")
     })
     @PreAuthorize("hasAuthority('PURCHASE_ORDER_READ')")
-    public ResponseEntity<List<PurchaseOrderResponseDTO>> getPurchaseOrdersByStatus(
-            @PathVariable String status,
-            @RequestHeader("X-Organization-Id") UUID organizationId
-    ) {
+    public ResponseEntity<List<PurchaseOrderResponseDTO>> getPurchaseOrdersByStatus(@PathVariable String status) {
+        UUID organizationId = TenantContext.current().organizationId();
         log.debug("Getting purchase orders by status: {}", status);
         try {
             List<PurchaseOrderResponseDTO> result = queryBus.dispatch(
@@ -108,9 +104,10 @@ public class PurchaseOrderController {
     })
     @PreAuthorize("hasAuthority('PURCHASE_ORDER_WRITE')")
     public ResponseEntity<PurchaseOrderResponseDTO> createPurchaseOrder(
-            @RequestHeader("X-Organization-Id") UUID organizationId,
             @Valid @RequestBody CreatePurchaseOrderRequestDTO request
     ) {
+        UUID organizationId = TenantContext.current().organizationId();
+        UUID userId = TenantContext.current().userId();
         log.info("Creating purchase order for supplier: {}", request.supplierId());
         try {
             CreatePurchaseOrderCommand cmd = new CreatePurchaseOrderCommand(
@@ -120,7 +117,7 @@ public class PurchaseOrderController {
                     request.trackingNumber(),
                     request.notes(),
                     request.items(),
-                    null // userId - could be extracted from authentication
+                    userId
             );
             PurchaseOrderResponseDTO result = commandBus.dispatch(cmd);
             return ResponseEntity.status(HttpStatus.CREATED).body(result);
@@ -142,9 +139,9 @@ public class PurchaseOrderController {
     @PreAuthorize("hasAuthority('PURCHASE_ORDER_WRITE')")
     public ResponseEntity<PurchaseOrderResponseDTO> updatePurchaseOrder(
             @PathVariable UUID id,
-            @RequestHeader("X-Organization-Id") UUID organizationId,
             @Valid @RequestBody UpdatePurchaseOrderRequestDTO request
     ) {
+        UUID organizationId = TenantContext.current().organizationId();
         log.info("Updating purchase order: {}", id);
         try {
             UpdatePurchaseOrderCommand cmd = new UpdatePurchaseOrderCommand(
@@ -175,16 +172,17 @@ public class PurchaseOrderController {
     @PreAuthorize("hasAuthority('PURCHASE_ORDER_WRITE')")
     public ResponseEntity<PurchaseOrderResponseDTO> receivePurchaseOrder(
             @PathVariable UUID id,
-            @RequestHeader("X-Organization-Id") UUID organizationId,
             @Valid @RequestBody ReceivePurchaseOrderRequestDTO request
     ) {
+        UUID organizationId = TenantContext.current().organizationId();
+        UUID userId = TenantContext.current().userId();
         log.info("Receiving items for purchase order: {}", id);
         try {
             ReceivePurchaseOrderCommand cmd = new ReceivePurchaseOrderCommand(
                     id,
                     organizationId,
                     request.items(),
-                    null // userId - could be extracted from authentication
+                    userId
             );
             PurchaseOrderResponseDTO result = commandBus.dispatch(cmd);
             return ResponseEntity.ok(result);
@@ -204,10 +202,8 @@ public class PurchaseOrderController {
             @ApiResponse(responseCode = "404", description = "Purchase order not found")
     })
     @PreAuthorize("hasAuthority('PURCHASE_ORDER_WRITE')")
-    public ResponseEntity<Void> cancelPurchaseOrder(
-            @PathVariable UUID id,
-            @RequestHeader("X-Organization-Id") UUID organizationId
-    ) {
+    public ResponseEntity<Void> cancelPurchaseOrder(@PathVariable UUID id) {
+        UUID organizationId = TenantContext.current().organizationId();
         log.info("Cancelling purchase order: {}", id);
         try {
             commandBus.dispatch(new CancelPurchaseOrderCommand(id, organizationId));

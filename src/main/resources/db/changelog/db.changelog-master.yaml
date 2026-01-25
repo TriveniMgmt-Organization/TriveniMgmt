@@ -1,1 +1,15 @@
-
+databaseChangeLog:
+  # Seed reference data (permissions, roles, role-permission mappings)
+  # Note: Schema is managed by Hibernate ddl-auto in dev, Liquibase in prod
+  - include:
+      file: V10__seed_permissions.sql
+      relativeToChangelogFile: true
+  - include:
+      file: V11__seed_roles.sql
+      relativeToChangelogFile: true
+  - include:
+      file: V12__seed_role_permissions.sql
+      relativeToChangelogFile: true
+  - include:
+      file: V14__add_template_permissions.sql
+      relativeToChangelogFile: true

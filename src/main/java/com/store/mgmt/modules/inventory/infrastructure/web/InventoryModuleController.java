@@ -5,6 +5,7 @@ import com.store.mgmt.modules.inventory.application.dto.InventoryItemDTO;
 import com.store.mgmt.modules.inventory.application.query.*;
 import com.store.mgmt.shared.infrastructure.CommandBus;
 import com.store.mgmt.shared.infrastructure.QueryBus;
+import com.store.mgmt.shared.infrastructure.security.TenantContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -39,9 +40,9 @@ public class InventoryModuleController {
     @PreAuthorize("hasAuthority('INVENTORY_ITEM_WRITE')")
     @Operation(summary = "Create inventory item", description = "Create a new inventory item for a product variant at a location")
     public ResponseEntity<InventoryItemDTO> createItem(
-            @RequestHeader("X-Store-Id") UUID storeId,
             @Valid @RequestBody CreateInventoryItemRequest request
     ) {
+        UUID storeId = TenantContext.current().storeId();
         CreateInventoryItemCommand cmd = new CreateInventoryItemCommand(
                 request.variantId(),
                 request.locationId(),
@@ -61,9 +62,9 @@ public class InventoryModuleController {
     @Operation(summary = "Receive stock", description = "Add stock to an inventory item")
     public ResponseEntity<InventoryItemDTO> receiveStock(
             @PathVariable UUID itemId,
-            @RequestHeader("X-Store-Id") UUID storeId,
             @Valid @RequestBody StockOperationRequest request
     ) {
+        UUID storeId = TenantContext.current().storeId();
         ReceiveStockCommand cmd = new ReceiveStockCommand(
                 itemId,
                 storeId,
@@ -80,9 +81,9 @@ public class InventoryModuleController {
     @Operation(summary = "Issue stock", description = "Remove stock from an inventory item")
     public ResponseEntity<InventoryItemDTO> issueStock(
             @PathVariable UUID itemId,
-            @RequestHeader("X-Store-Id") UUID storeId,
             @Valid @RequestBody StockOperationRequest request
     ) {
+        UUID storeId = TenantContext.current().storeId();
         IssueStockCommand cmd = new IssueStockCommand(
                 itemId,
                 storeId,
@@ -99,9 +100,9 @@ public class InventoryModuleController {
     @Operation(summary = "Adjust stock", description = "Adjust stock level (positive or negative)")
     public ResponseEntity<InventoryItemDTO> adjustStock(
             @PathVariable UUID itemId,
-            @RequestHeader("X-Store-Id") UUID storeId,
             @Valid @RequestBody AdjustStockRequest request
     ) {
+        UUID storeId = TenantContext.current().storeId();
         AdjustStockCommand cmd = new AdjustStockCommand(
                 itemId,
                 storeId,
@@ -116,10 +117,8 @@ public class InventoryModuleController {
     @DeleteMapping("/items/{itemId}")
     @PreAuthorize("hasAuthority('INVENTORY_ITEM_WRITE')")
     @Operation(summary = "Delete inventory item", description = "Soft delete an inventory item")
-    public ResponseEntity<Void> deleteItem(
-            @PathVariable UUID itemId,
-            @RequestHeader("X-Store-Id") UUID storeId
-    ) {
+    public ResponseEntity<Void> deleteItem(@PathVariable UUID itemId) {
+        UUID storeId = TenantContext.current().storeId();
         DeleteInventoryItemCommand cmd = new DeleteInventoryItemCommand(itemId, storeId);
         commandBus.dispatch(cmd);
         return ResponseEntity.noContent().build();
@@ -130,10 +129,8 @@ public class InventoryModuleController {
     @GetMapping("/items/{itemId}")
     @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
     @Operation(summary = "Get inventory item", description = "Get a single inventory item by ID")
-    public ResponseEntity<InventoryItemDTO> getItem(
-            @PathVariable UUID itemId,
-            @RequestHeader("X-Store-Id") UUID storeId
-    ) {
+    public ResponseEntity<InventoryItemDTO> getItem(@PathVariable UUID itemId) {
+        UUID storeId = TenantContext.current().storeId();
         GetInventoryItemQuery query = new GetInventoryItemQuery(itemId, storeId);
         InventoryItemDTO result = queryBus.dispatch(query);
         return ResponseEntity.ok(result);
@@ -143,13 +140,13 @@ public class InventoryModuleController {
     @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
     @Operation(summary = "List inventory items", description = "Get inventory items with optional filters")
     public ResponseEntity<List<InventoryItemDTO>> getItems(
-            @RequestHeader("X-Store-Id") UUID storeId,
             @RequestParam(required = false, defaultValue = "false") boolean lowStockOnly,
             @RequestParam(required = false, defaultValue = "false") boolean expiringSoonOnly,
             @RequestParam(required = false) UUID locationId,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "20") int size
     ) {
+        UUID storeId = TenantContext.current().storeId();
         GetInventoryItemsQuery query = new GetInventoryItemsQuery(
                 storeId,
                 lowStockOnly,

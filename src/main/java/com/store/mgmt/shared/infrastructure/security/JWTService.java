@@ -193,6 +193,7 @@ public class JWTService {
         public String username;
         public UUID organizationId;
         public UUID storeId;
+        public List<GrantedAuthority> authorities;
     }
 
     public JwtData extractJwtData(String token) {
@@ -201,6 +202,19 @@ public class JWTService {
         data.username = claims.getSubject();
         data.organizationId = (String) claims.getClaim("organization_id") != null ? UUID.fromString((String) claims.getClaim("organization_id")) : null;
         data.storeId = (String) claims.getClaim("store_id") != null ? UUID.fromString((String) claims.getClaim("store_id")) : null;
+
+        // Extract authorities from JWT claims
+        @SuppressWarnings("unchecked")
+        List<String> authorityStrings = (List<String>) claims.getClaim("authorities");
+        if (authorityStrings != null) {
+            data.authorities = authorityStrings.stream()
+                    .map(SimpleGrantedAuthority::new)
+                    .collect(Collectors.toList());
+            log.debug("Extracted {} authorities from JWT for user: {}", data.authorities.size(), data.username);
+        } else {
+            data.authorities = Collections.emptyList();
+            log.warn("No authorities found in JWT for user: {}", data.username);
+        }
 
         if (data.username == null) {
             log.warn("JWT does not contain a username");

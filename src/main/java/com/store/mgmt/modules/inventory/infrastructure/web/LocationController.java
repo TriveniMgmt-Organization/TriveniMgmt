@@ -5,6 +5,7 @@ import com.store.mgmt.modules.inventory.application.dto.*;
 import com.store.mgmt.modules.inventory.application.query.*;
 import com.store.mgmt.shared.infrastructure.CommandBus;
 import com.store.mgmt.shared.infrastructure.QueryBus;
+import com.store.mgmt.shared.infrastructure.security.TenantContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -48,9 +49,9 @@ public class LocationController {
     })
     @PreAuthorize("hasAuthority('LOCATION_READ')")
     public ResponseEntity<List<LocationResponseDTO>> getAllLocations(
-            @RequestHeader("X-Store-Id") UUID storeId,
             @RequestParam(required = false, defaultValue = "false") boolean includeInactive
     ) {
+        UUID storeId = TenantContext.current().storeId();
         log.debug("Getting all locations for store: {}, includeInactive: {}", storeId, includeInactive);
         List<LocationResponseDTO> result = queryBus.dispatch(new GetAllLocationsQuery(storeId, includeInactive));
         return ResponseEntity.ok(result);
@@ -63,10 +64,8 @@ public class LocationController {
             @ApiResponse(responseCode = "404", description = "Location not found")
     })
     @PreAuthorize("hasAuthority('LOCATION_READ')")
-    public ResponseEntity<LocationResponseDTO> getLocationById(
-            @PathVariable UUID id,
-            @RequestHeader("X-Store-Id") UUID storeId
-    ) {
+    public ResponseEntity<LocationResponseDTO> getLocationById(@PathVariable UUID id) {
+        UUID storeId = TenantContext.current().storeId();
         log.debug("Getting location by ID: {}", id);
         try {
             LocationResponseDTO result = queryBus.dispatch(new GetLocationByIdQuery(id, storeId));
@@ -87,9 +86,9 @@ public class LocationController {
     })
     @PreAuthorize("hasAuthority('LOCATION_WRITE')")
     public ResponseEntity<LocationResponseDTO> createLocation(
-            @RequestHeader("X-Store-Id") UUID storeId,
             @Valid @RequestBody CreateLocationRequestDTO request
     ) {
+        UUID storeId = TenantContext.current().storeId();
         log.info("Creating location: {} for store: {}", request.name(), storeId);
         try {
             CreateLocationCommand cmd = new CreateLocationCommand(
@@ -117,9 +116,9 @@ public class LocationController {
     @PreAuthorize("hasAuthority('LOCATION_WRITE')")
     public ResponseEntity<LocationResponseDTO> updateLocation(
             @PathVariable UUID id,
-            @RequestHeader("X-Store-Id") UUID storeId,
             @Valid @RequestBody UpdateLocationRequestDTO request
     ) {
+        UUID storeId = TenantContext.current().storeId();
         log.info("Updating location: {}", id);
         try {
             UpdateLocationCommand cmd = new UpdateLocationCommand(
@@ -147,10 +146,8 @@ public class LocationController {
             @ApiResponse(responseCode = "404", description = "Location not found")
     })
     @PreAuthorize("hasAuthority('LOCATION_WRITE')")
-    public ResponseEntity<Void> deleteLocation(
-            @PathVariable UUID id,
-            @RequestHeader("X-Store-Id") UUID storeId
-    ) {
+    public ResponseEntity<Void> deleteLocation(@PathVariable UUID id) {
+        UUID storeId = TenantContext.current().storeId();
         log.info("Deleting location: {}", id);
         try {
             commandBus.dispatch(new DeleteLocationCommand(id, storeId));

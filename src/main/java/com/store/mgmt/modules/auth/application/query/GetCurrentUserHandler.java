@@ -116,20 +116,39 @@ public class GetCurrentUserHandler implements QueryHandler<GetCurrentUserQuery, 
                 roleRepository.findByIdsWithPermissions(roleIds).stream()
                         .collect(Collectors.toMap(Role::getId, r -> r));
 
-        // Get stores user has access to
-        List<StoreDTO> stores = userOrgRoles.stream()
+        // Check if user has an org-level role (store is null) - means access to all stores
+        boolean hasOrgLevelRole = userOrgRoles.stream()
                 .filter(uor -> uor.getOrganization().getId().equals(orgId))
-                .map(UserOrganizationRole::getStore)
-                .filter(Objects::nonNull)
-                .distinct()
-                .map(store -> StoreDTO.builder()
-                        .id(store.getId())
-                        .name(store.getName())
-                        .location(store.getLocation())
-                        .contactInfo(store.getContactInfo())
-                        .status(store.getStatus() != null ? store.getStatus().name() : null)
-                        .build())
-                .collect(Collectors.toList());
+                .anyMatch(uor -> uor.getStore() == null);
+
+        List<StoreDTO> stores;
+        if (hasOrgLevelRole) {
+            // User has org-level access, show all stores in the organization
+            stores = organization.getStores().stream()
+                    .map(store -> StoreDTO.builder()
+                            .id(store.getId())
+                            .name(store.getName())
+                            .location(store.getLocation())
+                            .contactInfo(store.getContactInfo())
+                            .status(store.getStatus() != null ? store.getStatus().name() : null)
+                            .build())
+                    .collect(Collectors.toList());
+        } else {
+            // User only has store-level access, show only assigned stores
+            stores = userOrgRoles.stream()
+                    .filter(uor -> uor.getOrganization().getId().equals(orgId))
+                    .map(UserOrganizationRole::getStore)
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .map(store -> StoreDTO.builder()
+                            .id(store.getId())
+                            .name(store.getName())
+                            .location(store.getLocation())
+                            .contactInfo(store.getContactInfo())
+                            .status(store.getStatus() != null ? store.getStatus().name() : null)
+                            .build())
+                    .collect(Collectors.toList());
+        }
         organizationDTO.setStores(stores);
 
         // Get active store if selected

@@ -5,6 +5,7 @@ import com.store.mgmt.modules.inventory.application.dto.*;
 import com.store.mgmt.modules.inventory.application.query.*;
 import com.store.mgmt.shared.infrastructure.CommandBus;
 import com.store.mgmt.shared.infrastructure.QueryBus;
+import com.store.mgmt.shared.infrastructure.security.TenantContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -49,10 +50,8 @@ public class DamageLossController {
             @ApiResponse(responseCode = "404", description = "Record not found")
     })
     @PreAuthorize("hasAuthority('INVENTORY_READ')")
-    public ResponseEntity<DamageLossResponseDTO> getDamageLossById(
-            @PathVariable UUID id,
-            @RequestHeader("X-Organization-Id") UUID organizationId
-    ) {
+    public ResponseEntity<DamageLossResponseDTO> getDamageLossById(@PathVariable UUID id) {
+        UUID organizationId = TenantContext.current().organizationId();
         log.debug("Getting damage/loss by ID: {}", id);
         try {
             DamageLossResponseDTO result = queryBus.dispatch(new GetDamageLossByIdQuery(id, organizationId));
@@ -69,11 +68,11 @@ public class DamageLossController {
     })
     @PreAuthorize("hasAuthority('INVENTORY_READ')")
     public ResponseEntity<List<DamageLossResponseDTO>> getDamageLossRecords(
-            @RequestHeader("X-Store-Id") UUID storeId,
             @RequestParam(required = false) UUID locationId,
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate
     ) {
+        UUID storeId = TenantContext.current().storeId();
         log.debug("Getting damage/loss records, storeId: {}, locationId: {}, startDate: {}, endDate: {}",
                 storeId, locationId, startDate, endDate);
         List<DamageLossResponseDTO> result = queryBus.dispatch(
@@ -93,10 +92,11 @@ public class DamageLossController {
     })
     @PreAuthorize("hasAuthority('INVENTORY_WRITE')")
     public ResponseEntity<DamageLossResponseDTO> recordDamageLoss(
-            @RequestHeader("X-Organization-Id") UUID organizationId,
-            @RequestHeader("X-Store-Id") UUID storeId,
             @Valid @RequestBody CreateDamageLossRequestDTO request
     ) {
+        UUID organizationId = TenantContext.current().organizationId();
+        UUID storeId = TenantContext.current().storeId();
+        UUID userId = TenantContext.current().userId();
         log.info("Recording damage/loss for variant: {}, location: {}, quantity: {}",
                 request.variantId(), request.locationId(), request.quantity());
         try {
@@ -108,7 +108,7 @@ public class DamageLossController {
                     request.quantity(),
                     request.reason(),
                     request.notes(),
-                    null // userId - could be extracted from authentication
+                    userId
             );
             DamageLossResponseDTO result = commandBus.dispatch(cmd);
             return ResponseEntity.status(HttpStatus.CREATED).body(result);

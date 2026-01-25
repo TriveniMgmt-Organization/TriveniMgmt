@@ -4,8 +4,6 @@ import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.store.mgmt.shared.infrastructure.security.JWTService;
-import com.store.mgmt.modules.organization.domain.repository.OrganizationRepository;
-import com.store.mgmt.modules.organization.domain.repository.StoreRepository;
 import com.store.mgmt.modules.users.domain.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
@@ -69,8 +67,6 @@ public class SecurityConfig {
     private final CustomUserDetailsService userService;
     private final JWTService jwtService;
     private final UserRepository userRepository;
-    private final OrganizationRepository organizationRepository;
-    private final StoreRepository storeRepository;
 
     // JWT Configuration
     @Value("${jwt.secret}")
@@ -99,13 +95,10 @@ public class SecurityConfig {
     private SecretKey signingKey;
 
     public SecurityConfig(CustomUserDetailsService userService, JWTService jwtService,
-                          UserRepository userRepository, OrganizationRepository organizationRepository,
-                          StoreRepository storeRepository) {
+                          UserRepository userRepository) {
         this.userService = userService;
         this.jwtService = jwtService;
         this.userRepository = userRepository;
-        this.organizationRepository = organizationRepository;
-        this.storeRepository = storeRepository;
     }
 
     @PostConstruct
@@ -134,30 +127,33 @@ public class SecurityConfig {
                                 // Public endpoints
                                 .requestMatchers("/api/v1/auth/**").permitAll()
                                 .requestMatchers("/api/v2/auth/login", "/api/v2/auth/register", "/api/v2/auth/refresh").permitAll()
+                                .requestMatchers("/api/v2/global-templates/active").permitAll()
                                 .requestMatchers(SWAGGER_WHITELIST).permitAll()
                                 .requestMatchers("/error").permitAll()
                                 .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info").permitAll()
+
+                                // V2 API endpoints - permission based
+                                .requestMatchers("/api/v2/global-templates/**").hasAnyAuthority("ROLE_SUPER_ADMIN")
+                                .requestMatchers("/api/v2/organizations/**").authenticated()
+                                .requestMatchers("/api/v2/stores/**").authenticated()
+                                .requestMatchers("/api/v2/users/**").authenticated()
+                                .requestMatchers("/api/v2/roles/**").authenticated()
+                                .requestMatchers("/api/v2/inventory/**").authenticated()
+
+                                // V1 API endpoints (legacy)
                                 .requestMatchers("/api/v1/global-templates/**").hasAnyAuthority("ROLE_SUPER_ADMIN")
                                 .requestMatchers("/api/v1/organizations/**").hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ORG_ADMIN")
                                 .requestMatchers("/api/v1/stores/**").hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ORG_ADMIN", "ROLE_STORE_MANAGER")
                                 .requestMatchers("/api/v1/user-organizations/**").hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ORG_ADMIN")
-                                // Role-based endpoint restrictions
                                 .requestMatchers("/api/v1/admin/**").hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ADMIN")
-//                        .requestMatchers("/api/v1/manager/**").hasAnyAuthority("ROLE_MANAGER")
-//                        .requestMatchers("/api/v1/cashier/**").hasAnyAuthority("ROLE_CASHIER")
-//                        .requestMatchers("/api/v1/support/**").hasAnyAuthority("ROLE_SUPPORT")
-//                        .requestMatchers("/api/v1/customer/**").hasAnyAuthority("ROLE_CUSTOMER")
-                                // Permission-based restrictions (optional, for finer control)
                                 .requestMatchers("/api/v1/users/**").hasAnyAuthority("USER_READ", "USER_WRITE")
                                 .requestMatchers("/api/v1/roles/**").hasAnyAuthority("ROLE_READ", "ROLE_WRITE")
-                                // Product endpoints (templates) require PRODUCT_READ/PRODUCT_WRITE or ROLE_SUPER_ADMIN
                                 .requestMatchers("/api/v1/inventory/products/**").hasAnyAuthority("ROLE_SUPER_ADMIN", "PRODUCT_READ", "PRODUCT_WRITE", "INVENTORY_ITEM_READ", "INVENTORY_ITEM_WRITE")
-                                // Other inventory endpoints require INVENTORY_ITEM_READ/INVENTORY_ITEM_WRITE
                                 .requestMatchers("/api/v1/inventory/**").hasAnyAuthority("INVENTORY_ITEM_READ", "INVENTORY_ITEM_WRITE")
-//                        .requestMatchers("/api/v1/inventory/**").permitAll()
+
                                 .anyRequest().authenticated()
                 )
-                .addFilterBefore(new JWTCookieAuthenticationFilter(jwtService, userRepository, organizationRepository, storeRepository), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JWTCookieAuthenticationFilter(jwtService, userRepository), UsernamePasswordAuthenticationFilter.class)
                 .userDetailsService(userService)
                 .headers(headers -> headers
                         .xssProtection(xss -> xss.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))

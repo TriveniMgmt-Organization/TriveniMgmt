@@ -23,6 +23,7 @@ public interface StoreRepository extends JpaRepository<Store, UUID> {
 
     Optional<Store> findByNameAndOrganizationId(String name, UUID organizationId);
 
+    @Query("SELECT s FROM Store s WHERE s.organization.id = :organizationId AND s.deletedAt IS NULL ORDER BY s.createdAt ASC")
     List<Store> findByOrganizationId(UUID organizationId);
 
     boolean existsByNameAndOrganizationId(String name, UUID organizationId);

@@ -5,6 +5,7 @@ import com.store.mgmt.modules.inventory.application.dto.*;
 import com.store.mgmt.modules.inventory.application.query.*;
 import com.store.mgmt.shared.infrastructure.CommandBus;
 import com.store.mgmt.shared.infrastructure.QueryBus;
+import com.store.mgmt.shared.infrastructure.security.TenantContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -47,9 +48,8 @@ public class UnitOfMeasureController {
             @ApiResponse(responseCode = "200", description = "Units of measure retrieved successfully")
     })
     @PreAuthorize("hasAuthority('UOM_READ')")
-    public ResponseEntity<List<UnitOfMeasureResponseDTO>> getAllUnitsOfMeasure(
-            @RequestHeader("X-Organization-Id") UUID organizationId
-    ) {
+    public ResponseEntity<List<UnitOfMeasureResponseDTO>> getAllUnitsOfMeasure() {
+        UUID organizationId = TenantContext.current().organizationId();
         log.debug("Getting all units of measure for organization: {}", organizationId);
         List<UnitOfMeasureResponseDTO> result = queryBus.dispatch(new GetAllUnitsOfMeasureQuery(organizationId));
         return ResponseEntity.ok(result);
@@ -62,10 +62,8 @@ public class UnitOfMeasureController {
             @ApiResponse(responseCode = "404", description = "Unit of measure not found")
     })
     @PreAuthorize("hasAuthority('UOM_READ')")
-    public ResponseEntity<UnitOfMeasureResponseDTO> getUnitOfMeasureById(
-            @PathVariable UUID id,
-            @RequestHeader("X-Organization-Id") UUID organizationId
-    ) {
+    public ResponseEntity<UnitOfMeasureResponseDTO> getUnitOfMeasureById(@PathVariable UUID id) {
+        UUID organizationId = TenantContext.current().organizationId();
         log.debug("Getting unit of measure by ID: {}", id);
         try {
             UnitOfMeasureResponseDTO result = queryBus.dispatch(new GetUnitOfMeasureByIdQuery(id, organizationId));
@@ -86,9 +84,9 @@ public class UnitOfMeasureController {
     })
     @PreAuthorize("hasAuthority('UOM_WRITE')")
     public ResponseEntity<UnitOfMeasureResponseDTO> createUnitOfMeasure(
-            @RequestHeader("X-Organization-Id") UUID organizationId,
             @Valid @RequestBody CreateUnitOfMeasureRequestDTO request
     ) {
+        UUID organizationId = TenantContext.current().organizationId();
         log.info("Creating unit of measure: {} for organization: {}", request.name(), organizationId);
         try {
             CreateUnitOfMeasureCommand cmd = new CreateUnitOfMeasureCommand(
@@ -114,9 +112,9 @@ public class UnitOfMeasureController {
     @PreAuthorize("hasAuthority('UOM_WRITE')")
     public ResponseEntity<UnitOfMeasureResponseDTO> updateUnitOfMeasure(
             @PathVariable UUID id,
-            @RequestHeader("X-Organization-Id") UUID organizationId,
             @Valid @RequestBody UpdateUnitOfMeasureRequestDTO request
     ) {
+        UUID organizationId = TenantContext.current().organizationId();
         log.info("Updating unit of measure: {}", id);
         try {
             UpdateUnitOfMeasureCommand cmd = new UpdateUnitOfMeasureCommand(
@@ -142,10 +140,8 @@ public class UnitOfMeasureController {
             @ApiResponse(responseCode = "404", description = "Unit of measure not found")
     })
     @PreAuthorize("hasAuthority('UOM_WRITE')")
-    public ResponseEntity<Void> deleteUnitOfMeasure(
-            @PathVariable UUID id,
-            @RequestHeader("X-Organization-Id") UUID organizationId
-    ) {
+    public ResponseEntity<Void> deleteUnitOfMeasure(@PathVariable UUID id) {
+        UUID organizationId = TenantContext.current().organizationId();
         log.info("Deleting unit of measure: {}", id);
         try {
             commandBus.dispatch(new DeleteUnitOfMeasureCommand(id, organizationId));

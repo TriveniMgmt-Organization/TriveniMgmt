@@ -6,6 +6,7 @@ import com.store.mgmt.modules.inventory.application.dto.SaleResponseDTO;
 import com.store.mgmt.modules.inventory.application.query.*;
 import com.store.mgmt.shared.infrastructure.CommandBus;
 import com.store.mgmt.shared.infrastructure.QueryBus;
+import com.store.mgmt.shared.infrastructure.security.TenantContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -51,10 +52,8 @@ public class SaleController {
             @ApiResponse(responseCode = "404", description = "Sale not found")
     })
     @PreAuthorize("hasAuthority('SALE_READ')")
-    public ResponseEntity<SaleResponseDTO> getSaleById(
-            @PathVariable UUID id,
-            @RequestHeader("X-Store-Id") UUID storeId
-    ) {
+    public ResponseEntity<SaleResponseDTO> getSaleById(@PathVariable UUID id) {
+        UUID storeId = TenantContext.current().storeId();
         log.debug("Getting sale by ID: {}", id);
         try {
             SaleResponseDTO result = queryBus.dispatch(new GetSaleByIdQuery(id, storeId));
@@ -72,10 +71,10 @@ public class SaleController {
     })
     @PreAuthorize("hasAuthority('SALE_READ')")
     public ResponseEntity<List<SaleResponseDTO>> getSalesByDateRange(
-            @RequestHeader("X-Store-Id") UUID storeId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate
     ) {
+        UUID storeId = TenantContext.current().storeId();
         log.debug("Getting sales for store {} between {} and {}", storeId, startDate, endDate);
 
         if (startDate.isAfter(endDate)) {
@@ -95,10 +94,8 @@ public class SaleController {
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
     @PreAuthorize("hasAuthority('SALE_READ')")
-    public ResponseEntity<List<SaleResponseDTO>> getSalesForProduct(
-            @PathVariable UUID productTemplateId,
-            @RequestHeader("X-Store-Id") UUID storeId
-    ) {
+    public ResponseEntity<List<SaleResponseDTO>> getSalesForProduct(@PathVariable UUID productTemplateId) {
+        UUID storeId = TenantContext.current().storeId();
         log.debug("Getting sales for product template {} in store {}", productTemplateId, storeId);
         try {
             List<SaleResponseDTO> result = queryBus.dispatch(
@@ -121,9 +118,10 @@ public class SaleController {
     })
     @PreAuthorize("hasAuthority('SALE_WRITE')")
     public ResponseEntity<SaleResponseDTO> processSale(
-            @RequestHeader("X-Store-Id") UUID storeId,
             @Valid @RequestBody CreateSaleRequestDTO request
     ) {
+        UUID storeId = TenantContext.current().storeId();
+        UUID userId = TenantContext.current().userId();
         log.info("Processing sale for store: {}", storeId);
         try {
             ProcessSaleCommand cmd = new ProcessSaleCommand(
@@ -132,7 +130,7 @@ public class SaleController {
                     request.transactionId(),
                     request.notes(),
                     request.items(),
-                    null // userId - could be extracted from authentication
+                    userId
             );
             SaleResponseDTO result = commandBus.dispatch(cmd);
             return ResponseEntity.status(HttpStatus.CREATED).body(result);

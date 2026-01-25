@@ -1,20 +1,17 @@
 package com.store.mgmt.shared.infrastructure.audit;
 
 import com.store.mgmt.shared.domain.model.BaseEntity;
-import com.store.mgmt.modules.organization.domain.model.Organization;
-import com.store.mgmt.modules.organization.domain.model.Store;
-import com.store.mgmt.modules.users.domain.model.User;
 import com.vladmihalcea.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.ToString;
 import org.hibernate.annotations.Type;
 
 import java.util.UUID;
 
 /**
  * Audit log entity for tracking actions across the system.
+ * Uses UUIDs to reference other modules (no cross-module entity dependencies).
  */
 @Entity
 @Table(name = "audit_logs")
@@ -22,20 +19,17 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = false)
 public class AuditLog extends BaseEntity {
 
-    @ManyToOne
-    @JoinColumn(name = "organization_id", nullable = false)
-    @ToString.Exclude
-    private Organization organization;
+    @Column(name = "organization_id")
+    private UUID organizationId;
 
-    @ManyToOne
-    @JoinColumn(name = "store_id")
-    @ToString.Exclude
-    private Store store;
+    @Column(name = "store_id")
+    private UUID storeId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    @ToString.Exclude
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private UUID userId;
+
+    @Column(name = "username")
+    private String username;
 
     @Column(name = "action", nullable = false)
     private String action;

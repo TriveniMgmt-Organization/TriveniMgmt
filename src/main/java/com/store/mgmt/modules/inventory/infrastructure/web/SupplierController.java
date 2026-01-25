@@ -5,6 +5,7 @@ import com.store.mgmt.modules.inventory.application.dto.*;
 import com.store.mgmt.modules.inventory.application.query.*;
 import com.store.mgmt.shared.infrastructure.CommandBus;
 import com.store.mgmt.shared.infrastructure.QueryBus;
+import com.store.mgmt.shared.infrastructure.security.TenantContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -47,9 +48,8 @@ public class SupplierController {
             @ApiResponse(responseCode = "200", description = "Suppliers retrieved successfully")
     })
     @PreAuthorize("hasAuthority('SUPPLIER_READ')")
-    public ResponseEntity<List<SupplierResponseDTO>> getAllSuppliers(
-            @RequestHeader("X-Organization-Id") UUID organizationId
-    ) {
+    public ResponseEntity<List<SupplierResponseDTO>> getAllSuppliers() {
+        UUID organizationId = TenantContext.current().organizationId();
         log.debug("Getting all suppliers for organization: {}", organizationId);
         List<SupplierResponseDTO> result = queryBus.dispatch(new GetAllSuppliersQuery(organizationId));
         return ResponseEntity.ok(result);
@@ -62,10 +62,8 @@ public class SupplierController {
             @ApiResponse(responseCode = "404", description = "Supplier not found")
     })
     @PreAuthorize("hasAuthority('SUPPLIER_READ')")
-    public ResponseEntity<SupplierResponseDTO> getSupplierById(
-            @PathVariable UUID id,
-            @RequestHeader("X-Organization-Id") UUID organizationId
-    ) {
+    public ResponseEntity<SupplierResponseDTO> getSupplierById(@PathVariable UUID id) {
+        UUID organizationId = TenantContext.current().organizationId();
         log.debug("Getting supplier by ID: {}", id);
         try {
             SupplierResponseDTO result = queryBus.dispatch(new GetSupplierByIdQuery(id, organizationId));
@@ -86,9 +84,9 @@ public class SupplierController {
     })
     @PreAuthorize("hasAuthority('SUPPLIER_WRITE')")
     public ResponseEntity<SupplierResponseDTO> createSupplier(
-            @RequestHeader("X-Organization-Id") UUID organizationId,
             @Valid @RequestBody CreateSupplierRequestDTO request
     ) {
+        UUID organizationId = TenantContext.current().organizationId();
         log.info("Creating supplier: {} for organization: {}", request.name(), organizationId);
         try {
             CreateSupplierCommand cmd = new CreateSupplierCommand(
@@ -118,9 +116,9 @@ public class SupplierController {
     @PreAuthorize("hasAuthority('SUPPLIER_WRITE')")
     public ResponseEntity<SupplierResponseDTO> updateSupplier(
             @PathVariable UUID id,
-            @RequestHeader("X-Organization-Id") UUID organizationId,
             @Valid @RequestBody UpdateSupplierRequestDTO request
     ) {
+        UUID organizationId = TenantContext.current().organizationId();
         log.info("Updating supplier: {}", id);
         try {
             UpdateSupplierCommand cmd = new UpdateSupplierCommand(
@@ -150,10 +148,8 @@ public class SupplierController {
             @ApiResponse(responseCode = "404", description = "Supplier not found")
     })
     @PreAuthorize("hasAuthority('SUPPLIER_WRITE')")
-    public ResponseEntity<Void> deleteSupplier(
-            @PathVariable UUID id,
-            @RequestHeader("X-Organization-Id") UUID organizationId
-    ) {
+    public ResponseEntity<Void> deleteSupplier(@PathVariable UUID id) {
+        UUID organizationId = TenantContext.current().organizationId();
         log.info("Deleting supplier: {}", id);
         try {
             commandBus.dispatch(new DeleteSupplierCommand(id, organizationId));

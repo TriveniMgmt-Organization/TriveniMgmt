@@ -5,6 +5,7 @@ import com.store.mgmt.modules.inventory.application.dto.*;
 import com.store.mgmt.modules.inventory.application.query.*;
 import com.store.mgmt.shared.infrastructure.CommandBus;
 import com.store.mgmt.shared.infrastructure.QueryBus;
+import com.store.mgmt.shared.infrastructure.security.TenantContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -48,9 +49,9 @@ public class CategoryController {
     })
     @PreAuthorize("hasAuthority('CATEGORY_READ')")
     public ResponseEntity<List<CategoryResponseDTO>> getAllCategories(
-            @RequestHeader("X-Organization-Id") UUID organizationId,
             @RequestParam(required = false, defaultValue = "false") boolean includeInactive
     ) {
+        UUID organizationId = TenantContext.current().organizationId();
         log.debug("Getting all categories for organization: {}, includeInactive: {}", organizationId, includeInactive);
         List<CategoryResponseDTO> result = queryBus.dispatch(new GetAllCategoriesQuery(organizationId, includeInactive));
         return ResponseEntity.ok(result);
@@ -63,10 +64,8 @@ public class CategoryController {
             @ApiResponse(responseCode = "404", description = "Category not found")
     })
     @PreAuthorize("hasAuthority('CATEGORY_READ')")
-    public ResponseEntity<CategoryResponseDTO> getCategoryById(
-            @PathVariable UUID id,
-            @RequestHeader("X-Organization-Id") UUID organizationId
-    ) {
+    public ResponseEntity<CategoryResponseDTO> getCategoryById(@PathVariable UUID id) {
+        UUID organizationId = TenantContext.current().organizationId();
         log.debug("Getting category by ID: {}", id);
         try {
             CategoryResponseDTO result = queryBus.dispatch(new GetCategoryByIdQuery(id, organizationId));
@@ -87,9 +86,9 @@ public class CategoryController {
     })
     @PreAuthorize("hasAuthority('CATEGORY_WRITE')")
     public ResponseEntity<CategoryResponseDTO> createCategory(
-            @RequestHeader("X-Organization-Id") UUID organizationId,
             @Valid @RequestBody CreateCategoryRequestDTO request
     ) {
+        UUID organizationId = TenantContext.current().organizationId();
         log.info("Creating category: {} for organization: {}", request.name(), organizationId);
         try {
             CreateCategoryCommand cmd = new CreateCategoryCommand(
@@ -117,9 +116,9 @@ public class CategoryController {
     @PreAuthorize("hasAuthority('CATEGORY_WRITE')")
     public ResponseEntity<CategoryResponseDTO> updateCategory(
             @PathVariable UUID id,
-            @RequestHeader("X-Organization-Id") UUID organizationId,
             @Valid @RequestBody UpdateCategoryRequestDTO request
     ) {
+        UUID organizationId = TenantContext.current().organizationId();
         log.info("Updating category: {}", id);
         try {
             UpdateCategoryCommand cmd = new UpdateCategoryCommand(
@@ -146,10 +145,8 @@ public class CategoryController {
             @ApiResponse(responseCode = "404", description = "Category not found")
     })
     @PreAuthorize("hasAuthority('CATEGORY_WRITE')")
-    public ResponseEntity<Void> deleteCategory(
-            @PathVariable UUID id,
-            @RequestHeader("X-Organization-Id") UUID organizationId
-    ) {
+    public ResponseEntity<Void> deleteCategory(@PathVariable UUID id) {
+        UUID organizationId = TenantContext.current().organizationId();
         log.info("Deleting category: {}", id);
         try {
             commandBus.dispatch(new DeleteCategoryCommand(id, organizationId));

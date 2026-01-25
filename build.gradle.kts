@@ -35,7 +35,10 @@ dependencies {
 	implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
 	implementation("org.springframework.boot:spring-boot-starter-mail")
 	// implementation("org.flywaydb:flyway-core:11.10.2")
-//	implementation("org.liquibase:liquibase-core")
+	implementation("org.liquibase:liquibase-core")
+	// Spring Cache with Caffeine
+	implementation("org.springframework.boot:spring-boot-starter-cache")
+	implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
 	// MapStruct Core Dependency
 	implementation("org.mapstruct:mapstruct:1.5.5.Final") // Use the latest stable version

@@ -1,9 +1,7 @@
 package com.store.mgmt.shared.infrastructure.audit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.store.mgmt.config.TenantContext;
-import com.store.mgmt.shared.infrastructure.audit.AuditLog;
-import com.store.mgmt.shared.infrastructure.audit.AuditLogRepository;
+import com.store.mgmt.shared.infrastructure.security.TenantContext;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,16 +40,21 @@ public class AuditLogServiceImpl implements AuditLogService {
 
             AuditLog log = new AuditLog();
             log.setAction(action);
-            log.setEntityType(entityId != null ? entityId.getClass().getSimpleName() : "Unknown");
+            log.setEntityType(entityId != null ? "UUID" : "Unknown");
             log.setEntityId(entityId);
 
             Map<String, Object> finalDetails = new HashMap<>(detailsData);
             finalDetails.put("correlationId", MDC.get("correlationId"));
 
             log.setDetails(objectMapper.writeValueAsString(finalDetails));
-            log.setOrganization(TenantContext.getCurrentOrganization());
-            log.setStore(TenantContext.getCurrentStore());
-            log.setUser(TenantContext.getCurrentUser());
+
+            // Get tenant info from TenantContext
+            TenantContext.currentOptional().ifPresent(ctx -> {
+                log.setOrganizationId(ctx.organizationId());
+                log.setStoreId(ctx.storeId());
+                log.setUserId(ctx.userId());
+                log.setUsername(ctx.username());
+            });
 
             auditLogRepository.save(log);
             logger.debug("Audit entry persisted: action={}, entityId={}", action, entityId);

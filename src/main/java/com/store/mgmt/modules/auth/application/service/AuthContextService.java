@@ -8,6 +8,7 @@ import com.store.mgmt.modules.organization.application.dto.StoreDTO;
 import com.store.mgmt.modules.organization.domain.model.Organization;
 import com.store.mgmt.modules.organization.domain.model.Store;
 import com.store.mgmt.modules.organization.domain.model.UserOrganizationRole;
+import com.store.mgmt.modules.organization.domain.repository.OrganizationRepository;
 import com.store.mgmt.modules.organization.domain.repository.UserOrganizationRoleRepository;
 import com.store.mgmt.modules.users.domain.model.Role;
 import com.store.mgmt.modules.users.domain.model.RoleType;
@@ -32,17 +33,20 @@ public class AuthContextService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserOrganizationRoleRepository userOrganizationRoleRepository;
     private final JpaRoleRepository roleRepository;
+    private final OrganizationRepository organizationRepository;
 
     public AuthContextService(
             JWTService jwtService,
             RefreshTokenRepository refreshTokenRepository,
             UserOrganizationRoleRepository userOrganizationRoleRepository,
-            JpaRoleRepository roleRepository
+            JpaRoleRepository roleRepository,
+            OrganizationRepository organizationRepository
     ) {
         this.jwtService = jwtService;
         this.refreshTokenRepository = refreshTokenRepository;
         this.userOrganizationRoleRepository = userOrganizationRoleRepository;
         this.roleRepository = roleRepository;
+        this.organizationRepository = organizationRepository;
     }
 
     /**
@@ -220,13 +224,33 @@ public class AuthContextService {
 
         // Get stores user has access to in this organization
         List<UserOrganizationRole> userOrgRoles = userOrganizationRoleRepository.findByUserIdWithOrganizationAndStore(user.getId());
-        List<StoreDTO> stores = userOrgRoles.stream()
+
+        // Check if user has an org-level role (store is null) - means access to all stores
+        boolean hasOrgLevelRole = userOrgRoles.stream()
                 .filter(uor -> uor.getOrganization().getId().equals(org.getId()))
-                .map(UserOrganizationRole::getStore)
-                .filter(Objects::nonNull)
-                .distinct()
-                .map(this::mapStoreToDTO)
-                .collect(Collectors.toList());
+                .anyMatch(uor -> uor.getStore() == null);
+
+        List<StoreDTO> stores;
+        if (hasOrgLevelRole) {
+            // User has org-level access, show all stores in the organization
+            // Fetch organization with stores to avoid lazy loading issues
+            Organization orgWithStores = organizationRepository.findByIdWithStores(org.getId())
+                    .orElse(org);
+            stores = orgWithStores.getStores() != null
+                    ? orgWithStores.getStores().stream()
+                            .map(this::mapStoreToDTO)
+                            .collect(Collectors.toList())
+                    : Collections.emptyList();
+        } else {
+            // User only has store-level access, show only assigned stores
+            stores = userOrgRoles.stream()
+                    .filter(uor -> uor.getOrganization().getId().equals(org.getId()))
+                    .map(UserOrganizationRole::getStore)
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .map(this::mapStoreToDTO)
+                    .collect(Collectors.toList());
+        }
         dto.setStores(stores);
 
         return dto;

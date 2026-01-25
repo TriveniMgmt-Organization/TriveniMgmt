@@ -29,5 +29,8 @@ public interface JpaRoleRepository extends JpaRepository<Role, UUID> {
     @Query("SELECT r FROM Role r LEFT JOIN FETCH r.permissions WHERE r.id IN :ids AND r.deletedAt IS NULL")
     List<Role> findByIdsWithPermissions(@Param("ids") List<UUID> ids);
 
+    @Query("SELECT DISTINCT r FROM Role r LEFT JOIN FETCH r.permissions WHERE r.deletedAt IS NULL")
+    List<Role> findAllWithPermissions();
+
     boolean existsByName(String name);
 }
