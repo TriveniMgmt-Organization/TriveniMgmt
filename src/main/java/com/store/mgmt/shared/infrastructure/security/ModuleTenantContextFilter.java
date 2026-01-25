@@ -39,11 +39,16 @@ public class ModuleTenantContextFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
         try {
-            TenantContext context = extractTenantContext(request);
-            if (context != null) {
-                TenantContext.set(context);
-                log.debug("Tenant context set: org={}, store={}, user={}",
-                        context.organizationId(), context.storeId(), context.userId());
+            // Check if TenantContext is already set by JWTCookieAuthenticationFilter
+            if (!TenantContext.isSet()) {
+                TenantContext context = extractTenantContext(request);
+                if (context != null) {
+                    TenantContext.set(context);
+                    log.debug("Tenant context set: org={}, store={}, user={}",
+                            context.organizationId(), context.storeId(), context.userId());
+                }
+            } else {
+                log.debug("Tenant context already set, skipping extraction");
             }
 
             filterChain.doFilter(request, response);

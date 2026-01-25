@@ -53,7 +53,8 @@ public class SelectTenantHandler implements CommandHandler<SelectTenantCommand, 
 
     @Override
     public AuthResponseDTO handle(SelectTenantCommand cmd) {
-        log.info("Selecting tenant - org: {}, store: {}", cmd.organizationId(), cmd.storeId());
+        log.info("SelectTenant received - organizationId: {}, storeId: {}, storeId is null: {}",
+                cmd.organizationId(), cmd.storeId(), cmd.storeId() == null);
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -83,8 +84,13 @@ public class SelectTenantHandler implements CommandHandler<SelectTenantCommand, 
         }
 
         // Build context and generate tokens
+        log.info("Building context with store object: {}, store ID from object: {}",
+                store != null ? "present" : "null", store != null ? store.getId() : "null");
         ActiveContext context = authContextService.buildContextForOrganization(user, organization, store);
+        log.info("Built context - orgId: {}, storeId: {}, context.storeId() is null: {}",
+                context.organizationId(), context.storeId(), context.storeId() == null);
         TokenPair tokens = authContextService.generateTokens(user, context);
+        log.info("Tokens generated successfully");
 
         // Set cookies
         authCookieService.setAuthCookies(tokens.accessToken(), tokens.refreshToken(), cmd.response());

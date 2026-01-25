@@ -65,7 +65,7 @@ public class DiscountController {
     })
     @PreAuthorize("hasAuthority('DISCOUNT_READ')")
     public ResponseEntity<DiscountResponseDTO> getDiscountById(@PathVariable UUID id) {
-        UUID storeId = TenantContext.current().storeId();
+        UUID storeId = TenantContext.current().requireStoreId();
         log.debug("Getting discount by ID: {}", id);
         try {
             DiscountResponseDTO result = queryBus.dispatch(new GetDiscountByIdQuery(id, storeId));
@@ -114,7 +114,7 @@ public class DiscountController {
             @Valid @RequestBody CreateDiscountRequestDTO request
     ) {
         UUID organizationId = TenantContext.current().organizationId();
-        UUID storeId = TenantContext.current().storeId();
+        UUID storeId = TenantContext.current().requireStoreId();
         log.info("Creating discount: {}", request.name());
         try {
             CreateDiscountCommand cmd = new CreateDiscountCommand(
@@ -154,7 +154,7 @@ public class DiscountController {
             @PathVariable UUID id,
             @Valid @RequestBody UpdateDiscountRequestDTO request
     ) {
-        UUID storeId = TenantContext.current().storeId();
+        UUID storeId = TenantContext.current().requireStoreId();
         log.info("Updating discount: {}", id);
         try {
             UpdateDiscountCommand cmd = new UpdateDiscountCommand(
@@ -190,7 +190,7 @@ public class DiscountController {
     })
     @PreAuthorize("hasAuthority('DISCOUNT_WRITE')")
     public ResponseEntity<Void> deactivateDiscount(@PathVariable UUID id) {
-        UUID storeId = TenantContext.current().storeId();
+        UUID storeId = TenantContext.current().requireStoreId();
         log.info("Deactivating discount: {}", id);
         try {
             commandBus.dispatch(new DeactivateDiscountCommand(id, storeId));

@@ -75,8 +75,8 @@ public class JWTCookieAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
-            logger.debug("Authenticated user: {} with organizationId={}, storeId={}, authorities={}",
-                    email, orgId, storeId, jwtData.authorities);
+            logger.info("JWT Authentication - user: {}, organizationId={}, storeId={}, authorities count={}",
+                    email, orgId, storeId, jwtData.authorities != null ? jwtData.authorities.size() : 0);
 
             // Use authorities from JWT token (not from database)
             // This is more efficient and ensures consistency with what was granted at login

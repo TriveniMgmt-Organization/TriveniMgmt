@@ -39,7 +39,7 @@ public class StockCheckController {
             @ApiResponse(responseCode = "200", description = "Stock summary retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Variant not found")
     })
-    @PreAuthorize("hasAuthority('INVENTORY_READ')")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
     public ResponseEntity<StockSummaryResponseDTO> getStockByVariant(@PathVariable UUID variantId) {
         log.debug("Getting stock summary for variant: {}", variantId);
         try {
@@ -56,7 +56,7 @@ public class StockCheckController {
             @ApiResponse(responseCode = "200", description = "Stock summaries retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Template not found")
     })
-    @PreAuthorize("hasAuthority('INVENTORY_READ')")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
     public ResponseEntity<List<StockSummaryResponseDTO>> getStockByTemplate(@PathVariable UUID templateId) {
         log.debug("Getting stock summary for template: {}", templateId);
         try {
@@ -73,7 +73,7 @@ public class StockCheckController {
             @ApiResponse(responseCode = "200", description = "Availability check completed"),
             @ApiResponse(responseCode = "404", description = "Variant not found")
     })
-    @PreAuthorize("hasAuthority('INVENTORY_READ')")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
     public ResponseEntity<StockAvailabilityResponseDTO> checkAvailability(
             @PathVariable UUID variantId,
             @RequestParam int quantity
@@ -94,7 +94,7 @@ public class StockCheckController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Low stock items retrieved successfully")
     })
-    @PreAuthorize("hasAuthority('INVENTORY_READ')")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
     public ResponseEntity<List<LowStockItemResponseDTO>> getLowStockItems(
             @RequestParam(required = false) UUID locationId
     ) {

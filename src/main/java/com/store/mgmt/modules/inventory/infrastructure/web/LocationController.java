@@ -51,7 +51,7 @@ public class LocationController {
     public ResponseEntity<List<LocationResponseDTO>> getAllLocations(
             @RequestParam(required = false, defaultValue = "false") boolean includeInactive
     ) {
-        UUID storeId = TenantContext.current().storeId();
+        UUID storeId = TenantContext.current().requireStoreId();
         log.debug("Getting all locations for store: {}, includeInactive: {}", storeId, includeInactive);
         List<LocationResponseDTO> result = queryBus.dispatch(new GetAllLocationsQuery(storeId, includeInactive));
         return ResponseEntity.ok(result);
@@ -65,7 +65,7 @@ public class LocationController {
     })
     @PreAuthorize("hasAuthority('LOCATION_READ')")
     public ResponseEntity<LocationResponseDTO> getLocationById(@PathVariable UUID id) {
-        UUID storeId = TenantContext.current().storeId();
+        UUID storeId = TenantContext.current().requireStoreId();
         log.debug("Getting location by ID: {}", id);
         try {
             LocationResponseDTO result = queryBus.dispatch(new GetLocationByIdQuery(id, storeId));
@@ -88,7 +88,7 @@ public class LocationController {
     public ResponseEntity<LocationResponseDTO> createLocation(
             @Valid @RequestBody CreateLocationRequestDTO request
     ) {
-        UUID storeId = TenantContext.current().storeId();
+        UUID storeId = TenantContext.current().requireStoreId();
         log.info("Creating location: {} for store: {}", request.name(), storeId);
         try {
             CreateLocationCommand cmd = new CreateLocationCommand(
@@ -118,7 +118,7 @@ public class LocationController {
             @PathVariable UUID id,
             @Valid @RequestBody UpdateLocationRequestDTO request
     ) {
-        UUID storeId = TenantContext.current().storeId();
+        UUID storeId = TenantContext.current().requireStoreId();
         log.info("Updating location: {}", id);
         try {
             UpdateLocationCommand cmd = new UpdateLocationCommand(
@@ -147,7 +147,7 @@ public class LocationController {
     })
     @PreAuthorize("hasAuthority('LOCATION_WRITE')")
     public ResponseEntity<Void> deleteLocation(@PathVariable UUID id) {
-        UUID storeId = TenantContext.current().storeId();
+        UUID storeId = TenantContext.current().requireStoreId();
         log.info("Deleting location: {}", id);
         try {
             commandBus.dispatch(new DeleteLocationCommand(id, storeId));

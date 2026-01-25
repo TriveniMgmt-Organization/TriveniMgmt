@@ -102,11 +102,51 @@ public record TenantContext(
     }
 
     /**
+     * Get the store ID, throwing an exception if not in store context.
+     * Use this for operations that require a store context.
+     */
+    public UUID requireStoreId() {
+        if (this.storeId == null) {
+            throw new StoreContextRequiredException();
+        }
+        return this.storeId;
+    }
+
+    /**
+     * Get the organization ID, throwing an exception if not set.
+     * Use this for operations that require an organization context.
+     */
+    public UUID requireOrganizationId() {
+        if (this.organizationId == null) {
+            throw new OrganizationContextRequiredException();
+        }
+        return this.organizationId;
+    }
+
+    /**
      * Exception thrown when tenant context is not set.
      */
     public static class TenantContextNotSetException extends RuntimeException {
         public TenantContextNotSetException() {
             super("Tenant context is not set for this request");
+        }
+    }
+
+    /**
+     * Exception thrown when store context is required but not set.
+     */
+    public static class StoreContextRequiredException extends RuntimeException {
+        public StoreContextRequiredException() {
+            super("This operation requires a store context. Please select a store first.");
+        }
+    }
+
+    /**
+     * Exception thrown when organization context is required but not set.
+     */
+    public static class OrganizationContextRequiredException extends RuntimeException {
+        public OrganizationContextRequiredException() {
+            super("This operation requires an organization context.");
         }
     }
 }

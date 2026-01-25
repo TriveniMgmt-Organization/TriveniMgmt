@@ -49,7 +49,7 @@ public class DamageLossController {
             @ApiResponse(responseCode = "200", description = "Record retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Record not found")
     })
-    @PreAuthorize("hasAuthority('INVENTORY_READ')")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
     public ResponseEntity<DamageLossResponseDTO> getDamageLossById(@PathVariable UUID id) {
         UUID organizationId = TenantContext.current().organizationId();
         log.debug("Getting damage/loss by ID: {}", id);
@@ -66,13 +66,13 @@ public class DamageLossController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Records retrieved successfully")
     })
-    @PreAuthorize("hasAuthority('INVENTORY_READ')")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
     public ResponseEntity<List<DamageLossResponseDTO>> getDamageLossRecords(
             @RequestParam(required = false) UUID locationId,
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate
     ) {
-        UUID storeId = TenantContext.current().storeId();
+        UUID storeId = TenantContext.current().requireStoreId();
         log.debug("Getting damage/loss records, storeId: {}, locationId: {}, startDate: {}, endDate: {}",
                 storeId, locationId, startDate, endDate);
         List<DamageLossResponseDTO> result = queryBus.dispatch(
@@ -90,12 +90,12 @@ public class DamageLossController {
             @ApiResponse(responseCode = "400", description = "Invalid input or insufficient stock"),
             @ApiResponse(responseCode = "404", description = "Variant or location not found")
     })
-    @PreAuthorize("hasAuthority('INVENTORY_WRITE')")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_WRITE')")
     public ResponseEntity<DamageLossResponseDTO> recordDamageLoss(
             @Valid @RequestBody CreateDamageLossRequestDTO request
     ) {
         UUID organizationId = TenantContext.current().organizationId();
-        UUID storeId = TenantContext.current().storeId();
+        UUID storeId = TenantContext.current().requireStoreId();
         UUID userId = TenantContext.current().userId();
         log.info("Recording damage/loss for variant: {}, location: {}, quantity: {}",
                 request.variantId(), request.locationId(), request.quantity());

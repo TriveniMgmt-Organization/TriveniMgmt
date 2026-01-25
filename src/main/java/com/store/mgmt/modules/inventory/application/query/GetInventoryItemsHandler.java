@@ -77,11 +77,27 @@ public class GetInventoryItemsHandler implements QueryHandler<GetInventoryItemsQ
         boolean isExpiringSoon = item.getExpiryDate() != null &&
                 item.getExpiryDate().isBefore(LocalDate.now().plusDays(30));
 
+        // Get variant info
+        String variantSku = null;
+        String variantName = null;
+        if (item.getVariant() != null) {
+            variantSku = item.getVariant().getSku();
+            if (item.getVariant().getTemplate() != null) {
+                variantName = item.getVariant().getTemplate().getName();
+            }
+        }
+
+        // Get location name
+        String locationName = item.getLocation() != null ? item.getLocation().getName() : null;
+
         return InventoryItemDTO.builder()
                 .id(item.getId())
                 .variantId(item.getVariant() != null ? item.getVariant().getId() : null)
                 .locationId(item.getLocation() != null ? item.getLocation().getId() : null)
                 .storeId(item.getLocation() != null ? item.getLocation().getStoreId() : null)
+                .variantSku(variantSku)
+                .variantName(variantName)
+                .locationName(locationName)
                 .onHand(stockLevel != null ? stockLevel.getOnHand() : 0)
                 .reserved(stockLevel != null ? stockLevel.getCommitted() : 0)
                 .available(stockLevel != null ? stockLevel.getAvailable() : 0)

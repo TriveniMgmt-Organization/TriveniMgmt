@@ -1,6 +1,7 @@
 package com.store.mgmt.shared.infrastructure.web;
 
 import com.store.mgmt.shared.domain.exception.*;
+import com.store.mgmt.shared.infrastructure.security.TenantContext;
 import com.store.mgmt.modules.organization.domain.exception.*;
 import com.store.mgmt.modules.users.domain.exception.*;
 import com.store.mgmt.modules.products.domain.exception.*;
@@ -178,6 +179,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
                 .body(ErrorResponse.of(HttpStatus.FORBIDDEN, ex.getMessage(), ""));
+    }
+
+    @ExceptionHandler(TenantContext.StoreContextRequiredException.class)
+    public ResponseEntity<ErrorResponse> handleStoreContextRequired(TenantContext.StoreContextRequiredException ex) {
+        log.warn("Store context required: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.of(HttpStatus.BAD_REQUEST, ex.getMessage(), ""));
+    }
+
+    @ExceptionHandler(TenantContext.OrganizationContextRequiredException.class)
+    public ResponseEntity<ErrorResponse> handleOrganizationContextRequired(TenantContext.OrganizationContextRequiredException ex) {
+        log.warn("Organization context required: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.of(HttpStatus.BAD_REQUEST, ex.getMessage(), ""));
     }
 
     @ExceptionHandler(AccessDeniedException.class)

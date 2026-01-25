@@ -53,7 +53,7 @@ public class SaleController {
     })
     @PreAuthorize("hasAuthority('SALE_READ')")
     public ResponseEntity<SaleResponseDTO> getSaleById(@PathVariable UUID id) {
-        UUID storeId = TenantContext.current().storeId();
+        UUID storeId = TenantContext.current().requireStoreId();
         log.debug("Getting sale by ID: {}", id);
         try {
             SaleResponseDTO result = queryBus.dispatch(new GetSaleByIdQuery(id, storeId));
@@ -74,7 +74,7 @@ public class SaleController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate
     ) {
-        UUID storeId = TenantContext.current().storeId();
+        UUID storeId = TenantContext.current().requireStoreId();
         log.debug("Getting sales for store {} between {} and {}", storeId, startDate, endDate);
 
         if (startDate.isAfter(endDate)) {
@@ -95,7 +95,7 @@ public class SaleController {
     })
     @PreAuthorize("hasAuthority('SALE_READ')")
     public ResponseEntity<List<SaleResponseDTO>> getSalesForProduct(@PathVariable UUID productTemplateId) {
-        UUID storeId = TenantContext.current().storeId();
+        UUID storeId = TenantContext.current().requireStoreId();
         log.debug("Getting sales for product template {} in store {}", productTemplateId, storeId);
         try {
             List<SaleResponseDTO> result = queryBus.dispatch(
@@ -120,7 +120,7 @@ public class SaleController {
     public ResponseEntity<SaleResponseDTO> processSale(
             @Valid @RequestBody CreateSaleRequestDTO request
     ) {
-        UUID storeId = TenantContext.current().storeId();
+        UUID storeId = TenantContext.current().requireStoreId();
         UUID userId = TenantContext.current().userId();
         log.info("Processing sale for store: {}", storeId);
         try {

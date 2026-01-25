@@ -51,7 +51,7 @@ public class StockTransactionController {
             @ApiResponse(responseCode = "200", description = "Transaction retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Transaction not found")
     })
-    @PreAuthorize("hasAuthority('INVENTORY_READ')")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
     public ResponseEntity<StockTransactionResponseDTO> getTransactionById(@PathVariable UUID id) {
         log.debug("Getting transaction by ID: {}", id);
         try {
@@ -67,7 +67,7 @@ public class StockTransactionController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Transactions retrieved successfully")
     })
-    @PreAuthorize("hasAuthority('INVENTORY_READ')")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
     public ResponseEntity<List<StockTransactionResponseDTO>> getTransactionsByInventoryItem(
             @PathVariable UUID inventoryItemId
     ) {
@@ -83,7 +83,7 @@ public class StockTransactionController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Transactions retrieved successfully")
     })
-    @PreAuthorize("hasAuthority('INVENTORY_READ')")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
     public ResponseEntity<List<StockTransactionResponseDTO>> getTransactionsByDateRange(
             @RequestParam LocalDate startDate,
             @RequestParam LocalDate endDate
@@ -103,7 +103,7 @@ public class StockTransactionController {
             @ApiResponse(responseCode = "200", description = "Stock level retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Stock level not found")
     })
-    @PreAuthorize("hasAuthority('INVENTORY_READ')")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
     public ResponseEntity<StockLevelResponseDTO> getStockLevel(@PathVariable UUID inventoryItemId) {
         log.debug("Getting stock level for inventory item: {}", inventoryItemId);
         try {
@@ -119,7 +119,7 @@ public class StockTransactionController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Stock levels retrieved successfully")
     })
-    @PreAuthorize("hasAuthority('INVENTORY_READ')")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
     public ResponseEntity<List<StockLevelResponseDTO>> getStockLevelsByVariant(@PathVariable UUID variantId) {
         log.debug("Getting stock levels for variant: {}", variantId);
         List<StockLevelResponseDTO> result = queryBus.dispatch(new GetStockLevelsByVariantQuery(variantId));
@@ -135,7 +135,7 @@ public class StockTransactionController {
             @ApiResponse(responseCode = "400", description = "Invalid input or insufficient stock"),
             @ApiResponse(responseCode = "404", description = "Inventory item not found")
     })
-    @PreAuthorize("hasAuthority('INVENTORY_WRITE')")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_WRITE')")
     public ResponseEntity<StockTransactionResponseDTO> createTransaction(
             @Valid @RequestBody CreateStockTransactionRequestDTO request,
             @AuthenticationPrincipal UserDetails userDetails

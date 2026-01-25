@@ -46,7 +46,7 @@ public class BatchLotController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Batch/lots retrieved successfully")
     })
-    @PreAuthorize("hasAuthority('INVENTORY_READ')")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
     public ResponseEntity<List<BatchLotResponseDTO>> getAllBatchLots(
             @RequestParam(required = false, defaultValue = "false") boolean includeInactive
     ) {
@@ -61,7 +61,7 @@ public class BatchLotController {
             @ApiResponse(responseCode = "200", description = "Batch/lot retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "Batch/lot not found")
     })
-    @PreAuthorize("hasAuthority('INVENTORY_READ')")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
     public ResponseEntity<BatchLotResponseDTO> getBatchLotById(@PathVariable UUID id) {
         log.debug("Getting batch/lot by ID: {}", id);
         try {
@@ -77,7 +77,7 @@ public class BatchLotController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Expiring batch/lots retrieved successfully")
     })
-    @PreAuthorize("hasAuthority('INVENTORY_READ')")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_READ')")
     public ResponseEntity<List<BatchLotResponseDTO>> getExpiringBatchLots(
             @RequestParam(required = false, defaultValue = "30") int daysAhead
     ) {
@@ -96,7 +96,7 @@ public class BatchLotController {
             @ApiResponse(responseCode = "404", description = "Supplier not found"),
             @ApiResponse(responseCode = "409", description = "Batch number already exists")
     })
-    @PreAuthorize("hasAuthority('INVENTORY_WRITE')")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_WRITE')")
     public ResponseEntity<BatchLotResponseDTO> createBatchLot(
             @Valid @RequestBody CreateBatchLotRequestDTO request
     ) {
@@ -124,7 +124,7 @@ public class BatchLotController {
             @ApiResponse(responseCode = "204", description = "Batch/lot deactivated successfully"),
             @ApiResponse(responseCode = "404", description = "Batch/lot not found")
     })
-    @PreAuthorize("hasAuthority('INVENTORY_WRITE')")
+    @PreAuthorize("hasAuthority('INVENTORY_ITEM_WRITE')")
     public ResponseEntity<Void> deactivateBatchLot(@PathVariable UUID id) {
         log.info("Deactivating batch/lot: {}", id);
         try {

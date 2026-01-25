@@ -87,6 +87,8 @@ public class JWTService {
     public String generateAccessToken(User user,
                                       UUID activeOrganizationId, UUID activeStoreId,
                                       List<GrantedAuthority> authoritiesForActiveOrg) {
+        log.info("generateAccessToken called - user: {}, orgId: {}, storeId: {}, storeId is null: {}",
+                user.getEmail(), activeOrganizationId, activeStoreId, activeStoreId == null);
         return generateToken(user, accessTokenExpiration, false, activeOrganizationId, activeStoreId, authoritiesForActiveOrg);
     }
 
@@ -200,8 +202,11 @@ public class JWTService {
         JWTClaimsSet claims = parseAndGetClaims(token);
         JwtData data = new JwtData();
         data.username = claims.getSubject();
-        data.organizationId = (String) claims.getClaim("organization_id") != null ? UUID.fromString((String) claims.getClaim("organization_id")) : null;
-        data.storeId = (String) claims.getClaim("store_id") != null ? UUID.fromString((String) claims.getClaim("store_id")) : null;
+        String orgIdClaim = (String) claims.getClaim("organization_id");
+        String storeIdClaim = (String) claims.getClaim("store_id");
+        log.info("extractJwtData - organization_id claim: {}, store_id claim: {}", orgIdClaim, storeIdClaim);
+        data.organizationId = orgIdClaim != null ? UUID.fromString(orgIdClaim) : null;
+        data.storeId = storeIdClaim != null ? UUID.fromString(storeIdClaim) : null;
 
         // Extract authorities from JWT claims
         @SuppressWarnings("unchecked")

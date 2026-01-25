@@ -2,8 +2,10 @@ package com.store.mgmt.modules.products.application.query;
 
 import com.store.mgmt.modules.products.application.dto.ProductVariantDTO;
 import com.store.mgmt.modules.products.domain.model.OrganizationId;
+import com.store.mgmt.modules.products.domain.model.ProductTemplate;
 import com.store.mgmt.modules.products.domain.model.ProductTemplateId;
 import com.store.mgmt.modules.products.domain.model.ProductVariant;
+import com.store.mgmt.modules.products.domain.repository.ProductTemplateRepository;
 import com.store.mgmt.modules.products.domain.repository.ProductVariantRepository;
 import com.store.mgmt.shared.application.query.QueryHandler;
 import com.store.mgmt.shared.infrastructure.security.TenantContext;
@@ -13,6 +15,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -25,9 +29,11 @@ public class GetProductVariantsHandler implements QueryHandler<GetProductVariant
     private static final Logger log = LoggerFactory.getLogger(GetProductVariantsHandler.class);
 
     private final ProductVariantRepository variantRepo;
+    private final ProductTemplateRepository templateRepo;
 
-    public GetProductVariantsHandler(ProductVariantRepository variantRepo) {
+    public GetProductVariantsHandler(ProductVariantRepository variantRepo, ProductTemplateRepository templateRepo) {
         this.variantRepo = variantRepo;
+        this.templateRepo = templateRepo;
     }
 
     @Override
@@ -57,15 +63,31 @@ public class GetProductVariantsHandler implements QueryHandler<GetProductVariant
             return List.of();
         }
 
-        return variants.subList(start, end).stream()
-                .map(this::toDTO)
+        List<ProductVariant> paginatedVariants = variants.subList(start, end);
+
+        // Fetch template names for all variants in a single query
+        List<UUID> templateIds = paginatedVariants.stream()
+                .map(v -> v.getTemplateId().getValue())
+                .distinct()
+                .collect(Collectors.toList());
+
+        Map<UUID, String> templateNameMap = templateRepo.findByOrganizationId(orgId).stream()
+                .filter(t -> templateIds.contains(t.getId().getValue()))
+                .collect(Collectors.toMap(
+                        t -> t.getId().getValue(),
+                        ProductTemplate::getName
+                ));
+
+        return paginatedVariants.stream()
+                .map(v -> toDTO(v, templateNameMap.get(v.getTemplateId().getValue())))
                 .collect(Collectors.toList());
     }
 
-    private ProductVariantDTO toDTO(ProductVariant variant) {
+    private ProductVariantDTO toDTO(ProductVariant variant, String templateName) {
         return ProductVariantDTO.builder()
                 .id(variant.getId().getValue())
                 .templateId(variant.getTemplateId().getValue())
+                .templateName(templateName)
                 .sku(variant.getSku().getValue())
                 .barcode(variant.getBarcode() != null ? variant.getBarcode().getValue() : null)
                 .costPrice(variant.getCostPrice().getAmount())
